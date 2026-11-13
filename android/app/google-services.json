@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "127277295223",
-    "project_id": "lunar-option-jbvhw",
-    "storage_bucket": "lunar-option-jbvhw.firebasestorage.app"
+    "project_number": "692632401182",
+    "project_id": "gen-lang-client-0645056984",
+    "storage_bucket": "gen-lang-client-0645056984.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:127277295223:android:5e41cb0d282bea0bd4c872",
+        "mobilesdk_app_id": "1:692632401182:android:d184e4e80c44de8c7e050f",
         "android_client_info": {
-          "package_name": "wise.sell.ai2"
+          "package_name": "com.aistudio.wisesell.kpzqvm"
         }
       },
       "oauth_client": [
         {
-          "client_id": "127277295223-e104mmm3s8laun9m1bt9akvmvma7oeph.apps.googleusercontent.com",
+          "client_id": "692632401182-5r8gn9jh7jlevukcaqrv8q5c8vrit2uk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aistudio.wisesell.kpzqvm",
+            "certificate_hash": "7cdbbe436738e60827d2b81ec7e05d2c84080060"
+          }
+        },
+        {
+          "client_id": "692632401182-6mdj4nqga8i7gkcu1g9ia23kv986sbcc.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA0g1n2Pu4YbQzHoZ9uVbY72X34gsavCVw"
+          "current_key": "AIzaSyD2AuiZsJ0eUA3dyGU9vQJ50MsDejvcvXU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "127277295223-e104mmm3s8laun9m1bt9akvmvma7oeph.apps.googleusercontent.com",
+              "client_id": "692632401182-6mdj4nqga8i7gkcu1g9ia23kv986sbcc.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
