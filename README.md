@@ -35,4 +35,4 @@ To complete that integration, add the Firebase Android app configuration for pac
 
 Workflow: `.github/workflows/wisesell-flutter-mobile-ci.yml`
 
-The workflow installs Flutter dependencies, checks Dart formatting, runs static analysis, and executes widget tests. APK packaging will be added after the Android platform scaffold and Firebase configuration are verified.
+The workflow installs Flutter dependencies, runs static analysis, and executes widget tests. APK packaging will be added after the Android platform scaffold and Firebase configuration are verified.
