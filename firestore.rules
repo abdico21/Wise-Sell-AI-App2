@@ -19,5 +19,21 @@ service cloud.firestore {
                     && resource.data.uid == request.auth.uid
                     && request.resource.data.uid == request.auth.uid;
     }
+
+    match /sales/{saleId} {
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.productId is string
+                    && request.resource.data.quantity is int
+                    && request.resource.data.quantity > 0
+                    && request.resource.data.unitPrice is number
+                    && request.resource.data.unitPrice >= 0
+                    && request.resource.data.total is number
+                    && request.resource.data.total >= 0
+                    && get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.uid == request.auth.uid;
+      allow read, delete: if request.auth != null
+                           && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
   }
 }
