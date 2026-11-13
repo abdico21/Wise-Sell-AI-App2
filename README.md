@@ -10,7 +10,7 @@ The `feature/flutter-mobile-foundation` branch includes the Material 3 mobile da
 
 - Flutter stable
 - Dart SDK 3.3 or later
-- Android Studio and Android SDK for Android packaging
+- Android Studio and Android SDK for local Android packaging
 
 ### Run and verify
 
@@ -20,17 +20,17 @@ flutter analyze
 flutter test
 ```
 
-### Firebase project
-
-The Android Firebase configuration is committed at `android/app/google-services.json`, and `lib/main.dart` now calls `Firebase.initializeApp()` before launching the app.
+### Firebase Android setup
 
 - Firebase project ID: `lunar-option-jbvhw`
-- Android application ID expected by Firebase: `wise.sell.ai2`
+- Android application ID: `wise.sell.ai2`
+- Android config: `android/app/google-services.json`
+- Firebase initialization: `Firebase.initializeApp()` runs before `runApp`.
 
-**Remaining Android integration:** this branch did not yet contain an Android Gradle platform scaffold when the Firebase configuration was added. The Google Services Gradle plugin and matching Android application ID must be configured in that scaffold before an Android APK can be built and Firebase's native configuration can be verified. Push-notification permission handling and token registration also remain to be implemented. Do not commit service-account credentials. Restrict the Firebase API key in Google Cloud Console and configure Firebase Authentication providers and security rules before production use.
+The CI workflow generates the Flutter Android platform scaffold, applies the Google Services Gradle plugin, validates the Firebase project/package pairing, runs analysis and tests, then builds a release APK. Firebase Authentication and Cloud Messaging SDKs are included; sign-in flows, notification permission/token registration, and production Firebase security rules still need implementation and verification. Restrict the Firebase API key in Google Cloud Console. Never commit service-account credentials.
 
-### Continuous integration
+### Continuous integration and APK
 
 Workflow: `.github/workflows/wisesell-flutter-mobile-ci.yml`
 
-The workflow installs Flutter dependencies, runs static analysis, and executes widget tests. APK packaging will be enabled after the Android platform scaffold is added and verified.
+A successful run publishes the release APK as the `wisesell-ai-android-apk` workflow artifact. The artifact is only available after the run completes successfully.
