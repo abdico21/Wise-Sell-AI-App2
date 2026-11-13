@@ -1,0 +1,60 @@
+name: WiseSell Flutter Mobile CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/flutter-mobile-foundation
+  pull_request:
+    branches:
+      - main
+      - feature/flutter-mobile-foundation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wisesell-mobile-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter-quality-and-android-build:
+    name: Analyze, test and build Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Android platform scaffolding
+        run: flutter create . --platforms=android --org com.wisesellai --project-name wisesell_ai
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test --reporter expanded
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wisesell-ai-android-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
