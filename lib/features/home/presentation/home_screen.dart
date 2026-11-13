@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../auth/presentation/auth_screen.dart';
 import '../../../l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -22,6 +23,13 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Account',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AuthScreen()),
+            ),
+            icon: const Icon(Icons.account_circle_outlined),
+          ),
           PopupMenuButton<Locale>(
             tooltip: l.language,
             icon: const Icon(Icons.language_rounded),
