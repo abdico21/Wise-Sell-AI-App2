@@ -22,8 +22,8 @@ flutter test
 
 ### Firebase Android setup
 
-- Firebase project ID: `lunar-option-jbvhw`
-- Android application ID: `wise.sell.ai2`
+- Firebase project ID: `gen-lang-client-0645056984`
+- Android application ID: `com.aistudio.wisesell.kpzqvm`
 - Android config: `android/app/google-services.json`
 - Firebase initialization: `Firebase.initializeApp()` runs before `runApp`.
 
