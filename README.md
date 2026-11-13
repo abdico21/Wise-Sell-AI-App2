@@ -22,17 +22,15 @@ flutter test
 
 ### Firebase project
 
-The configured Firebase project identifiers previously supplied for this app are:
+The Android Firebase configuration is committed at `android/app/google-services.json`, and `lib/main.dart` now calls `Firebase.initializeApp()` before launching the app.
 
-- Project ID: `lunar-option-jbvhw`
-- Android application ID: `wise.sell.ai2`
+- Firebase project ID: `lunar-option-jbvhw`
+- Android application ID expected by Firebase: `wise.sell.ai2`
 
-Firebase Core, Authentication, and Cloud Messaging packages are declared. Runtime initialization and Android push-notification registration are not yet enabled because this branch does not currently contain the Android Gradle project or the verified `google-services.json` / generated FlutterFire options.
-
-To complete that integration, add the Firebase Android app configuration for package `wise.sell.ai2`, generate `lib/firebase_options.dart` with FlutterFire CLI, then initialize Firebase before `runApp`. Keep service-account keys and private credentials out of source control. Configure Authentication providers, API-key restrictions, and least-privilege security rules in Firebase Console.
+**Remaining Android integration:** this branch did not yet contain an Android Gradle platform scaffold when the Firebase configuration was added. The Google Services Gradle plugin and matching Android application ID must be configured in that scaffold before an Android APK can be built and Firebase's native configuration can be verified. Push-notification permission handling and token registration also remain to be implemented. Do not commit service-account credentials. Restrict the Firebase API key in Google Cloud Console and configure Firebase Authentication providers and security rules before production use.
 
 ### Continuous integration
 
 Workflow: `.github/workflows/wisesell-flutter-mobile-ci.yml`
 
-The workflow installs Flutter dependencies, runs static analysis, and executes widget tests. APK packaging will be added after the Android platform scaffold and Firebase configuration are verified.
+The workflow installs Flutter dependencies, runs static analysis, and executes widget tests. APK packaging will be enabled after the Android platform scaffold is added and verified.
