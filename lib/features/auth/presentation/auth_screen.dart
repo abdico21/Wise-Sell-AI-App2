@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../business/presentation/business_workspace_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -274,6 +275,17 @@ class _AuthScreenState extends State<AuthScreen> {
         const SizedBox(height: 8),
         Text(user.email ?? 'WiseSell user', textAlign: TextAlign.center),
         const SizedBox(height: 24),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const BusinessWorkspaceScreen(),
+            ),
+          ),
+          icon: const Icon(Icons.storefront_outlined),
+          label: const Text('Open business workspace'),
+          style: FilledButton.styleFrom(backgroundColor: AppTheme.blue),
+        ),
+        const SizedBox(height: 10),
         OutlinedButton.icon(
           onPressed: _signOut,
           icon: const Icon(Icons.logout_rounded),
