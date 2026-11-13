@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../data/business_profile_service.dart';
 import '../../inventory/presentation/inventory_screen.dart';
+import '../../sales/presentation/sales_screen.dart';
 
 class BusinessWorkspaceScreen extends StatefulWidget {
   const BusinessWorkspaceScreen({super.key});
@@ -175,6 +176,18 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                 ),
                 icon: const Icon(Icons.inventory_2_outlined),
                 label: const Text('Manage product inventory'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  minimumSize: const Size.fromHeight(48),
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const SalesScreen()),
+                ),
+                icon: const Icon(Icons.point_of_sale_outlined),
+                label: const Text('Manage sales and orders'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
