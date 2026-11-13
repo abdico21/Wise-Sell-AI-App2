@@ -27,7 +27,7 @@ flutter test
 - Android config: `android/app/google-services.json`
 - Firebase initialization: `Firebase.initializeApp()` runs before `runApp`.
 
-The CI workflow generates the Flutter Android platform scaffold, applies the Google Services Gradle plugin, validates the Firebase project/package pairing, runs analysis and tests, then builds a release APK. Firebase Authentication and Cloud Messaging SDKs are included; sign-in flows, notification permission/token registration, and production Firebase security rules still need implementation and verification. Restrict the Firebase API key in Google Cloud Console. Never commit service-account credentials.
+The CI workflow generates the Flutter Android platform scaffold, applies the Google Services Gradle plugin, validates the Firebase project/package pairing, runs analysis and tests, then builds a release APK. Firebase Authentication, Cloud Firestore, and Cloud Messaging SDKs are included. The app provides email/password registration, sign-in, password reset, sign-out, and an authenticated business-profile workspace. Business profiles are stored in `business_profiles/{uid}`. The `firestore.rules` file restricts each profile to its owner. Before using the workspace, create the Cloud Firestore database in the Firebase console and publish these rules (Firebase Console → Firestore Database → Rules, or deploy with the Firebase CLI). Enable Email/Password under Authentication → Sign-in method. Restrict the Firebase API key in Google Cloud Console. Never commit service-account credentials.
 
 ### Continuous integration and APK
 
