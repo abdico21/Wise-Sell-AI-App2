@@ -34,7 +34,50 @@ jobs:
           cache: true
 
       - name: Generate Android platform scaffolding
-        run: flutter create . --platforms=android --org com.wisesellai --project-name wisesell_ai
+        run: flutter create . --platforms=android --org=wise.sell --project-name=ai2
+
+      - name: Configure Firebase Google Services plugin
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          settings_kts = Path("android/settings.gradle.kts")
+          app_kts = Path("android/app/build.gradle.kts")
+          if settings_kts.exists() and app_kts.exists():
+              settings = settings_kts
+              app = app_kts
+              plugin_line = '    id("com.google.gms.google-services") version "4.4.2" apply false'
+              app_plugin = '    id("com.google.gms.google-services")'
+          else:
+              settings = Path("android/settings.gradle")
+              app = Path("android/app/build.gradle")
+              if not settings.exists() or not app.exists():
+                  raise SystemExit("Android Gradle files were not generated.")
+              plugin_line = '    id "com.google.gms.google-services" version "4.4.2" apply false'
+              app_plugin = '    id "com.google.gms.google-services"'
+
+          settings_text = settings.read_text()
+          if "com.google.gms.google-services" not in settings_text:
+              settings_text = settings_text.replace("plugins {", "plugins {\\n" + plugin_line, 1)
+              settings.write_text(settings_text)
+
+          app_text = app.read_text()
+          if "com.google.gms.google-services" not in app_text:
+              app_text = app_text.replace("plugins {", "plugins {\\n" + app_plugin, 1)
+              app.write_text(app_text)
+          PY
+
+      - name: Verify Firebase Android configuration
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path("android/app/google-services.json").read_text())
+          assert config["project_info"]["project_id"] == "lunar-option-jbvhw"
+          assert config["client"][0]["client_info"]["android_client_info"]["package_name"] == "wise.sell.ai2"
+          print("Firebase configuration verified for wise.sell.ai2")
+          PY
 
       - name: Install dependencies
         run: flutter pub get
