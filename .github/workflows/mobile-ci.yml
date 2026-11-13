@@ -59,12 +59,12 @@ jobs:
 
           settings_text = settings.read_text()
           if "com.google.gms.google-services" not in settings_text:
-              settings_text = settings_text.replace("plugins {", "plugins {\\n" + plugin_line, 1)
+              settings_text = settings_text.replace("plugins {", "plugins {\n" + plugin_line, 1)
               settings.write_text(settings_text)
 
           app_text = app.read_text()
           if "com.google.gms.google-services" not in app_text:
-              app_text = app_text.replace("plugins {", "plugins {\\n" + app_plugin, 1)
+              app_text = app_text.replace("plugins {", "plugins {\n" + app_plugin, 1)
               app.write_text(app_text)
           PY
 
