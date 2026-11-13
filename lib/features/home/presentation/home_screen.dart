@@ -1,24 +1,41 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({required this.onLocaleChanged, super.key});
+
+  final ValueChanged<Locale> onLocaleChanged;
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.storefront_rounded, color: AppTheme.blue),
-            SizedBox(width: 10),
-            Text('WiseSell AI', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Icon(Icons.storefront_rounded, color: AppTheme.blue),
+            const SizedBox(width: 10),
+            Text(l.appTitle, style: const TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
         actions: [
+          PopupMenuButton<Locale>(
+            tooltip: l.language,
+            icon: const Icon(Icons.language_rounded),
+            onSelected: onLocaleChanged,
+            itemBuilder: (context) => [
+              PopupMenuItem(value: const Locale('en'), child: Text(l.english)),
+              PopupMenuItem(value: const Locale('am'), child: Text(l.amharic)),
+              PopupMenuItem(value: const Locale('om'), child: Text(l.afaanOromo)),
+              PopupMenuItem(value: const Locale('ti'), child: Text(l.tigrinya)),
+              PopupMenuItem(value: const Locale('so'), child: Text(l.somali)),
+            ],
+          ),
           IconButton(
-            tooltip: 'Notifications',
+            tooltip: l.notifications,
             onPressed: () {},
             icon: const Icon(Icons.notifications_none_rounded),
           ),
@@ -39,54 +56,50 @@ class HomeScreen extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(22),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('YOUR BUSINESS,\nSMARTER', style: TextStyle(
+                  Text(l.yourBusinessSmarter, style: const TextStyle(
                     color: Colors.white,
                     fontSize: 25,
                     height: 1.15,
                     fontWeight: FontWeight.w800,
                   )),
-                  SizedBox(height: 10),
-                  Text(
-                    'Manage sales, customers and social commerce from one place.',
-                    style: TextStyle(color: Colors.white70, height: 1.4),
-                  ),
+                  const SizedBox(height: 10),
+                  Text(l.heroDescription,
+                    style: const TextStyle(color: Colors.white70, height: 1.4)),
                 ],
               ),
             ),
             const SizedBox(height: 26),
-            const Text('Business workspace', style: TextStyle(
+            Text(l.businessWorkspace, style: const TextStyle(
               fontSize: 19, fontWeight: FontWeight.w800, color: AppTheme.navy,
             )),
             const SizedBox(height: 14),
-            const Wrap(
+            Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
-                _FeatureTile(icon: Icons.auto_awesome, title: 'AI Assistant', detail: 'Business insights'),
-                _FeatureTile(icon: Icons.shopping_bag_outlined, title: 'Marketplace', detail: 'Products & orders'),
-                _FeatureTile(icon: Icons.campaign_outlined, title: 'Marketing', detail: 'Social campaigns'),
-                _FeatureTile(icon: Icons.inventory_2_outlined, title: 'Inventory', detail: 'Stock management'),
+                _FeatureTile(icon: Icons.auto_awesome, title: l.aiAssistant, detail: l.businessInsights),
+                _FeatureTile(icon: Icons.shopping_bag_outlined, title: l.marketplace, detail: l.productsOrders),
+                _FeatureTile(icon: Icons.campaign_outlined, title: l.marketing, detail: l.socialCampaigns),
+                _FeatureTile(icon: Icons.inventory_2_outlined, title: l.inventory, detail: l.stockManagement),
               ],
             ),
             const SizedBox(height: 24),
-            const Text('Getting started', style: TextStyle(
+            Text(l.gettingStarted, style: const TextStyle(
               fontSize: 19, fontWeight: FontWeight.w800, color: AppTheme.navy,
             )),
             const SizedBox(height: 8),
-            const Card(
+            Card(
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.rocket_launch_outlined, color: AppTheme.teal, size: 30),
-                    SizedBox(width: 14),
-                    Expanded(child: Text(
-                      'Your mobile foundation is ready. Connect your account to unlock your workspace.',
-                      style: TextStyle(height: 1.4),
-                    )),
+                    const Icon(Icons.rocket_launch_outlined, color: AppTheme.teal, size: 30),
+                    const SizedBox(width: 14),
+                    Expanded(child: Text(l.foundationReady,
+                      style: const TextStyle(height: 1.4))),
                   ],
                 ),
               ),
@@ -96,11 +109,11 @@ class HomeScreen extends StatelessWidget {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: 0,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.storefront_outlined), label: 'Market'),
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), label: 'AI Studio'),
-          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profile'),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.home_outlined), label: l.home),
+          NavigationDestination(icon: const Icon(Icons.storefront_outlined), label: l.market),
+          NavigationDestination(icon: const Icon(Icons.chat_bubble_outline), label: l.aiStudio),
+          NavigationDestination(icon: const Icon(Icons.person_outline), label: l.profile),
         ],
       ),
     );
