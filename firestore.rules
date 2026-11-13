@@ -30,7 +30,7 @@ service cloud.firestore {
                     && request.resource.data.unitPrice >= 0
                     && request.resource.data.total is number
                     && request.resource.data.total >= 0
-                    && get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.uid == request.auth.uid;
+                    && get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.uid == request.auth.uid
                     && (!('customerId' in request.resource.data)
                         || (request.resource.data.customerId is string
                             && exists(/databases/$(database)/documents/customers/$(request.resource.data.customerId))
