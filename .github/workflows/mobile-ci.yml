@@ -34,7 +34,7 @@ jobs:
           cache: true
 
       - name: Generate Android platform scaffolding
-        run: flutter create . --platforms=android --org=wise.sell --project-name=ai2
+        run: flutter create . --platforms=android --org=com.aistudio.wisesell --project-name=kpzqvm
 
       - name: Configure Firebase Google Services plugin
         shell: bash
@@ -74,9 +74,9 @@ jobs:
           import json
           from pathlib import Path
           config = json.loads(Path("android/app/google-services.json").read_text())
-          assert config["project_info"]["project_id"] == "lunar-option-jbvhw"
-          assert config["client"][0]["client_info"]["android_client_info"]["package_name"] == "wise.sell.ai2"
-          print("Firebase configuration verified for wise.sell.ai2")
+          assert config["project_info"]["project_id"] == "gen-lang-client-0645056984"
+          assert config["client"][0]["client_info"]["android_client_info"]["package_name"] == "com.aistudio.wisesell.kpzqvm"
+          print("Firebase configuration verified for com.aistudio.wisesell.kpzqvm")
           PY
 
       - name: Install dependencies
