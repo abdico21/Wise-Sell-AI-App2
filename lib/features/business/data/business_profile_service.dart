@@ -65,11 +65,13 @@ class BusinessProfileService {
   Future<void> saveMyProfile(BusinessProfile profile) async {
     final user = _auth.currentUser;
     if (user == null) throw StateError('Sign in before saving a business profile.');
-    await _profileRef(user.uid).set({
+    final reference = _profileRef(user.uid);
+    final existing = await reference.get();
+    await reference.set({
       ...profile.toMap(),
       'uid': user.uid,
       'email': user.email,
-      'createdAt': FieldValue.serverTimestamp(),
+      if (!existing.exists) 'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
 }
