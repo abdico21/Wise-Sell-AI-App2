@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "127277295223",
+    "project_id": "lunar-option-jbvhw",
+    "storage_bucket": "lunar-option-jbvhw.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127277295223:android:5e41cb0d282bea0bd4c872",
+        "android_client_info": {
+          "package_name": "wise.sell.ai2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "127277295223-e104mmm3s8laun9m1bt9akvmvma7oeph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0g1n2Pu4YbQzHoZ9uVbY72X34gsavCVw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "127277295223-e104mmm3s8laun9m1bt9akvmvma7oeph.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
