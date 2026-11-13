@@ -13,10 +13,11 @@ service cloud.firestore {
     match /products/{productId} {
       allow create: if request.auth != null
                     && request.resource.data.uid == request.auth.uid;
-      allow read, update, delete: if request.auth != null
-                                  && resource.data.uid == request.auth.uid
-                                  && (request.method != 'update'
-                                      || request.resource.data.uid == request.auth.uid);
+      allow read, delete: if request.auth != null
+                           && resource.data.uid == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.uid == request.auth.uid
+                    && request.resource.data.uid == request.auth.uid;
     }
   }
 }
