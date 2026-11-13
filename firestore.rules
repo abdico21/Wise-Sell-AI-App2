@@ -35,5 +35,19 @@ service cloud.firestore {
                            && resource.data.uid == request.auth.uid;
       allow update: if false;
     }
+
+    match /customers/{customerId} {
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0;
+      allow read, delete: if request.auth != null
+                           && resource.data.uid == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.uid == request.auth.uid
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0;
+    }
   }
 }
