@@ -124,7 +124,12 @@ class SalesScreen extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     subtitle: Text(
-                      '$quantity × ETB ${unitPrice.toStringAsFixed(2)} • $date',
+                      [
+                        '$quantity × ETB ${unitPrice.toStringAsFixed(2)}',
+                        if ((data['customerName'] as String? ?? '').isNotEmpty)
+                          'Customer: ${data['customerName']}',
+                        date,
+                      ].join(' • '),
                     ),
                     trailing: Text(
                       'ETB ${total.toStringAsFixed(2)}',
@@ -241,7 +246,15 @@ class SalesScreen extends StatelessWidget {
       return;
     }
 
+    final customersSnapshot = await FirebaseFirestore.instance
+        .collection('customers')
+        .where('uid', isEqualTo: uid)
+        .get();
+    if (!context.mounted) return;
+    final customers = customersSnapshot.docs;
+
     String selectedId = available.first.id;
+    String? selectedCustomerId;
     final quantityController = TextEditingController(text: '1');
     final formKey = GlobalKey<FormState>();
     var saving = false;
@@ -287,6 +300,33 @@ class SalesScreen extends StatelessWidget {
                               setDialogState(() => selectedId = value);
                             }
                           },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String?>(
+                    value: selectedCustomerId,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Customer (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('Walk-in / no customer'),
+                      ),
+                      ...customers.map((doc) => DropdownMenuItem<String?>(
+                            value: doc.id,
+                            child: Text(
+                              doc.data()['name'] as String? ?? 'Customer',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )),
+                    ],
+                    onChanged: saving
+                        ? null
+                        : (value) => setDialogState(
+                              () => selectedCustomerId = value,
+                            ),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -339,6 +379,20 @@ class SalesScreen extends StatelessWidget {
                               .runTransaction((transaction) async {
                             final freshProduct =
                                 await transaction.get(productRef);
+                            final customerRef = selectedCustomerId == null
+                                ? null
+                                : FirebaseFirestore.instance
+                                    .collection('customers')
+                                    .doc(selectedCustomerId);
+                            final freshCustomer = customerRef == null
+                                ? null
+                                : await transaction.get(customerRef);
+                            if (customerRef != null &&
+                                (freshCustomer == null ||
+                                    !freshCustomer.exists ||
+                                    freshCustomer.data()?['uid'] != uid)) {
+                              throw StateError('Selected customer is unavailable.');
+                            }
                             if (!freshProduct.exists) {
                               throw StateError('Product no longer exists.');
                             }
@@ -364,6 +418,10 @@ class SalesScreen extends StatelessWidget {
                               'uid': uid,
                               'productId': selectedId,
                               'productName': productName,
+                              if (freshCustomer != null)
+                                'customerId': selectedCustomerId,
+                              if (freshCustomer != null)
+                                'customerName': freshCustomer.data()?['name'] as String? ?? 'Customer',
                               'quantity': quantity,
                               'unitPrice': currentPrice,
                               'total': total,
