@@ -31,6 +31,10 @@ service cloud.firestore {
                     && request.resource.data.total is number
                     && request.resource.data.total >= 0
                     && get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.uid == request.auth.uid;
+                    && (!('customerId' in request.resource.data)
+                        || (request.resource.data.customerId is string
+                            && exists(/databases/$(database)/documents/customers/$(request.resource.data.customerId))
+                            && get(/databases/$(database)/documents/customers/$(request.resource.data.customerId)).data.uid == request.auth.uid));
       allow read, delete: if request.auth != null
                            && resource.data.uid == request.auth.uid;
       allow update: if false;
