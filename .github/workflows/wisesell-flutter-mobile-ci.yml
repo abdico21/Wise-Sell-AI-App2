@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   flutter-checks:
-    name: Flutter analyze and test
+    name: Flutter analyze, test and Android APK
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -26,6 +26,55 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Generate Android platform scaffold
+        run: flutter create --platforms=android --org=wise.sell --project-name=ai2 .
+
+      - name: Configure Firebase Google Services plugin
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          settings = Path("android/settings.gradle.kts")
+          app = Path("android/app/build.gradle.kts")
+          if settings.exists() and app.exists():
+              s = settings.read_text()
+              plugin = '    id("com.google.gms.google-services") version "4.4.2" apply false'
+              if "com.google.gms.google-services" not in s:
+                  s = s.replace("plugins {", "plugins {\n" + plugin, 1)
+                  settings.write_text(s)
+              a = app.read_text()
+              if 'id("com.google.gms.google-services")' not in a:
+                  a = a.replace("plugins {", 'plugins {\n    id("com.google.gms.google-services")', 1)
+                  app.write_text(a)
+          else:
+              settings = Path("android/settings.gradle")
+              app = Path("android/app/build.gradle")
+              if not settings.exists() or not app.exists():
+                  raise SystemExit("Flutter did not generate the expected Android Gradle files.")
+              s = settings.read_text()
+              plugin = '    id "com.google.gms.google-services" version "4.4.2" apply false'
+              if "com.google.gms.google-services" not in s:
+                  s = s.replace("plugins {", "plugins {\n" + plugin, 1)
+                  settings.write_text(s)
+              a = app.read_text()
+              if "com.google.gms.google-services" not in a:
+                  a = a.replace("plugins {", 'plugins {\n    id "com.google.gms.google-services"', 1)
+                  app.write_text(a)
+          PY
+
+      - name: Verify Firebase Android configuration
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path("android/app/google-services.json").read_text())
+          info = config["client"][0]["client_info"]["android_client_info"]
+          assert config["project_info"]["project_id"] == "lunar-option-jbvhw"
+          assert info["package_name"] == "wise.sell.ai2"
+          print("Firebase Android configuration matches wise.sell.ai2")
+          PY
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -34,3 +83,13 @@ jobs:
 
       - name: Run widget tests
         run: flutter test --reporter expanded
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wisesell-ai-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
