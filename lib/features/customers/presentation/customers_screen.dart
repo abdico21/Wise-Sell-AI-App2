@@ -172,6 +172,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   final email = data['email'] as String? ?? '';
                   return Card(
                     child: ListTile(
+                      onTap: () => _showCustomerDetails(
+                        context,
+                        user.uid,
+                        doc.id,
+                        data,
+                      ),
                       leading: CircleAvatar(
                         backgroundColor: const Color(0xFFE8F1FF),
                         child: Text(
@@ -216,6 +222,162 @@ class _CustomersScreenState extends State<CustomersScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+
+  Future<void> _showCustomerDetails(
+    BuildContext context,
+    String uid,
+    String customerId,
+    Map<String, dynamic> customer,
+  ) async {
+    final salesQuery = FirebaseFirestore.instance
+        .collection('sales')
+        .where('uid', isEqualTo: uid)
+        .where('customerId', isEqualTo: customerId);
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (detailContext) => Scaffold(
+          appBar: AppBar(title: const Text('Customer activity')),
+          body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: salesQuery.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Could not load customer purchase history.'),
+                );
+              }
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final sales = snapshot.data!.docs.toList()
+                ..sort((a, b) {
+                  final aDate = a.data()['createdAt'] as Timestamp?;
+                  final bDate = b.data()['createdAt'] as Timestamp?;
+                  return (bDate?.millisecondsSinceEpoch ?? 0)
+                      .compareTo(aDate?.millisecondsSinceEpoch ?? 0);
+                });
+              final lifetimeValue = sales.fold<double>(
+                0,
+                (sum, sale) =>
+                    sum + ((sale.data()['total'] as num?)?.toDouble() ?? 0),
+              );
+              final totalUnits = sales.fold<int>(
+                0,
+                (sum, sale) =>
+                    sum + ((sale.data()['quantity'] as num?)?.toInt() ?? 0),
+              );
+              final name = customer['name'] as String? ?? 'Customer';
+              final phone = customer['phone'] as String? ?? '';
+              final email = customer['email'] as String? ?? '';
+              final company = customer['company'] as String? ?? '';
+
+              return ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: const TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.navy,
+                          )),
+                          if (company.isNotEmpty) Text(company),
+                          if (phone.isNotEmpty) Text(phone),
+                          if (email.isNotEmpty) Text(email),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _summaryCard(
+                          'Lifetime value',
+                          'ETB ${lifetimeValue.toStringAsFixed(2)}',
+                          Icons.payments_outlined,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _summaryCard(
+                          'Purchases',
+                          '${sales.length}',
+                          Icons.receipt_long_outlined,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  _summaryCard(
+                    'Units purchased',
+                    '$totalUnits',
+                    Icons.shopping_bag_outlined,
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Purchase history',
+                    style: TextStyle(
+                      color: AppTheme.navy,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (sales.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: Center(
+                        child: Text('No purchases recorded for this customer yet.'),
+                      ),
+                    )
+                  else
+                    ...sales.map((sale) {
+                      final data = sale.data();
+                      final quantity =
+                          (data['quantity'] as num?)?.toInt() ?? 0;
+                      final total =
+                          (data['total'] as num?)?.toDouble() ?? 0;
+                      final timestamp = data['createdAt'] as Timestamp?;
+                      final date = timestamp == null
+                          ? 'Date unavailable'
+                          : '${timestamp.toDate().day.toString().padLeft(2, '0')}/'
+                            '${timestamp.toDate().month.toString().padLeft(2, '0')}/'
+                            '${timestamp.toDate().year}';
+                      return Card(
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.shopping_bag_outlined),
+                          ),
+                          title: Text(
+                            data['productName'] as String? ?? 'Product',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          subtitle: Text('$quantity unit(s) • $date'),
+                          trailing: Text(
+                            'ETB ${total.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.navy,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
