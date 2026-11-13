@@ -31,6 +31,6 @@ The CI workflow generates the Flutter Android platform scaffold, applies the Goo
 
 ### Continuous integration and APK
 
-Workflow: `.github/workflows/wisesell-flutter-mobile-ci.yml`
+Workflow: `.github/workflows/mobile-ci.yml`
 
-A successful run publishes the release APK as the `wisesell-ai-android-apk` workflow artifact. The artifact is only available after the run completes successfully.
+A successful run publishes the release APK as the `wisesell-ai-android-release` workflow artifact. The artifact is only available after the run completes successfully.
