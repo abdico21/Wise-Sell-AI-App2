@@ -1,30 +1,34 @@
-# WiseSell AI Mobile
+# WiseSell AI mobile and backend
 
-Enterprise AI-powered social-commerce mobile application for merchants and businesses.
+WiseSell AI uses Firebase Authentication for account sign-in and Cloudflare Workers AI
+for AI responses. The seven agent modes are Business Assistant, Digital Marketing,
+Content Marketing, SEO, Social Media Marketing, Video & Audio Marketing, and Inventory.
 
-## Flutter foundation
+## Cloudflare AI backend
 
-The `feature/flutter-mobile-foundation` branch includes the Material 3 mobile dashboard, multilingual localization foundation (English, Amharic, Afaan Oromo, Tigrinya and Somali), Firebase Authentication/Firestore/Cloud Messaging SDKs, and GitHub Actions quality checks.
+See [Cloudflare AI setup](docs/CLOUDFLARE_AI_SETUP.md). The Worker verifies Firebase ID
+tokens and calls the Workers AI binding. No Gemini key or other model API key is stored
+in the Android app. The app's default endpoint is
+`https://wisesell-ai-api.iamabdu3.workers.dev`; if Cloudflare displays a different
+workers.dev address for your account, update the `WISESELL_API_BASE_URL` build value
+in `.github/workflows/mobile-ci.yml` before producing the APK.
 
-## Secure AI agent service
+Cloudflare Workers and Workers AI have free-plan limits, model quotas and availability
+conditions. Free use is not unlimited or guaranteed. Review current dashboard usage.
+The first AI features provide advice and drafts; they do not publish posts, send messages,
+charge payments, alter stock or render video/audio files.
 
-The Agent Workspace now calls a Firebase callable function named `runWiseSellAgent` in `europe-west1`. It supports seven specialist modes: Business Assistant (coordinator), Digital Marketing, Content Marketing, SEO, Social Media, Video & Audio, and Inventory. The function requires Firebase Authentication, keeps the Gemini API key in Firebase Secret Manager, and applies a starter limit of 20 requests per user per UTC day. It stores minimal usage metadata only.
+## Firebase mobile services
 
-**The AI service will not answer until the backend function is deployed and the `GEMINI_API_KEY` secret is configured.** Follow [docs/AI_BACKEND_SETUP.md](docs/AI_BACKEND_SETUP.md). Cloud Functions deployment may require the Firebase Blaze plan and provider usage can incur charges. Configure budget alerts before enabling production traffic.
+Firebase project ID: `gen-lang-client-0645056984`
+Android application ID: `com.aistudio.wisesell.kpzqvm`
 
-Agent output is advice and draft content only. It does not publish to social channels, send customer messages, charge payments, create media files or change inventory. Official channel OAuth/API integrations and those action workflows remain to be implemented and reviewed.
+Firebase remains responsible for authentication and existing app data. AI inference does
+not require Firebase Cloud Functions. Never put service-account keys, Worker tokens or
+private credentials in the Flutter source or APK.
 
-## Firebase Android setup
+## Build
 
-- Firebase project ID: `gen-lang-client-0645056984`
-- Android application ID: `com.aistudio.wisesell.kpzqvm`
-- Android config: `android/app/google-services.json`
-- Firebase initialization: `Firebase.initializeApp()` runs before `runApp`.
-
-Enable Email/Password under Authentication → Sign-in method. Create the Cloud Firestore database and publish `firestore.rules`. Never commit service-account credentials, Gemini API keys or signing keys.
-
-## Continuous integration and APK
-
-Workflow: `.github/workflows/mobile-ci.yml`
-
-A successful run verifies the Node.js Functions source, runs Flutter analysis and tests, builds the Android release APK, and uploads it as `wisesell-ai-android-release`. This CI APK is not proof of Play Store production signing.
+GitHub Actions workflow `.github/workflows/mobile-ci.yml` verifies the Worker source,
+runs Flutter analysis/tests, builds the Android APK and uploads
+`wisesell-ai-android-release`. A CI APK is not proof of Play Store production signing.
