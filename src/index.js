@@ -102,7 +102,7 @@ export default {
 
     if (url.pathname === "/" || url.pathname === "/api/health") {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), ai: Boolean(env.OPENAI_API_KEY) } }, 200, origin);
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), cloudflareWorkersAI: Boolean(env.AI) } }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
@@ -113,7 +113,7 @@ export default {
       let user;
       try { user = await firebaseUser(request, projectId); }
       catch (e) { return json({ error: "Authentication failed", detail: e.message }, 401, origin); }
-      if (!env.OPENAI_API_KEY) return json({ error: "AI provider secret is not configured. Firebase authentication succeeded.", uid: user.uid }, 503, origin);
+      if (!env.AI) return json({ error: "Cloudflare Workers AI binding is not configured.", uid: user.uid }, 503, origin);
 
       const id = url.pathname.slice("/api/agents/".length);
       const agent = AGENTS.find(a => a.id === id);
@@ -122,17 +122,20 @@ export default {
       try { body = await request.json(); } catch { return json({ error: "Request body must be valid JSON." }, 400, origin); }
       const message = typeof body.message === "string" ? body.message.trim() : "";
       if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
-      const response = await fetch("https://api.openai.com/v1/responses", {
-        method: "POST",
-        headers: { "authorization": `Bearer ${env.OPENAI_API_KEY}`, "content-type": "application/json" },
-        body: JSON.stringify({ model: env.OPENAI_MODEL || "gpt-4.1-mini",
-          instructions: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request.`,
-          input: message, max_output_tokens: 700 })
-      });
-      const result = await response.json();
-      if (!response.ok) return json({ error: "AI provider request failed.", providerStatus: response.status }, 502, origin);
-      const answer = (result.output || []).flatMap(x => x.content || []).filter(x => x.type === "output_text").map(x => x.text).join("\n");
-      return json({ ok: true, agent: agent.id, answer }, 200, origin);
+      try {
+        const result = await env.AI.run("@cf/google/gemma-4-26b-a4b-it", {
+          messages: [
+            { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request.` },
+            { role: "user", content: message }
+          ],
+          max_tokens: 700
+        });
+        const answer = result.response || result.choices?.[0]?.message?.content || result.output_text || "";
+        if (!answer) return json({ error: "The AI model returned an empty response." }, 502, origin);
+        return json({ ok: true, agent: agent.id, answer, provider: "Cloudflare Workers AI" }, 200, origin);
+      } catch (e) {
+        return json({ error: "Cloudflare Workers AI request failed.", detail: e.message }, 502, origin);
+      }
     }
     return json({ error: "Not found" }, 404, origin);
   }
