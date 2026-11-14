@@ -1,0 +1,6 @@
+name = "wise-sell-ai-app2"
+main = "src/index.js"
+compatibility_date = "2026-11-14"
+
+[vars]
+APP_NAME = "Wise Sell AI"
