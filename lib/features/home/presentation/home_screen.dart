@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../auth/presentation/auth_screen.dart';
@@ -47,9 +48,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ? AppBar(
               title: Row(
                 children: [
-                  const Icon(Icons.storefront_rounded, color: AppTheme.blue),
-                  const SizedBox(width: 10),
-                  Text(l.appTitle, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: SvgPicture.asset('assets/branding/wisesell_app_icon.svg', width: 38, height: 38),
+                  ),
+                  const SizedBox(width: 9),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(l.appTitle, style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.4)),
+                      const Text('Sell Smarter · Grow Bigger', style: TextStyle(fontSize: 9, color: AppTheme.orange, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
                 ],
               ),
               actions: [
@@ -119,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppTheme.navy, AppTheme.blue],
+                colors: [AppTheme.navy, AppTheme.blue, AppTheme.orange],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -137,7 +148,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Row(children: [
+              Expanded(child: Container(height: 5, color: AppTheme.green)),
+              Expanded(child: Container(height: 5, color: AppTheme.yellow)),
+              Expanded(child: Container(height: 5, color: AppTheme.red)),
+            ]),
+          ),
+          const SizedBox(height: 20),
           Text(l.businessWorkspace, style: const TextStyle(
             fontSize: 19, fontWeight: FontWeight.w800, color: AppTheme.navy,
           )),
@@ -180,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Icon(Icons.rocket_launch_outlined, color: AppTheme.teal, size: 30),
+                  const Icon(Icons.rocket_launch_outlined, color: AppTheme.orange, size: 30),
                   const SizedBox(width: 14),
                   Expanded(child: Text(
                     'Your mobile foundation is connected. Open the available business tools below; AI, marketplace and marketing services still need implementation.',
