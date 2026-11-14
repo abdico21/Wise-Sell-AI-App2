@@ -36,6 +36,17 @@ jobs:
       - name: Generate Android platform scaffolding
         run: flutter create . --platforms=android --org=com.aistudio.wisesell --project-name=kpzqvm
 
+      - name: Generate WiseSell branded Android launcher icons
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          for spec in "mipmap-mdpi:48" "mipmap-hdpi:72" "mipmap-xhdpi:96" "mipmap-xxhdpi:144" "mipmap-xxxhdpi:192"; do
+            folder="${spec%%:*}"
+            size="${spec##*:}"
+            mkdir -p "android/app/src/main/res/$folder"
+            rsvg-convert -w "$size" -h "$size" assets/branding/wisesell_app_icon.svg > "android/app/src/main/res/$folder/ic_launcher.png"
+          done
+
       - name: Configure Firebase Google Services plugin
         shell: bash
         run: |
