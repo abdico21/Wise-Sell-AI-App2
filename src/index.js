@@ -1,10 +1,10 @@
 const AGENTS = [
-  { id: "business-manager", name: "AI Business Manager", instruction: "Help with business operations, task planning and authorized business records." },
-  { id: "sales-marketing", name: "AI Sales & Marketing", instruction: "Create marketing plans, product descriptions and social content. Never publish or send without user approval." },
-  { id: "marketplace", name: "Marketplace Agent", instruction: "Help prepare and compare listings. Never invent prices, stock or sellers." },
-  { id: "payments-orders", name: "Payments & Orders Agent", instruction: "Help draft and summarize orders and invoices. Never claim payment success without verified provider data." },
-  { id: "business-intelligence", name: "Business Intelligence Agent", instruction: "Analyze only data supplied by authorized connected sources. Label estimates clearly." },
-  { id: "enterprise-services", name: "Enterprise Services Agent", instruction: "Help prepare support, partnership and supplier requests; route decisions to authorized staff." }
+  { id: "business-assistant", name: "AI Business Assistant", instruction: "Help with business planning, operations, cash-flow reasoning and decision support. Clearly label assumptions and never claim access to private business records unless provided." },
+  { id: "sales-agent", name: "AI Sales Agent", instruction: "Help with sales strategy, lead qualification, customer conversations, objection handling and conversion. Never claim a sale or payment occurred." },
+  { id: "digital-marketing", name: "Digital Marketing Agent", instruction: "Create practical digital campaign strategies, ad concepts, audience plans, channel recommendations and measurable KPIs. Never claim an ad was launched." },
+  { id: "seo-content", name: "SEO & Content Marketing Agent", instruction: "Provide keyword research strategy, search intent analysis, technical and on-page SEO guidance, content briefs and editorial plans. Do not invent live ranking or traffic data." },
+  { id: "social-media", name: "Social Media Agent", instruction: "Create platform-specific social posts, captions, hashtags and calendars. Never claim to publish, schedule or message on a social platform." },
+  { id: "video-audio", name: "Video & Audio Marketing Agent", instruction: "Create video concepts, storyboards, scripts, voiceovers and audio ad scripts. Never claim to render or publish media." }
 ];
 
 const json = (data, status = 200, origin = "*") => new Response(JSON.stringify(data), {
@@ -120,9 +120,9 @@ export default {
       if (!env.AI) return json({ error: "Cloudflare Workers AI binding is not configured.", uid: user.uid }, 503, origin);
 
       const legacyRoutes = {
-        "/api/ai/business-growth": "business-manager",
-        "/api/ai/marketing-advisor": "sales-marketing",
-        "/api/ai/lead-qualify": "business-intelligence"
+        "/api/ai/business-growth": "business-assistant",
+        "/api/ai/marketing-advisor": "digital-marketing",
+        "/api/ai/lead-qualify": "sales-agent"
       };
       const id = legacyRoutes[url.pathname] || url.pathname.slice("/api/agents/".length);
       const agent = AGENTS.find(a => a.id === id);
