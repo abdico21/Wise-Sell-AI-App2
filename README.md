@@ -4,33 +4,27 @@ Enterprise AI-powered social-commerce mobile application for merchants and busin
 
 ## Flutter foundation
 
-The `feature/flutter-mobile-foundation` branch includes the Material 3 mobile dashboard, multilingual localization foundation (English, Amharic, Afaan Oromo, Tigrinya and Somali), Firebase SDK dependencies, and GitHub Actions quality checks.
+The `feature/flutter-mobile-foundation` branch includes the Material 3 mobile dashboard, multilingual localization foundation (English, Amharic, Afaan Oromo, Tigrinya and Somali), Firebase Authentication/Firestore/Cloud Messaging SDKs, and GitHub Actions quality checks.
 
-### Requirements
+## Secure AI agent service
 
-- Flutter stable
-- Dart SDK 3.3 or later
-- Android Studio and Android SDK for local Android packaging
+The Agent Workspace now calls a Firebase callable function named `runWiseSellAgent` in `europe-west1`. It supports seven specialist modes: Business Assistant (coordinator), Digital Marketing, Content Marketing, SEO, Social Media, Video & Audio, and Inventory. The function requires Firebase Authentication, keeps the Gemini API key in Firebase Secret Manager, and applies a starter limit of 20 requests per user per UTC day. It stores minimal usage metadata only.
 
-### Run and verify
+**The AI service will not answer until the backend function is deployed and the `GEMINI_API_KEY` secret is configured.** Follow [docs/AI_BACKEND_SETUP.md](docs/AI_BACKEND_SETUP.md). Cloud Functions deployment may require the Firebase Blaze plan and provider usage can incur charges. Configure budget alerts before enabling production traffic.
 
-```bash
-flutter pub get
-flutter analyze
-flutter test
-```
+Agent output is advice and draft content only. It does not publish to social channels, send customer messages, charge payments, create media files or change inventory. Official channel OAuth/API integrations and those action workflows remain to be implemented and reviewed.
 
-### Firebase Android setup
+## Firebase Android setup
 
 - Firebase project ID: `gen-lang-client-0645056984`
 - Android application ID: `com.aistudio.wisesell.kpzqvm`
 - Android config: `android/app/google-services.json`
 - Firebase initialization: `Firebase.initializeApp()` runs before `runApp`.
 
-The CI workflow generates the Flutter Android platform scaffold, applies the Google Services Gradle plugin, validates the Firebase project/package pairing, runs analysis and tests, then builds a release APK. Firebase Authentication, Cloud Firestore, and Cloud Messaging SDKs are included. The app provides email/password registration, sign-in, password reset, sign-out, and an authenticated business-profile workspace. Business profiles are stored in `business_profiles/{uid}`. The `firestore.rules` file restricts each profile to its owner. Before using the workspace, create the Cloud Firestore database in the Firebase console and publish these rules (Firebase Console → Firestore Database → Rules, or deploy with the Firebase CLI). Enable Email/Password under Authentication → Sign-in method. Restrict the Firebase API key in Google Cloud Console. Never commit service-account credentials.
+Enable Email/Password under Authentication → Sign-in method. Create the Cloud Firestore database and publish `firestore.rules`. Never commit service-account credentials, Gemini API keys or signing keys.
 
-### Continuous integration and APK
+## Continuous integration and APK
 
 Workflow: `.github/workflows/mobile-ci.yml`
 
-A successful run publishes the release APK as the `wisesell-ai-android-release` workflow artifact. The artifact is only available after the run completes successfully.
+A successful run verifies the Node.js Functions source, runs Flutter analysis and tests, builds the Android release APK, and uploads it as `wisesell-ai-android-release`. This CI APK is not proof of Play Store production signing.
