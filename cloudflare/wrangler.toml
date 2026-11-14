@@ -1,0 +1,10 @@
+name = "wisesell-ai-api"
+main = "src/index.js"
+compatibility_date = "2026-11-14"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
+
+[vars]
+FIREBASE_PROJECT_ID = "gen-lang-client-0645056984"
