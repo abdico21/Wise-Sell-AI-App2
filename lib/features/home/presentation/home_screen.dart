@@ -9,6 +9,7 @@ import '../../inventory/presentation/inventory_screen.dart';
 import '../../sales/presentation/sales_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import 'feature_status_screen.dart';
+import '../../agents/presentation/agent_hub_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({required this.onLocaleChanged, super.key});
@@ -36,11 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
         description: 'Product discovery, buyer and seller storefronts, and marketplace orders.',
         plannedItems: ['Seller storefronts', 'Product listings and search', 'Buyer enquiries and orders'],
       ),
-      const FeatureStatusScreen(
-        title: 'AI Studio',
-        description: 'The AI assistant experience is not connected in this mobile foundation yet.',
-        plannedItems: ['Business questions and insights', 'Sales and expense analysis', 'AI-generated business recommendations'],
-      ),
+      const AgentHubScreen(),
     ];
 
     return Scaffold(
@@ -167,11 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
             runSpacing: 12,
             children: [
               _FeatureTile(icon: Icons.auto_awesome, title: l.aiAssistant,
-                detail: l.businessInsights, onTap: () => _open(const FeatureStatusScreen(
-                  title: 'AI Business Assistant',
-                  description: 'The AI assistant is not yet connected to an AI service in this build.',
-                  plannedItems: ['Ask business questions', 'Analyze sales and expenses', 'Get business recommendations'],
-                ))),
+                detail: l.businessInsights, onTap: () => setState(() => _selectedIndex = 2)),
               _FeatureTile(icon: Icons.shopping_bag_outlined, title: l.marketplace,
                 detail: l.productsOrders, onTap: () => setState(() => _selectedIndex = 1)),
               _FeatureTile(icon: Icons.campaign_outlined, title: l.marketing,
