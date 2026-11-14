@@ -32,8 +32,9 @@ async function firebaseUser(request, projectId) {
   if (header.alg !== "RS256" || !header.kid) throw new Error("Unsupported token signature.");
   const now = Math.floor(Date.now() / 1000);
   if (claims.aud !== projectId || claims.iss !== `https://securetoken.google.com/${projectId}` ||
-      !claims.sub || claims.sub.length > 128 || claims.exp <= now || claims.iat > now ||
-      claims.auth_time > now) throw new Error("Firebase token claims are invalid or expired.");
+      typeof claims.sub !== "string" || !claims.sub || claims.sub.length > 128 ||
+      !Number.isFinite(claims.exp) || !Number.isFinite(claims.iat) || !Number.isFinite(claims.auth_time) ||
+      claims.exp <= now || claims.iat > now || claims.auth_time > now) throw new Error("Firebase token claims are invalid or expired.");
 
   if (!certCache || Date.now() > certExpiry) {
     const response = await fetch("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
@@ -52,41 +53,44 @@ async function firebaseUser(request, projectId) {
   return { uid: claims.sub, email: claims.email || null };
 }
 
-// Extract SubjectPublicKeyInfo from the X.509 certificate using DER boundaries.
-async function extractSpki(der) {
-  const bytes = der;
-  let p = 0;
-  const readLen = () => {
-    let n = bytes[p++];
-    if (n < 128) return n;
-    const count = n & 127; n = 0;
-    for (let i = 0; i < count; i++) n = n * 256 + bytes[p++];
-    return n;
-  };
-  if (bytes[p++] !== 0x30) throw new Error("Invalid certificate.");
-  readLen();
-  if (bytes[p++] !== 0x30) throw new Error("Invalid certificate.");
-  readLen();
-  if (bytes[p++] !== 0xA0) throw new Error("Invalid certificate.");
-  const v = readLen(); p += v;
-  if (bytes[p++] !== 0x02) throw new Error("Invalid certificate.");
-  p += readLen();
-  if (bytes[p++] !== 0x30) throw new Error("Invalid certificate.");
-  p += readLen();
-  if (bytes[p++] !== 0x30) throw new Error("Invalid certificate.");
-  const tbsLength = readLen();
-  const tbsStart = p;
-  const tbsEnd = tbsStart + tbsLength;
-  // Walk TBSCertificate fields to SubjectPublicKeyInfo (field 6 after optional version).
-  let q = tbsStart;
-  if (bytes[q] === 0xA0) { q++; let n=bytes[q++]; if(n&128){const c=n&127;n=0;for(let i=0;i<c;i++)n=n*256+bytes[q++];} q+=n; }
-  for (let i=0;i<5;i++) { q++; let n=bytes[q++]; if(n&128){const c=n&127;n=0;for(let j=0;j<c;j++)n=n*256+bytes[q++];} q+=n; }
-  const start = q;
-  if (bytes[start] !== 0x30 || start >= tbsEnd) throw new Error("Certificate public key is malformed.");
-  let n = bytes[start+1], head = 2;
-  if (n & 128) { const c=n&127; n=0; for(let i=0;i<c;i++) n=n*256+bytes[start+head++]; }
-  const end = start + head + n;
-  return bytes.slice(start, end);
+// Extract SubjectPublicKeyInfo from the X.509 certificate using bounded DER parsing.
+function readDerElement(bytes, offset) {
+  if (offset < 0 || offset + 2 > bytes.length) throw new Error("Invalid certificate DER.");
+  const tag = bytes[offset++];
+  let length = bytes[offset++];
+  if (length & 0x80) {
+    const count = length & 0x7f;
+    if (count === 0 || count > 4 || offset + count > bytes.length) throw new Error("Invalid certificate DER length.");
+    length = 0;
+    for (let i = 0; i < count; i++) length = length * 256 + bytes[offset++];
+  }
+  const start = offset;
+  const elementEnd = start + length;
+  if (elementEnd > bytes.length) throw new Error("Certificate element exceeds its bounds.");
+  return { tag, start, end: elementEnd, next: elementEnd };
+}
+
+function extractSpki(der) {
+  const certificate = readDerElement(der, 0);
+  if (certificate.tag !== 0x30 || certificate.next !== der.length) throw new Error("Invalid X.509 certificate.");
+  const tbs = readDerElement(der, certificate.start);
+  if (tbs.tag !== 0x30 || tbs.next > certificate.end) throw new Error("Invalid TBSCertificate.");
+
+  let offset = tbs.start;
+  let field = readDerElement(der, offset);
+  if (field.tag === 0xA0) {
+    offset = field.next;
+    field = readDerElement(der, offset);
+  }
+
+  const expectedTags = [0x02, 0x30, 0x30, 0x30, 0x30];
+  for (const tag of expectedTags) {
+    if (field.tag !== tag) throw new Error("Unexpected X.509 certificate field.");
+    offset = field.next;
+    field = readDerElement(der, offset);
+  }
+  if (field.tag !== 0x30 || field.next > tbs.end) throw new Error("Certificate public key is malformed.");
+  return der.slice(offset, field.next);
 }
 
 export default {
