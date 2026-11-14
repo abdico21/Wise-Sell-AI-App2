@@ -4,8 +4,9 @@ This checklist distinguishes a successful CI build from a production-ready Andro
 
 ## 1. Firebase project
 
-Firebase project: `lunar-option-jbvhw`  
-Android application ID: `wise.sell.ai2`
+Firebase project: `gen-lang-client-0645056984`  
+Android application ID: `com.aistudio.wisesell.kpzqvm`  
+Firebase Android app ID: `1:692632401182:android:d184e4e80c44de8c7e050f`
 
 - [ ] In Firebase Console, open Authentication → Sign-in method and enable Email/Password.
 - [ ] Create the Cloud Firestore database in the intended production region.
@@ -56,4 +57,4 @@ Suggested GitHub Actions secret names (the workflow must explicitly consume them
 
 ## Current verified state
 
-The repository's CI workflow has passed Flutter formatting, analysis, tests, Firebase configuration checks and release APK generation. This confirms that the current code builds in CI; it does not confirm live Firebase console configuration, production signing, physical-device testing, push-notification delivery or Play Store approval.
+The repository's CI workflow has passed Flutter formatting, analysis, tests, Firebase configuration checks and release APK generation for the Firebase project and Android application ID listed above. The workflow validates the checked-in `google-services.json` identity only; it does not confirm live Firebase Console settings, production signing, physical-device testing, push-notification delivery or Play Store approval.
