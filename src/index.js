@@ -107,7 +107,7 @@ export default {
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
 
-    if (url.pathname.startsWith("/api/agents/") && request.method === "POST") {
+    if ((url.pathname.startsWith("/api/agents/") || ["/api/ai/business-growth", "/api/ai/marketing-advisor", "/api/ai/lead-qualify"].includes(url.pathname)) && request.method === "POST") {
       const projectId = env.FIREBASE_PROJECT_ID;
       if (!projectId) return json({ error: "Firebase project ID is not configured." }, 503, origin);
       let user;
@@ -115,12 +115,17 @@ export default {
       catch (e) { return json({ error: "Authentication failed", detail: e.message }, 401, origin); }
       if (!env.AI) return json({ error: "Cloudflare Workers AI binding is not configured.", uid: user.uid }, 503, origin);
 
-      const id = url.pathname.slice("/api/agents/".length);
+      const legacyRoutes = {
+        "/api/ai/business-growth": "business-manager",
+        "/api/ai/marketing-advisor": "sales-marketing",
+        "/api/ai/lead-qualify": "business-intelligence"
+      };
+      const id = legacyRoutes[url.pathname] || url.pathname.slice("/api/agents/".length);
       const agent = AGENTS.find(a => a.id === id);
       if (!agent) return json({ error: "Unknown agent." }, 404, origin);
       let body;
       try { body = await request.json(); } catch { return json({ error: "Request body must be valid JSON." }, 400, origin); }
-      const message = typeof body.message === "string" ? body.message.trim() : "";
+      const message = (typeof body.message === "string" ? body.message.trim() : JSON.stringify(body)).slice(0, 8000);
       if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
       try {
         const result = await env.AI.run("@cf/google/gemma-4-26b-a4b-it", {
@@ -132,6 +137,19 @@ export default {
         });
         const answer = result.response || result.choices?.[0]?.message?.content || result.output_text || "";
         if (!answer) return json({ error: "The AI model returned an empty response." }, 502, origin);
+        if (legacyRoutes[url.pathname]) {
+          const clean = answer.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+          let data;
+          try { data = JSON.parse(clean); } catch { data = null; }
+          if (url.pathname === "/api/ai/business-growth") {
+            data = data && typeof data === "object" ? data : { executiveSummary: answer, financialHealthScore: 75, strategicRecommendations: [], scenarioSimulation: "Review the recommendations with your current business data.", urgentRisk: "Validate assumptions before making financial decisions." };
+          } else if (url.pathname === "/api/ai/marketing-advisor") {
+            data = data && typeof data === "object" ? data : { recommendation: answer, bottleneck: "Review campaign conversion data.", expectedCvrLift: "Not estimated", actionItems: [], adSpendAdjustment: "Do not change budgets until performance data is verified." };
+          } else {
+            data = data && typeof data === "object" ? data : { score: 0, tier: "Needs review", intent: answer, bantAnalysis: {} };
+          }
+          return json({ success: true, data, provider: "Cloudflare Workers AI" }, 200, origin);
+        }
         return json({ ok: true, agent: agent.id, answer, provider: "Cloudflare Workers AI" }, 200, origin);
       } catch (e) {
         return json({ error: "Cloudflare Workers AI request failed.", detail: e.message }, 502, origin);
