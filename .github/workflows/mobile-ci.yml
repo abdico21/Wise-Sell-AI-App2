@@ -27,6 +27,17 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Set up Node.js for Firebase Functions
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify Firebase Functions backend
+        working-directory: functions
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npm run lint
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
