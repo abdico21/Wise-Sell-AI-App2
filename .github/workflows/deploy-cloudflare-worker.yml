@@ -1,0 +1,33 @@
+name: Deploy WiseSell AI Cloudflare Worker
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: cloudflare/package.json
+      - name: Install dependencies
+        working-directory: cloudflare
+        run: npm install
+      - name: Check Worker source
+        working-directory: cloudflare
+        run: npm run check
+      - name: Deploy to Cloudflare
+        working-directory: cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "Add CLOUDFLARE_API_TOKEN in repository Actions secrets." && exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "Add CLOUDFLARE_ACCOUNT_ID in repository Actions secrets." && exit 1)
+          npx wrangler deploy
