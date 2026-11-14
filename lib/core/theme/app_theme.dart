@@ -3,23 +3,28 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const Color navy = Color(0xFF102A43);
-  static const Color blue = Color(0xFF1769AA);
-  static const Color teal = Color(0xFF12A89D);
+  static const Color navy = Color(0xFF10213F);
+  static const Color blue = Color(0xFF1769E8);
+  static const Color orange = Color(0xFFF47700);
+  static const Color cyan = Color(0xFF27C8F4);
+  static const Color green = Color(0xFF078A45);
+  static const Color yellow = Color(0xFFFFD21C);
+  static const Color red = Color(0xFFD71920);
 
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
       seedColor: blue,
       brightness: Brightness.light,
       primary: blue,
-      secondary: teal,
+      secondary: orange,
+      tertiary: cyan,
       surface: Colors.white,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFFF5F8FC),
+      scaffoldBackgroundColor: const Color(0xFFF7F9FC),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: navy,
