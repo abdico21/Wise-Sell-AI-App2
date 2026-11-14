@@ -1,0 +1,44 @@
+name: Deploy WiseSell AI backend
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WISESELL_AI }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: gen-lang-client-0645056984
+
+      - name: Publish Gemini key to Secret Manager
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          test -n "$GEMINI_API_KEY" || (echo "Add the GEMINI_API_KEY repository secret first." && exit 1)
+          if ! gcloud secrets describe GEMINI_API_KEY --project=gen-lang-client-0645056984 >/dev/null 2>&1; then
+            gcloud secrets create GEMINI_API_KEY --replication-policy=automatic --project=gen-lang-client-0645056984
+          fi
+          printf '%s' "$GEMINI_API_KEY" | gcloud secrets versions add GEMINI_API_KEY --data-file=- --project=gen-lang-client-0645056984
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Install Functions dependencies
+        working-directory: functions
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Deploy authenticated AI agent service
+        run: firebase deploy --only functions:runWiseSellAgent --project gen-lang-client-0645056984 --non-interactive
