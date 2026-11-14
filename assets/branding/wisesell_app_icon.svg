@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="112" fill="#FFFFFF"/>
+<path d="M72 166h78l62 171 44-111 40 111 78-171h74L342 394h-69l-19-48-19 48h-69z" fill="#1769E8"/>
+<path d="M286 394 382 132l72 22-96 240z" fill="#F47700"/>
+<path d="M92 360c94 58 217 56 331-31" fill="none" stroke="#F47700" stroke-width="18" stroke-linecap="round"/>
+<rect x="177" y="93" width="158" height="119" rx="54" fill="#FFFFFF" stroke="#123B91" stroke-width="13"/>
+<rect x="194" y="111" width="124" height="83" rx="36" fill="#10213F"/>
+<path d="M219 151q15-20 30 0m15 0q15-20 30 0" fill="none" stroke="#27C8F4" stroke-width="10" stroke-linecap="round"/>
+<path d="M256 93V64" stroke="#123B91" stroke-width="10" stroke-linecap="round"/>
+<circle cx="256" cy="51" r="13" fill="#F47700"/>
+<rect x="222" y="220" width="68" height="42" rx="12" fill="#1769E8" stroke="#FFFFFF" stroke-width="7"/>
+<text x="256" y="249" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#FFFFFF">AI</text>
+<path d="M0 0h132" stroke="#F47700" stroke-width="14"/><path d="M0 0v132" stroke="#F47700" stroke-width="14"/>
+<path d="M512 512H380" stroke="#D71920" stroke-width="14"/><path d="M512 512V380" stroke="#078A45" stroke-width="14"/>
+</svg>
