@@ -146,14 +146,14 @@ export default {
           return "";
         };
         const prompt = [
-          { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly.` },
+          { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. For multi-step or multi-day requests, complete every requested section, include practical actions and measurable targets where useful, and finish with a complete final sentence. If space is limited, be concise rather than leaving the answer unfinished.` },
           { role: "user", content: message }
         ];
         let answer = "";
         let lastModelError = "";
         for (const model of ["@cf/google/gemma-4-26b-a4b-it", "@cf/meta/llama-3.1-8b-instruct"]) {
           try {
-            const result = await env.AI.run(model, { messages: prompt, max_tokens: 700, temperature: 0.4 });
+            const result = await env.AI.run(model, { messages: prompt, max_tokens: 1800, temperature: 0.4 });
             answer = extractText(result);
             if (answer) break;
             lastModelError = `${model} returned no text`;
