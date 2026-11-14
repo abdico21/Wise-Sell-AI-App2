@@ -132,15 +132,36 @@ export default {
       const message = (typeof body.message === "string" ? body.message.trim() : JSON.stringify(body)).slice(0, 8000);
       if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
       try {
-        const result = await env.AI.run("@cf/google/gemma-4-26b-a4b-it", {
-          messages: [
-            { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request.` },
-            { role: "user", content: message }
-          ],
-          max_tokens: 700
-        });
-        const answer = result.response || result.choices?.[0]?.message?.content || result.output_text || "";
-        if (!answer) return json({ error: "The AI model returned an empty response." }, 502, origin);
+        const extractText = (value) => {
+          if (typeof value === "string") return value.trim();
+          if (!value || typeof value !== "object") return "";
+          const direct = value.response ?? value.output_text ?? value.generated_text;
+          if (typeof direct === "string" && direct.trim()) return direct.trim();
+          const content = value.choices?.[0]?.message?.content ?? value.result?.choices?.[0]?.message?.content;
+          if (typeof content === "string" && content.trim()) return content.trim();
+          if (Array.isArray(content)) return content.map(part => typeof part === "string" ? part : part?.text || "").join("\\n").trim();
+          if (Array.isArray(value.output)) return value.output.map(part => part?.text || part?.content || "").join("\\n").trim();
+          if (typeof value.result === "string") return value.result.trim();
+          if (value.result && value.result !== value) return extractText(value.result);
+          return "";
+        };
+        const prompt = [
+          { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly.` },
+          { role: "user", content: message }
+        ];
+        let answer = "";
+        let lastModelError = "";
+        for (const model of ["@cf/google/gemma-4-26b-a4b-it", "@cf/meta/llama-3.1-8b-instruct"]) {
+          try {
+            const result = await env.AI.run(model, { messages: prompt, max_tokens: 700, temperature: 0.4 });
+            answer = extractText(result);
+            if (answer) break;
+            lastModelError = `${model} returned no text`;
+          } catch (modelError) {
+            lastModelError = modelError?.message || String(modelError);
+          }
+        }
+        if (!answer) return json({ error: "The AI service did not return text from either configured model. Please retry shortly.", detail: lastModelError || "Empty model response." }, 502, origin);
         if (legacyRoutes[url.pathname]) {
           const clean = answer.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
           let data;
