@@ -5,7 +5,4 @@ compatibility_date = "2026-11-14"
 [vars]
 APP_NAME = "Wise Sell AI"
 FIREBASE_PROJECT_ID = "gen-lang-client-0645056984"
-OPENAI_MODEL = "gpt-4.1-mini"
-
-[ai]
-binding = "AI"
+GEMINI_MODEL = "gemini-3.8-flash"
