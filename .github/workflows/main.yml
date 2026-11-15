@@ -43,7 +43,8 @@ jobs:
             grep -q "id: \"$agent\"" src/index.js
             echo "PASS: $agent"
           done
-          grep -q "https://api.openai.com/v1/responses" src/index.js
-          grep -q 'env.OPENAI_API_KEY' src/index.js
+          grep -q "generativelanguage.googleapis.com" src/index.js
+          grep -q 'env.GEMINI_API_KEY' src/index.js
           grep -q 'firebaseUser(request, projectId)' src/index.js
-          echo "PASS: OpenAI Responses API, Worker secret binding, and Firebase authentication"
+          grep -q 'offlineAgentAnswer' src/index.js
+          echo "PASS: Gemini free-tier API, zero-cost fallback, Worker secret binding, and Firebase authentication"
