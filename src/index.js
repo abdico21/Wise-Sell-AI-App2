@@ -109,7 +109,7 @@ function offlineAgentAnswer(agentId, message) {
 }
 
 async function generateAgentAnswer(agent, user, message, env) {
-  if (!env.GEMINI_API_KEY) return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback" };
+  if (!env.GEMINI_API_KEY) return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Gemini API key is not configured in the Worker." };
   try {
     const model = env.GEMINI_MODEL || "gemini-2.5-flash";
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
@@ -123,10 +123,20 @@ async function generateAgentAnswer(agent, user, message, env) {
     });
     const data = await response.json().catch(() => ({}));
     const answer = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts || []).map(part => typeof part.text === "string" ? part.text : "").join("\n").trim();
-    if (!response.ok || !answer) return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Free AI quota unavailable or request failed." };
+    if (!response.ok || !answer) {
+      let reason;
+      if (response.status === 400 || response.status === 404) reason = "Gemini rejected the model or request configuration (HTTP " + response.status + ").";
+      else if (response.status === 401 || response.status === 403) reason = "Gemini rejected the API key or its permissions (HTTP " + response.status + "). Check the key in Google AI Studio without sharing it here.";
+      else if (response.status === 429) reason = "Gemini free-tier quota or rate limit was reached (HTTP 429). Wait for quota reset or check the project's free-tier limits.";
+      else if (response.status >= 500) reason = "Google's Gemini service is temporarily unavailable (HTTP " + response.status + ").";
+      else if (response.ok) reason = "Gemini returned no usable text. The request may have been blocked by a safety filter or ended without a text response.";
+      else reason = "Gemini request failed (HTTP " + response.status + ").";
+      return { answer: offlineAgentAnswer(agent.id, message) + "\n\nGemini diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+    }
     return { answer, provider: "Gemini free tier", mode: "free-ai" };
   } catch (e) {
-    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Free AI service could not be reached." };
+    const reason = "The Worker could not reach Gemini. Check network availability and retry; no API key is displayed.";
+    return { answer: offlineAgentAnswer(agent.id, message) + "\n\nGemini diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
   }
 }
 export default {
