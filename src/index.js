@@ -109,6 +109,10 @@ function offlineAgentAnswer(agentId, message) {
 }
 
 async function generateAgentAnswer(agent, user, message, env) {
+  // Zero-cost mode is the default. OpenAI is called only after an explicit opt-in.
+  if (env.AI_PROVIDER !== "openai") {
+    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback" };
+  }
   if (!env.OPENAI_API_KEY) {
     return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "OpenAI API key is not configured in the Worker." };
   }
@@ -162,7 +166,7 @@ export default {
 
     if (url.pathname === "/" || url.pathname === "/api/health") {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openaiConfigured: Boolean(env.OPENAI_API_KEY), zeroCostFallback: true, provider: env.OPENAI_API_KEY ? "OpenAI with built-in fallback" : "Built-in zero-cost fallback" } }, 200, origin);
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openaiConfigured: env.AI_PROVIDER === "openai" && Boolean(env.OPENAI_API_KEY), zeroCostFallback: env.AI_PROVIDER !== "openai", provider: env.AI_PROVIDER === "openai" ? "OpenAI (paid API)" : "Built-in zero-cost fallback" } }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
