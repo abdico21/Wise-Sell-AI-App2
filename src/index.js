@@ -183,7 +183,6 @@ export default {
           return json({ success: true, data, provider: generated.provider, mode: generated.mode }, 200, origin);
         }
         return json({ ok: true, agent: agent.id, answer, provider: generated.provider, mode: generated.mode, ...(generated.reason ? { notice: generated.reason } : {}) }, 200, origin);
-      }
       } catch (e) {
         return json({ error: "Agent request failed.", detail: e.message }, 502, origin);
       }
