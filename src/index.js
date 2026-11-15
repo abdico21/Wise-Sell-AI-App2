@@ -173,7 +173,7 @@ export default {
           .flatMap(item => item?.type === "message" ? (item.content || [])
             .filter(part => part?.type === "output_text" && typeof part.text === "string")
             .map(part => part.text) : [])
-          .join("\\n").trim() ||
+          .join("\n").trim() ||
           (typeof openaiData?.output_text === "string" ? openaiData.output_text.trim() : "");
         if (!answer) return json({ error: "OpenAI returned no text. Please retry.", detail: openaiData?.incomplete_details?.reason || "Empty OpenAI response." }, 502, origin);
         if (legacyRoutes[url.pathname]) {
