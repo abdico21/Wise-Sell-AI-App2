@@ -93,6 +93,42 @@ function extractSpki(der) {
   return der.slice(offset, field.next);
 }
 
+function offlineAgentAnswer(agentId, message) {
+  const request = message.slice(0, 700).trim();
+  const plans = {
+    "business-assistant": ["Clarify the goal: improve profit, cash flow, stock control, or reduce costs.", "Record daily sales, expenses, cash balance, and stock quantities.", "Prioritize three actions with the highest expected business impact.", "Review actual results weekly against a measurable target."],
+    "sales-agent": ["Identify the ideal buyer and the problem your product solves.", "Prepare one clear offer with price, benefit, availability, and delivery terms.", "Contact qualified prospects, ask what they need, and record objections.", "Follow up respectfully and track leads, conversion rate, and revenue."],
+    "digital-marketing": ["Choose one objective: awareness, inquiries, store visits, or sales.", "Define the audience, offer, message, channel, and call to action.", "Prepare two creative variations and test them organically before spending money.", "Track reach, engagement, inquiries, conversion rate, and revenue."],
+    "seo-content": ["Choose one page or product and define the search intent it should satisfy.", "Write a descriptive title, useful headings, clear product details, and a concise meta description.", "Add relevant internal links, descriptive image alt text, and a clear next step.", "Review indexing, impressions, clicks, and conversions in Search Console when connected."],
+    "social-media": ["Choose the platform and audience most relevant to the product.", "Lead with a customer benefit, add a specific offer, and finish with one clear call to action.", "Prepare a short caption, a visual brief, and a small set of relevant hashtags.", "Publish only after the social account and permissions are connected; track inquiries and sales."],
+    "video-audio": ["Open with a clear customer problem or benefit in the first few seconds.", "Show the product, explain its main benefit, and provide a practical example.", "Close with one call to action and contact or ordering instructions.", "Prepare captions, a shot list, and a voiceover script before recording."]
+  };
+  const titles = { "business-assistant": "Business action plan", "sales-agent": "Sales action plan", "digital-marketing": "Digital marketing plan", "seo-content": "SEO and content checklist", "social-media": "Social media content plan", "video-audio": "Video and audio production plan" };
+  const actions = plans[agentId] || plans["business-assistant"];
+  return [titles[agentId] || "Wise Sell AI action plan", "", "Your request: " + request, "", "Recommended steps:", ...actions.map((step, i) => (i + 1) + ". " + step), "", "Track these results:", "- Activity completed", "- Customer inquiries or leads", "- Sales and revenue", "- Costs and profit", "", "This is the built-in zero-API fallback. It uses templates rather than a live AI model. Add your product, target customer, budget, and goal for a more specific plan."].join("\n");
+}
+
+async function generateAgentAnswer(agent, user, message, env) {
+  if (!env.GEMINI_API_KEY) return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback" };
+  try {
+    const model = env.GEMINI_MODEL || "gemini-2.5-flash";
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: "You are " + agent.name + " in Wise Sell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. Never request passwords, API keys, payment-card details, or unnecessary personal data." }] },
+        contents: [{ role: "user", parts: [{ text: message }] }],
+        generationConfig: { temperature: 0.6, maxOutputTokens: 2048 }
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    const answer = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts || []).map(part => typeof part.text === "string" ? part.text : "").join("\n").trim();
+    if (!response.ok || !answer) return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Free AI quota unavailable or request failed." };
+    return { answer, provider: "Gemini free tier", mode: "free-ai" };
+  } catch (e) {
+    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Free AI service could not be reached." };
+  }
+}
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -106,7 +142,7 @@ export default {
 
     if (url.pathname === "/" || url.pathname === "/api/health") {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openai: Boolean(env.OPENAI_API_KEY), provider: "OpenAI" } }, 200, origin);
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), geminiFreeTier: Boolean(env.GEMINI_API_KEY), zeroCostFallback: true, provider: env.GEMINI_API_KEY ? "Gemini free tier with built-in fallback" : "Built-in zero-cost fallback" } }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
@@ -117,7 +153,6 @@ export default {
       let user;
       try { user = await firebaseUser(request, projectId); }
       catch (e) { return json({ error: "Authentication failed", detail: e.message }, 401, origin); }
-      if (!env.OPENAI_API_KEY) return json({ error: "OpenAI is not configured yet. Add the OPENAI_API_KEY Worker secret in Cloudflare.", uid: user.uid }, 503, origin);
 
       const legacyRoutes = {
         "/api/ai/business-growth": "business-assistant",
@@ -132,66 +167,25 @@ export default {
       const message = typeof body.message === "string" ? body.message.trim() : JSON.stringify(body);
       if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
       try {
-        const extractText = (value) => {
-          if (typeof value === "string") return value.trim();
-          if (!value || typeof value !== "object") return "";
-          const direct = value.response ?? value.output_text ?? value.generated_text;
-          if (typeof direct === "string" && direct.trim()) return direct.trim();
-          const content = value.choices?.[0]?.message?.content ?? value.result?.choices?.[0]?.message?.content;
-          if (typeof content === "string" && content.trim()) return content.trim();
-          if (Array.isArray(content)) return content.map(part => typeof part === "string" ? part : part?.text || "").join("\\n").trim();
-          if (Array.isArray(value.output)) return value.output.map(part => part?.text || part?.content || "").join("\\n").trim();
-          if (typeof value.result === "string") return value.result.trim();
-          if (value.result && value.result !== value) return extractText(value.result);
-          return "";
-        };
-        const prompt = [
-          { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. For multi-step or multi-day requests, complete every requested section, include practical actions and measurable targets where useful, and finish with a complete final sentence. If space is limited, be concise rather than leaving the answer unfinished.` },
-          { role: "user", content: message }
-        ];
-        const model = env.OPENAI_MODEL || "gpt-5.4-mini";
-        const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "authorization": `Bearer ${env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model,
-            instructions: prompt[0].content,
-            input: prompt[1].content,
-            max_output_tokens: 3000,
-            store: false
-          })
-        });
-        const openaiData = await openaiResponse.json().catch(() => ({}));
-        if (!openaiResponse.ok) {
-          const detail = openaiData?.error?.message || `OpenAI API returned HTTP ${openaiResponse.status}`;
-          return json({ error: "OpenAI request failed.", detail }, openaiResponse.status === 429 ? 429 : 502, origin);
-        }
-        const answer = (openaiData?.output || [])
-          .flatMap(item => item?.type === "message" ? (item.content || [])
-            .filter(part => part?.type === "output_text" && typeof part.text === "string")
-            .map(part => part.text) : [])
-          .join("\n").trim() ||
-          (typeof openaiData?.output_text === "string" ? openaiData.output_text.trim() : "");
-        if (!answer) return json({ error: "OpenAI returned no text. Please retry.", detail: openaiData?.incomplete_details?.reason || "Empty OpenAI response." }, 502, origin);
+        const generated = await generateAgentAnswer(agent, user, message, env);
+        const answer = generated.answer;
         if (legacyRoutes[url.pathname]) {
           const clean = answer.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
           let data;
           try { data = JSON.parse(clean); } catch { data = null; }
           if (url.pathname === "/api/ai/business-growth") {
-            data = data && typeof data === "object" ? data : { executiveSummary: answer, financialHealthScore: 75, strategicRecommendations: [], scenarioSimulation: "Review the recommendations with your current business data.", urgentRisk: "Validate assumptions before making financial decisions." };
+            data = data && typeof data === "object" ? data : { executiveSummary: answer, financialHealthScore: null, strategicRecommendations: [], scenarioSimulation: "Use the action plan and enter current business figures to evaluate scenarios.", urgentRisk: "Validate assumptions against actual records." };
           } else if (url.pathname === "/api/ai/marketing-advisor") {
-            data = data && typeof data === "object" ? data : { recommendation: answer, bottleneck: "Review campaign conversion data.", expectedCvrLift: "Not estimated", actionItems: [], adSpendAdjustment: "Do not change budgets until performance data is verified." };
+            data = data && typeof data === "object" ? data : { recommendation: answer, bottleneck: "Review campaign conversion data.", expectedCvrLift: "Not estimated", actionItems: [], adSpendAdjustment: "No paid advertising budget is used by this zero-cost plan." };
           } else {
-            data = data && typeof data === "object" ? data : { score: 0, tier: "Needs review", intent: answer, bantAnalysis: {} };
+            data = data && typeof data === "object" ? data : { score: null, tier: "Needs review", intent: answer, bantAnalysis: {} };
           }
-          return json({ success: true, data, provider: "OpenAI" }, 200, origin);
+          return json({ success: true, data, provider: generated.provider, mode: generated.mode }, 200, origin);
         }
-        return json({ ok: true, agent: agent.id, answer, provider: "OpenAI" }, 200, origin);
+        return json({ ok: true, agent: agent.id, answer, provider: generated.provider, mode: generated.mode, ...(generated.reason ? { notice: generated.reason } : {}) }, 200, origin);
+      }
       } catch (e) {
-        return json({ error: "OpenAI request failed.", detail: e.message }, 502, origin);
+        return json({ error: "Agent request failed.", detail: e.message }, 502, origin);
       }
     }
     return json({ error: "Not found" }, 404, origin);
