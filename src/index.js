@@ -109,34 +109,44 @@ function offlineAgentAnswer(agentId, message) {
 }
 
 async function generateAgentAnswer(agent, user, message, env) {
-  if (!env.GEMINI_API_KEY) return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Gemini API key is not configured in the Worker." };
+  if (!env.OPENAI_API_KEY) {
+    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "OpenAI API key is not configured in the Worker." };
+  }
   try {
-    const model = env.GEMINI_MODEL || "gemini-2.5-flash";
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+    const model = env.OPENAI_MODEL || "gpt-4.1-mini";
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      headers: {
+        "content-type": "application/json",
+        "authorization": "Bearer " + env.OPENAI_API_KEY
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: "You are " + agent.name + " in Wise Sell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. Never request passwords, API keys, payment-card details, or unnecessary personal data." }] },
-        contents: [{ role: "user", parts: [{ text: message }] }],
-        generationConfig: { temperature: 0.6, maxOutputTokens: 2048 }
+        model,
+        instructions: "You are " + agent.name + " in Wise Sell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. Never request passwords, API keys, payment-card details, or unnecessary personal data.",
+        input: message,
+        max_output_tokens: 1800
       })
     });
     const data = await response.json().catch(() => ({}));
-    const answer = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts || []).map(part => typeof part.text === "string" ? part.text : "").join("\n").trim();
+    const outputText = typeof data.output_text === "string" ? data.output_text :
+      (Array.isArray(data.output) ? data.output.flatMap(item =>
+        Array.isArray(item.content) ? item.content.filter(part => part.type === "output_text" && typeof part.text === "string").map(part => part.text) : []
+      ).join("\n") : "");
+    const answer = outputText.trim();
     if (!response.ok || !answer) {
       let reason;
-      if (response.status === 400 || response.status === 404) reason = "Gemini rejected the model or request configuration (HTTP " + response.status + ").";
-      else if (response.status === 401 || response.status === 403) reason = "Gemini rejected the API key or its permissions (HTTP " + response.status + "). Check the key in Google AI Studio without sharing it here.";
-      else if (response.status === 429) reason = "Gemini free-tier quota or rate limit was reached (HTTP 429). Wait for quota reset or check the project's free-tier limits.";
-      else if (response.status >= 500) reason = "Google's Gemini service is temporarily unavailable (HTTP " + response.status + ").";
-      else if (response.ok) reason = "Gemini returned no usable text. The request may have been blocked by a safety filter or ended without a text response.";
-      else reason = "Gemini request failed (HTTP " + response.status + ").";
-      return { answer: offlineAgentAnswer(agent.id, message) + "\n\nGemini diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+      if (response.status === 400) reason = "OpenAI rejected the request configuration (HTTP 400). Check the configured model and request parameters.";
+      else if (response.status === 401 || response.status === 403) reason = "OpenAI rejected the API key or its permissions (HTTP " + response.status + "). Check the OPENAI_API_KEY Worker secret.";
+      else if (response.status === 429) reason = "OpenAI rate limit or project quota was reached (HTTP 429). Check the OpenAI project billing and usage limits.";
+      else if (response.status >= 500) reason = "OpenAI is temporarily unavailable (HTTP " + response.status + ").";
+      else if (response.ok) reason = "OpenAI returned no usable text. The response may have been incomplete or blocked.";
+      else reason = "OpenAI request failed (HTTP " + response.status + ").";
+      return { answer: offlineAgentAnswer(agent.id, message) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
     }
-    return { answer, provider: "Gemini free tier", mode: "free-ai" };
+    return { answer, provider: "OpenAI", mode: "openai" };
   } catch (e) {
-    const reason = "The Worker could not reach Gemini. Check network availability and retry; no API key is displayed.";
-    return { answer: offlineAgentAnswer(agent.id, message) + "\n\nGemini diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+    const reason = "The Worker could not reach OpenAI. Check network availability and retry; no API key is displayed.";
+    return { answer: offlineAgentAnswer(agent.id, message) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
   }
 }
 export default {
@@ -152,7 +162,7 @@ export default {
 
     if (url.pathname === "/" || url.pathname === "/api/health") {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), geminiFreeTier: Boolean(env.GEMINI_API_KEY), zeroCostFallback: true, provider: env.GEMINI_API_KEY ? "Gemini free tier with built-in fallback" : "Built-in zero-cost fallback" } }, 200, origin);
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openaiConfigured: Boolean(env.OPENAI_API_KEY), zeroCostFallback: true, provider: env.OPENAI_API_KEY ? "OpenAI with built-in fallback" : "Built-in zero-cost fallback" } }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
