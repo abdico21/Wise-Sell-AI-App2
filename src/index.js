@@ -106,7 +106,7 @@ export default {
 
     if (url.pathname === "/" || url.pathname === "/api/health") {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), gemini: Boolean(env.GEMINI_API_KEY), provider: "Google Gemini" } }, 200, origin);
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openai: Boolean(env.OPENAI_API_KEY), provider: "OpenAI" } }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
@@ -117,7 +117,7 @@ export default {
       let user;
       try { user = await firebaseUser(request, projectId); }
       catch (e) { return json({ error: "Authentication failed", detail: e.message }, 401, origin); }
-      if (!env.GEMINI_API_KEY) return json({ error: "Gemini is not configured yet. Add the GEMINI_API_KEY Worker secret in Cloudflare.", uid: user.uid }, 503, origin);
+      if (!env.OPENAI_API_KEY) return json({ error: "OpenAI is not configured yet. Add the OPENAI_API_KEY Worker secret in Cloudflare.", uid: user.uid }, 503, origin);
 
       const legacyRoutes = {
         "/api/ai/business-growth": "business-assistant",
@@ -129,7 +129,7 @@ export default {
       if (!agent) return json({ error: "Unknown agent." }, 404, origin);
       let body;
       try { body = await request.json(); } catch { return json({ error: "Request body must be valid JSON." }, 400, origin); }
-      const message = (typeof body.message === "string" ? body.message.trim() : JSON.stringify(body)).slice(0, 8000);
+      const message = typeof body.message === "string" ? body.message.trim() : JSON.stringify(body);
       if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
       try {
         const extractText = (value) => {
@@ -149,28 +149,33 @@ export default {
           { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. For multi-step or multi-day requests, complete every requested section, include practical actions and measurable targets where useful, and finish with a complete final sentence. If space is limited, be concise rather than leaving the answer unfinished.` },
           { role: "user", content: message }
         ];
-        const model = env.GEMINI_MODEL || "gemini-3.8-flash";
-        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+        const model = env.OPENAI_MODEL || "gpt-5.4-mini";
+        const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "x-goog-api-key": env.GEMINI_API_KEY
+            "authorization": `Bearer ${env.OPENAI_API_KEY}`
           },
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: prompt[0].content }] },
-            contents: [{ role: "user", parts: [{ text: prompt[1].content }] }],
-            generationConfig: { maxOutputTokens: 3000 }
+            model,
+            instructions: prompt[0].content,
+            input: prompt[1].content,
+            max_output_tokens: 3000,
+            store: false
           })
         });
-        const geminiData = await geminiResponse.json().catch(() => ({}));
-        if (!geminiResponse.ok) {
-          const detail = geminiData?.error?.message || `Gemini API returned HTTP ${geminiResponse.status}`;
-          return json({ error: "Gemini request failed.", detail }, geminiResponse.status === 429 ? 429 : 502, origin);
+        const openaiData = await openaiResponse.json().catch(() => ({}));
+        if (!openaiResponse.ok) {
+          const detail = openaiData?.error?.message || `OpenAI API returned HTTP ${openaiResponse.status}`;
+          return json({ error: "OpenAI request failed.", detail }, openaiResponse.status === 429 ? 429 : 502, origin);
         }
-        const answer = (geminiData?.candidates?.[0]?.content?.parts || [])
-          .map(part => typeof part.text === "string" ? part.text : "")
-          .join("\\n").trim();
-        if (!answer) return json({ error: "Gemini returned no text. Please retry.", detail: geminiData?.promptFeedback?.blockReason || "Empty Gemini response." }, 502, origin);
+        const answer = (openaiData?.output || [])
+          .flatMap(item => item?.type === "message" ? (item.content || [])
+            .filter(part => part?.type === "output_text" && typeof part.text === "string")
+            .map(part => part.text) : [])
+          .join("\\n").trim() ||
+          (typeof openaiData?.output_text === "string" ? openaiData.output_text.trim() : "");
+        if (!answer) return json({ error: "OpenAI returned no text. Please retry.", detail: openaiData?.incomplete_details?.reason || "Empty OpenAI response." }, 502, origin);
         if (legacyRoutes[url.pathname]) {
           const clean = answer.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
           let data;
@@ -182,11 +187,11 @@ export default {
           } else {
             data = data && typeof data === "object" ? data : { score: 0, tier: "Needs review", intent: answer, bantAnalysis: {} };
           }
-          return json({ success: true, data, provider: "Google Gemini" }, 200, origin);
+          return json({ success: true, data, provider: "OpenAI" }, 200, origin);
         }
-        return json({ ok: true, agent: agent.id, answer, provider: "Cloudflare Workers AI" }, 200, origin);
+        return json({ ok: true, agent: agent.id, answer, provider: "OpenAI" }, 200, origin);
       } catch (e) {
-        return json({ error: "Google Gemini request failed.", detail: e.message }, 502, origin);
+        return json({ error: "OpenAI request failed.", detail: e.message }, 502, origin);
       }
     }
     return json({ error: "Not found" }, 404, origin);
