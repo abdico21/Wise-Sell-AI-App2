@@ -106,7 +106,7 @@ export default {
 
     if (url.pathname === "/" || url.pathname === "/api/health") {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), cloudflareWorkersAI: Boolean(env.AI) } }, 200, origin);
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), gemini: Boolean(env.GEMINI_API_KEY), provider: "Google Gemini" } }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
@@ -117,7 +117,7 @@ export default {
       let user;
       try { user = await firebaseUser(request, projectId); }
       catch (e) { return json({ error: "Authentication failed", detail: e.message }, 401, origin); }
-      if (!env.AI) return json({ error: "Cloudflare Workers AI binding is not configured.", uid: user.uid }, 503, origin);
+      if (!env.GEMINI_API_KEY) return json({ error: "Gemini is not configured yet. Add the GEMINI_API_KEY Worker secret in Cloudflare.", uid: user.uid }, 503, origin);
 
       const legacyRoutes = {
         "/api/ai/business-growth": "business-assistant",
@@ -149,19 +149,28 @@ export default {
           { role: "system", content: `You are ${agent.name} in Wise Sell AI. ${agent.instruction} The signed-in user's ID is ${user.uid}. Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. For multi-step or multi-day requests, complete every requested section, include practical actions and measurable targets where useful, and finish with a complete final sentence. If space is limited, be concise rather than leaving the answer unfinished.` },
           { role: "user", content: message }
         ];
-        let answer = "";
-        let lastModelError = "";
-        for (const model of ["@cf/google/gemma-4-26b-a4b-it", "@cf/meta/llama-3.1-8b-instruct"]) {
-          try {
-            const result = await env.AI.run(model, { messages: prompt, max_tokens: 1800, temperature: 0.4 });
-            answer = extractText(result);
-            if (answer) break;
-            lastModelError = `${model} returned no text`;
-          } catch (modelError) {
-            lastModelError = modelError?.message || String(modelError);
-          }
+        const model = env.GEMINI_MODEL || "gemini-3.8-flash";
+        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-goog-api-key": env.GEMINI_API_KEY
+          },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: prompt[0].content }] },
+            contents: [{ role: "user", parts: [{ text: prompt[1].content }] }],
+            generationConfig: { maxOutputTokens: 3000 }
+          })
+        });
+        const geminiData = await geminiResponse.json().catch(() => ({}));
+        if (!geminiResponse.ok) {
+          const detail = geminiData?.error?.message || `Gemini API returned HTTP ${geminiResponse.status}`;
+          return json({ error: "Gemini request failed.", detail }, geminiResponse.status === 429 ? 429 : 502, origin);
         }
-        if (!answer) return json({ error: "The AI service did not return text from either configured model. Please retry shortly.", detail: lastModelError || "Empty model response." }, 502, origin);
+        const answer = (geminiData?.candidates?.[0]?.content?.parts || [])
+          .map(part => typeof part.text === "string" ? part.text : "")
+          .join("\\n").trim();
+        if (!answer) return json({ error: "Gemini returned no text. Please retry.", detail: geminiData?.promptFeedback?.blockReason || "Empty Gemini response." }, 502, origin);
         if (legacyRoutes[url.pathname]) {
           const clean = answer.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
           let data;
@@ -173,11 +182,11 @@ export default {
           } else {
             data = data && typeof data === "object" ? data : { score: 0, tier: "Needs review", intent: answer, bantAnalysis: {} };
           }
-          return json({ success: true, data, provider: "Cloudflare Workers AI" }, 200, origin);
+          return json({ success: true, data, provider: "Google Gemini" }, 200, origin);
         }
         return json({ ok: true, agent: agent.id, answer, provider: "Cloudflare Workers AI" }, 200, origin);
       } catch (e) {
-        return json({ error: "Cloudflare Workers AI request failed.", detail: e.message }, 502, origin);
+        return json({ error: "Google Gemini request failed.", detail: e.message }, 502, origin);
       }
     }
     return json({ error: "Not found" }, 404, origin);
