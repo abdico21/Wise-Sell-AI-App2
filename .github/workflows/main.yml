@@ -1,1 +1,49 @@
+name: Validate Wise Sell AI Worker
 
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "wrangler.toml"
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "wrangler.toml"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Worker and six AI agents
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check Worker JavaScript syntax
+        run: node --check src/index.js
+
+      - name: Verify six agent definitions and secure integrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f wrangler.toml
+          for agent in business-assistant sales-agent digital-marketing seo-content social-media video-audio; do
+            grep -q "id: \"$agent\"" src/index.js
+            echo "PASS: $agent"
+          done
+          grep -q "https://api.openai.com/v1/responses" src/index.js
+          grep -q 'env.OPENAI_API_KEY' src/index.js
+          grep -q 'firebaseUser(request, projectId)' src/index.js
+          echo "PASS: OpenAI Responses API, Worker secret binding, and Firebase authentication"
