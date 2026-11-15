@@ -14,12 +14,12 @@ The Worker source is in `src/index.js`; its configuration is in `wrangler.toml`.
 
 ## Required Worker configuration
 
-- `FIREBASE_PROJECT_ID` is declared in `wrangler.toml`.
-- The `AI` binding is declared in `wrangler.toml`. Confirm Workers AI is available/enabled for the Cloudflare account and that the deployed Worker shows the binding.
-- Never add an OpenAI or other private API key to the Android app.
+- `FIREBASE_PROJECT_ID` and `GEMINI_MODEL` are declared in `wrangler.toml`.
+- Add a Worker secret named `GEMINI_API_KEY` in Cloudflare: Workers & Pages → `wise-sell-ai-app2` → Settings → Variables and Secrets → Add → Secret. Paste the key created in Google AI Studio and save/deploy.
+- The Worker calls Google Gemini server-side. Never put the Gemini key in the Android app, GitHub source files, or chat.
 
 ## Verify after deployment
 
-Open `https://wise-sell-ai-app2.abdico-veiws22.workers.dev/api/health`. A successful response should contain `ok: true` and identify the Worker API. Then sign in to Wise Sell AI and test each agent. A successful health response alone does not prove that authenticated AI requests work.
+Open `https://wise-sell-ai-app2.abdico-veiws22.workers.dev/api/health`. A successful response should contain `ok: true` and report the Gemini integration as configured. Then sign in to Wise Sell AI and test each agent. A successful health response alone does not prove that authenticated Gemini requests work.
 
 The deployment workflow is manual so it does not fail on every commit before the Cloudflare secrets have been configured.
