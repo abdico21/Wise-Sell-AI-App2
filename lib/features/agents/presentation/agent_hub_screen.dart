@@ -16,7 +16,7 @@ class AgentHubScreen extends StatefulWidget {
 class _AgentHubScreenState extends State<AgentHubScreen> {
   static const _apiBaseUrl = String.fromEnvironment(
     'WISESELL_API_BASE_URL',
-    defaultValue: 'https://wisesell-ai-api.iamabdu3.workers.dev',
+    defaultValue: 'https://wise-sell-ai-app2.abdico-veiws22.workers.dev',
   );
 
   static const _agents = <_AgentInfo>[
