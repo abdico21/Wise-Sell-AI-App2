@@ -2,12 +2,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /business_profiles/{userId} {
-      allow create: if request.auth != null
+      // The owner can read their own document path, including before it exists.
+      // This allows the app to check whether a profile exists before creating it.
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+
+      // Only the signed-in owner can create or update the profile, and the
+      // stored uid must always match the authenticated Firebase user.
+      allow create, update: if request.auth != null
+                            && request.auth.uid == userId
+                            && request.resource.data.uid == request.auth.uid;
+
+      allow delete: if request.auth != null
                     && request.auth.uid == userId
-                    && request.resource.data.uid == request.auth.uid;
-      allow read, update, delete: if request.auth != null
-                                  && request.auth.uid == userId
-                                  && resource.data.uid == request.auth.uid;
+                    && resource.data.uid == request.auth.uid;
     }
 
     match /products/{productId} {
