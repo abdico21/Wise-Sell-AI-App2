@@ -89,14 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             )
           : null,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          pages[0],
-          pages[1],
-          pages[2],
-        ],
-      ),
+      body: pages[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
