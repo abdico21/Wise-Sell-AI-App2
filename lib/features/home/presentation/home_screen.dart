@@ -10,6 +10,8 @@ import '../../sales/presentation/sales_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import 'feature_status_screen.dart';
 import '../../agents/presentation/agent_hub_screen.dart';
+import '../../marketplace/presentation/marketplace_screen.dart';
+import '../../marketing/presentation/marketing_workspace_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({required this.onLocaleChanged, super.key});
@@ -32,11 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final l = AppLocalizations.of(context)!;
     final pages = <Widget>[
       _buildHome(context, l),
-      const FeatureStatusScreen(
-        title: 'Marketplace',
-        description: 'Product discovery, buyer and seller storefronts, and marketplace orders.',
-        plannedItems: ['Seller storefronts', 'Product listings and search', 'Buyer enquiries and orders'],
-      ),
+      const MarketplaceScreen(),
       const AgentHubScreen(),
     ];
 
@@ -168,11 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _FeatureTile(icon: Icons.shopping_bag_outlined, title: l.marketplace,
                 detail: l.productsOrders, onTap: () => setState(() => _selectedIndex = 1)),
               _FeatureTile(icon: Icons.campaign_outlined, title: l.marketing,
-                detail: l.socialCampaigns, onTap: () => _open(const FeatureStatusScreen(
-                  title: 'Sales and Marketing',
-                  description: 'Campaign creation and social-network publishing are not active in this build.',
-                  plannedItems: ['Product descriptions and ad copy', 'Campaign planning', 'Social channel integrations'],
-                ))),
+                detail: l.socialCampaigns, onTap: () => _open(const MarketingWorkspaceScreen())),
               _FeatureTile(icon: Icons.inventory_2_outlined, title: l.inventory,
                 detail: l.stockManagement, onTap: () => _open(const InventoryScreen())),
               _FeatureTile(icon: Icons.point_of_sale_outlined, title: 'Sales',
@@ -196,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.rocket_launch_outlined, color: AppTheme.orange, size: 30),
                   const SizedBox(width: 14),
                   Expanded(child: Text(
-                    'Your mobile foundation is connected. Open the available business tools below; AI, marketplace and marketing services still need implementation.',
+                    'Create product listings, receive buyer enquiries and save marketing campaign drafts. Use AI Studio for business advice and content ideas.',
                     style: const TextStyle(height: 1.4),
                   )),
                 ],
