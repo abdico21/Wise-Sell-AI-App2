@@ -103,47 +103,34 @@ function offlineAgentAnswer(agentId, message) {
 }
 __name(offlineAgentAnswer, "offlineAgentAnswer");
 async function generateAgentAnswer(agent, user, message, env) {
-  if (env.AI_PROVIDER !== "openai") {
-    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback" };
-  }
-  if (!env.OPENAI_API_KEY) {
-    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "OpenAI API key is not configured in the Worker." };
-  }
-  try {
-    const model = env.OPENAI_MODEL || "gpt-4.1-mini";
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "authorization": "Bearer " + env.OPENAI_API_KEY
-      },
-      body: JSON.stringify({
-        model,
-        instructions: "You are " + agent.name + " in Wise Sell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. Never request passwords, API keys, payment-card details, or unnecessary personal data.",
-        input: message,
-        max_output_tokens: 1800
-      })
-    });
-    const data = await response.json().catch(() => ({}));
-    const outputText = typeof data.output_text === "string" ? data.output_text : Array.isArray(data.output) ? data.output.flatMap(
-      (item) => Array.isArray(item.content) ? item.content.filter((part) => part.type === "output_text" && typeof part.text === "string").map((part) => part.text) : []
-    ).join("\n") : "";
-    const answer = outputText.trim();
-    if (!response.ok || !answer) {
-      let reason;
-      if (response.status === 400) reason = "OpenAI rejected the request configuration (HTTP 400). Check the configured model and request parameters.";
-      else if (response.status === 401 || response.status === 403) reason = "OpenAI rejected the API key or its permissions (HTTP " + response.status + "). Check the OPENAI_API_KEY Worker secret.";
-      else if (response.status === 429) reason = "OpenAI rate limit or project quota was reached (HTTP 429). Check the OpenAI project billing and usage limits.";
-      else if (response.status >= 500) reason = "OpenAI is temporarily unavailable (HTTP " + response.status + ").";
-      else if (response.ok) reason = "OpenAI returned no usable text. The response may have been incomplete or blocked.";
-      else reason = "OpenAI request failed (HTTP " + response.status + ").";
-      return { answer: offlineAgentAnswer(agent.id, message) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+  if (env.AI && typeof env.AI.run === "function") {
+    try {
+      const result = await env.AI.run(env.AI_MODEL || "@cf/google/gemma-4-26b-a4b-it", {
+        messages: [
+          {
+            role: "system",
+            content: "You are " + agent.name + " in WiseSell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". Give specific, practical, complete answers. For plans, include measurable actions and realistic targets. Do not claim access to connected accounts, business records, payments, or social platforms unless the request supplies that information. Never request passwords, API keys, payment-card details, or unnecessary personal data."
+          },
+          { role: "user", content: message }
+        ],
+        max_tokens: 1800,
+        temperature: 0.4,
+        chat_template_kwargs: { enable_thinking: false }
+      });
+      const answer = typeof result === "string" ? result :
+        typeof result?.response === "string" ? result.response :
+        typeof result?.choices?.[0]?.message?.content === "string" ? result.choices[0].message.content :
+        typeof result?.output_text === "string" ? result.output_text : "";
+      if (answer.trim()) {
+        return { answer: answer.trim(), provider: "Cloudflare Workers AI (Gemma 4)", mode: "workers-ai" };
+      }
+      throw new Error("Workers AI returned an empty response.");
+    } catch (e) {
+      const reason = "Workers AI could not complete this request. The built-in template is being used instead.";
+      return { answer: offlineAgentAnswer(agent.id, message) + "\\n\\nAI service notice: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
     }
-    return { answer, provider: "OpenAI", mode: "openai" };
-  } catch (e) {
-    const reason = "The Worker could not reach OpenAI. Check network availability and retry; no API key is displayed.";
-    return { answer: offlineAgentAnswer(agent.id, message) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
   }
+  return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "The Cloudflare AI binding is not available in this deployment." };
 }
 __name(generateAgentAnswer, "generateAgentAnswer");
 var index_default = {
@@ -161,7 +148,7 @@ var index_default = {
         ok: true,
         app: env.APP_NAME || "Wise Sell AI",
         service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openaiConfigured: env.AI_PROVIDER === "openai" && Boolean(env.OPENAI_API_KEY), zeroCostFallback: env.AI_PROVIDER !== "openai", provider: env.AI_PROVIDER === "openai" ? "OpenAI (paid API)" : "Built-in zero-cost fallback" }
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), workersAI: Boolean(env.AI), zeroCostFallback: !env.AI, provider: env.AI ? "Cloudflare Workers AI (Gemma 4; free daily allocation subject to limits)" : "Built-in zero-cost fallback" }
       }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
