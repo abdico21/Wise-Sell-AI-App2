@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - feature/flutter-mobile-foundation
+      - feature/ai-marketplace-marketing
   pull_request:
     branches:
       - main
       - feature/flutter-mobile-foundation
+      - feature/ai-marketplace-marketing
   workflow_dispatch:
 
 permissions:
