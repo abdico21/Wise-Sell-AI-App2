@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/wisesell_ai_service.dart';
 
 class MarketingWorkspaceScreen extends StatefulWidget {
   const MarketingWorkspaceScreen({super.key});
@@ -19,6 +20,8 @@ class _MarketingWorkspaceScreenState extends State<MarketingWorkspaceScreen> {
   final _audience = TextEditingController();
   String _channel = 'Facebook';
   bool _saving = false;
+  bool _generating = false;
+  String _generatedContent = '';
 
   static const _channels = ['Facebook', 'Instagram', 'TikTok', 'Telegram', 'WhatsApp', 'LinkedIn'];
 
@@ -81,6 +84,39 @@ class _MarketingWorkspaceScreenState extends State<MarketingWorkspaceScreen> {
             onChanged: (value) => setState(() => _channel = value ?? 'Facebook'),
           ),
           const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _generating ? null : () => _generateCampaign(),
+            icon: _generating
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.auto_awesome),
+            label: Text(_generating ? 'Generating with WiseSell AI…' : 'Generate campaign content with AI'),
+          ),
+          if (_generatedContent.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('AI-generated campaign draft',
+                      style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.navy)),
+                    const SizedBox(height: 8),
+                    SelectableText(_generatedContent),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => setState(() => _generatedContent = ''),
+                        icon: const Icon(Icons.clear),
+                        label: const Text('Clear draft'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: _saving ? null : () => _saveCampaign(user.uid),
             icon: const Icon(Icons.save_outlined),
@@ -136,6 +172,39 @@ class _MarketingWorkspaceScreenState extends State<MarketingWorkspaceScreen> {
     ),
   );
 
+  Future<void> _generateCampaign() async {
+    if (_product.text.trim().isEmpty || _goal.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter the product or service and campaign goal first.')),
+      );
+      return;
+    }
+    setState(() => _generating = true);
+    try {
+      final content = await WiseSellAiService.generate(
+        agent: 'marketing',
+        language: 'English',
+        businessContext: 'Business operates in Ethiopia. Target channel: $_channel. Planned budget: ${_budget.text.trim().isEmpty ? 'not specified' : _budget.text.trim() + ' ETB'}.',
+        prompt: 'Create a ready-to-edit campaign content pack for ${_product.text.trim()}. Campaign goal: ${_goal.text.trim()}. Target audience: ${_audience.text.trim().isEmpty ? 'suggest a suitable audience' : _audience.text.trim()}. Primary channel: $_channel. Include a campaign concept, 3 post variations, a call to action, a short content schedule and measurable KPIs. Do not claim to publish anything.',
+      );
+      if (!mounted) return;
+      setState(() => _generatedContent = content);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('AI campaign content generated. Review it before saving or publishing.')),
+      );
+    } on WiseSellAiException catch (error) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not generate campaign content. Please try again.')),
+      );
+    } finally {
+      if (mounted) setState(() => _generating = false);
+    }
+  }
+
   Future<void> _saveCampaign(String uid) async {
     if (_name.text.trim().isEmpty || _product.text.trim().isEmpty || _goal.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -161,6 +230,7 @@ class _MarketingWorkspaceScreenState extends State<MarketingWorkspaceScreen> {
         'audience': _audience.text.trim(),
         'budgetETB': budget,
         'channel': _channel,
+        'aiContent': _generatedContent,
         'status': 'draft',
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
@@ -170,6 +240,8 @@ class _MarketingWorkspaceScreenState extends State<MarketingWorkspaceScreen> {
       _goal.clear();
       _audience.clear();
       _budget.clear();
+      _generatedContent = '';
+      if (mounted) setState(() {});
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Campaign draft saved.')),
       );
