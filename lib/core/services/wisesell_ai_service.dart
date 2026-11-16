@@ -12,6 +12,19 @@ class WiseSellAiService {
     defaultValue: 'https://wise-sell-ai-app2.abdico-veiws22.workers.dev',
   );
 
+  // Map the app's UI categories to the agent IDs actually exposed by the Worker.
+  static const Map<String, String> _workerAgentIds = {
+    'business': 'business-assistant',
+    'marketing': 'digital-marketing',
+    'content': 'seo-content',
+    'seo': 'seo-content',
+    'social': 'social-media',
+    'video': 'video-audio',
+    // Inventory advice is handled by the business assistant until a dedicated
+    // inventory agent is added to the Worker.
+    'inventory': 'business-assistant',
+  };
+
   static Future<String> generate({
     required String agent,
     required String prompt,
@@ -28,20 +41,27 @@ class WiseSellAiService {
       throw const WiseSellAiException('Your sign-in session expired. Please sign in again.');
     }
 
+    final workerAgentId = _workerAgentIds[agent];
+    if (workerAgentId == null) {
+      throw const WiseSellAiException('This WiseSell AI agent is not configured yet.');
+    }
+
+    final enrichedMessage = [
+      'Please respond in $language.',
+      if (businessContext.trim().isNotEmpty) 'Business context: ${businessContext.trim()}',
+      if (agent == 'inventory') 'Focus on inventory levels, stock movement, reorder priorities and stockout risks.',
+      'User request: ${prompt.trim()}',
+    ].join('\n\n');
+
     late final http.Response response;
     try {
       response = await http.post(
-        Uri.parse('$_baseUrl/v1/agent'),
+        Uri.parse('$_baseUrl/api/agents/$workerAgentId'),
         headers: {
           'content-type': 'application/json',
           'authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          'agent': agent,
-          'prompt': prompt,
-          'language': language,
-          'businessContext': businessContext,
-        }),
+        body: jsonEncode({'message': enrichedMessage}),
       ).timeout(const Duration(seconds: 55));
     } on Exception {
       throw const WiseSellAiException(
@@ -70,7 +90,7 @@ class WiseSellAiService {
         throw const WiseSellAiException('Please sign in again to continue.');
       }
       if (response.statusCode == 404) {
-        throw const WiseSellAiException('The AI endpoint is not available on the configured Worker.');
+        throw const WiseSellAiException('The requested AI agent route was not found on the Worker.');
       }
       if (response.statusCode == 503) {
         throw const WiseSellAiException('AI capacity is temporarily unavailable. Please try again later.');
