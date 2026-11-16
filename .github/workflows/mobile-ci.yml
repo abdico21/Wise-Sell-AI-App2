@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - feature/flutter-mobile-foundation
+      - feature/ai-marketplace-marketing
   pull_request:
     branches:
       - main
       - feature/flutter-mobile-foundation
+      - feature/ai-marketplace-marketing
   workflow_dispatch:
 
 permissions:
@@ -117,7 +119,7 @@ jobs:
         run: flutter test --reporter expanded
 
       - name: Build release APK
-        run: flutter build apk --release --dart-define=WISESELL_API_BASE_URL=https://wisesell-ai-api.iamabdu3.workers.dev
+        run: flutter build apk --release --dart-define=WISESELL_API_BASE_URL=https://wise-sell-ai-app2.abdico-veiws22.workers.dev
 
       - name: Upload release APK
         uses: actions/upload-artifact@v4

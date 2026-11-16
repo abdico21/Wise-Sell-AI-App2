@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/wisesell_ai_service.dart';
 
 class AgentHubScreen extends StatefulWidget {
   const AgentHubScreen({super.key});
@@ -14,11 +11,6 @@ class AgentHubScreen extends StatefulWidget {
 }
 
 class _AgentHubScreenState extends State<AgentHubScreen> {
-  static const _apiBaseUrl = String.fromEnvironment(
-    'WISESELL_API_BASE_URL',
-    defaultValue: 'https://wisesell-ai-api.iamabdu3.workers.dev',
-  );
-
   static const _agents = <_AgentInfo>[
     _AgentInfo(Icons.business_center_outlined, 'Business Assistant', 'business', 'Coordinates specialist agents and turns advice into a business action plan.'),
     _AgentInfo(Icons.campaign_outlined, 'Digital Marketing', 'marketing', 'Campaign plans, audiences, budgets and measurable KPIs.'),
@@ -68,45 +60,14 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
     _scrollToBottom();
 
     try {
-      final idToken = await user.getIdToken();
-      if (idToken == null || idToken.isEmpty) {
-        throw const _AgentRequestException('Your sign-in session expired. Please sign in again.');
-      }
-      final response = await http.post(
-        Uri.parse('$_apiBaseUrl/v1/agent'),
-        headers: {
-          'content-type': 'application/json',
-          'authorization': 'Bearer $idToken',
-        },
-        body: jsonEncode({
-          'agent': _selectedAgent,
-          'prompt': prompt,
-          'language': _language,
-        }),
-      ).timeout(const Duration(seconds: 50));
-
-      Map<String, dynamic> data = {};
-      try {
-        data = Map<String, dynamic>.from(jsonDecode(response.body) as Map);
-      } catch (_) {
-        throw const _AgentRequestException('The AI service returned an unreadable response.');
-      }
-
-      if (response.statusCode == 200) {
-        final answer = data['answer'] as String? ?? 'No answer was returned.';
-        if (!mounted) return;
-        setState(() => _messages.add(_ChatMessage(answer, false)));
-      } else {
-        final message = data['error'] as String? ?? 'WiseSell AI could not complete your request.';
-        throw _AgentRequestException(
-          response.statusCode == 401
-              ? 'Please sign in again to continue.'
-              : response.statusCode == 503
-                  ? 'AI capacity is temporarily unavailable. Please try again later.'
-                  : message,
-        );
-      }
-    } on _AgentRequestException catch (error) {
+      final answer = await WiseSellAiService.generate(
+        agent: _selectedAgent,
+        prompt: prompt,
+        language: _language,
+      );
+      if (!mounted) return;
+      setState(() => _messages.add(_ChatMessage(answer, false)));
+    } on WiseSellAiException catch (error) {
       if (!mounted) return;
       setState(() => _messages.add(_ChatMessage(error.message, false)));
     } catch (_) {
@@ -345,7 +306,3 @@ class _AgentInfo {
   final String description;
 }
 
-class _AgentRequestException implements Exception {
-  const _AgentRequestException(this.message);
-  final String message;
-}
