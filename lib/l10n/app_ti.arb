@@ -183,5 +183,18 @@
   "category": "ምድብ",
   "sellingPrice": "ዋጋ መሸጣ (ETB)",
   "quantityInStock": "ኣብ ክምችት ዘሎ ብዝሒ",
-  "validNonNegativeNumber": "ቅኑዕ ዜሮ ወይ ካብ ዜሮ ዝዓቢ ቁጽሪ ኣእትዉ"
+  "validNonNegativeNumber": "ቅኑዕ ዜሮ ወይ ካብ ዜሮ ዝዓቢ ቁጽሪ ኣእትዉ",
+  "salesRecorded": "ዝተመዝገቡ መሸጣ",
+  "unitsSold": "ዝተሸጠ ብዝሒ",
+  "recordedRevenue": "ዝተመዝገበ ኣታዊ",
+  "recentSales": "ናይ ቀረባ መሸጣ",
+  "justRecorded": "ሕጂ ተመዝጊቡ",
+  "customerLabel": "ዓሚል: {name}",
+  "startRecordingSales": "መሸጣ ምምዝጋብ ጀምሩ",
+  "recordSalesInstruction": "ካብ ክምችት ፍርያት ምረጹ፣ ዝተሸጠ ብዝሒ ኣእትዉ፣ WiseSell ክምችትኩም ክሕድሶ እዩ።",
+  "selectedCustomerUnavailable": "እቲ ዝተመርጸ ዓሚል ኣይርከብን።",
+  "productNoLongerExists": "እቲ ፍርያት ድሕሪ ሕጂ የለን።",
+  "productAccessDenied": "ፍቓድ ምእታው ፍርያት ተኸልኪሉ።",
+  "insufficientStock": "እኹል ክምችት የለን።",
+  "couldNotRecordSale": "መሸጣ ምምዝጋብ ኣይተኻእለን። ምትእስሳርን ሕግታት Firestoreን ኣረጋግጹ።"
 }
