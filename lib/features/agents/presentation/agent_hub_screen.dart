@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AgentHubScreen extends StatefulWidget {
-  const AgentHubScreen({super.key});
+  const AgentHubScreen({required this.onLocaleChanged, super.key});
+
+  final ValueChanged<Locale> onLocaleChanged;
 
   @override
   State<AgentHubScreen> createState() => _AgentHubScreenState();
@@ -29,15 +32,10 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
     _AgentInfo(Icons.inventory_2_outlined, 'Inventory Management', 'inventory', 'Stock analysis and replenishment suggestions from supplied data.'),
   ];
 
-  static const _languages = <String>[
-    'English', 'Amharic', 'Afaan Oromo', 'Tigrinya', 'Somali'
-  ];
-
   final _promptController = TextEditingController();
   final _scrollController = ScrollController();
   final List<_ChatMessage> _messages = [];
   String _selectedAgent = 'business';
-  String _language = 'English';
   bool _busy = false;
 
   _AgentInfo get _agent => _agents.firstWhere((agent) => agent.id == _selectedAgent);
@@ -50,12 +48,13 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
   }
 
   Future<void> _send() async {
+    final l = AppLocalizations.of(context)!;
     final prompt = _promptController.text.trim();
     if (prompt.length < 3 || _busy) return;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please sign in before using WiseSell AI.')),
+        SnackBar(content: Text(l.agentPleaseSignIn)),
       );
       return;
     }
@@ -70,7 +69,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
     try {
       final idToken = await user.getIdToken();
       if (idToken == null || idToken.isEmpty) {
-        throw const _AgentRequestException('Your sign-in session expired. Please sign in again.');
+        throw _AgentRequestException(l.agentSessionExpired);
       }
       final response = await http.post(
         Uri.parse('$_apiBaseUrl/v1/agent'),
@@ -81,7 +80,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
         body: jsonEncode({
           'agent': _selectedAgent,
           'prompt': prompt,
-          'language': _language,
+          'language': _languageForCode(Localizations.localeOf(context).languageCode),
         }),
       ).timeout(const Duration(seconds: 50));
 
@@ -89,20 +88,20 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
       try {
         data = Map<String, dynamic>.from(jsonDecode(response.body) as Map);
       } catch (_) {
-        throw const _AgentRequestException('The AI service returned an unreadable response.');
+        throw _AgentRequestException(l.agentUnreadableResponse);
       }
 
       if (response.statusCode == 200) {
-        final answer = data['answer'] as String? ?? 'No answer was returned.';
+        final answer = data['answer'] as String? ?? l.agentNoAnswer;
         if (!mounted) return;
         setState(() => _messages.add(_ChatMessage(answer, false)));
       } else {
-        final message = data['error'] as String? ?? 'WiseSell AI could not complete your request.';
+        final message = data['error'] as String? ?? l.agentRequestFailed;
         throw _AgentRequestException(
           response.statusCode == 401
-              ? 'Please sign in again to continue.'
+              ? l.agentSignInAgain
               : response.statusCode == 503
-                  ? 'AI capacity is temporarily unavailable. Please try again later.'
+                  ? l.agentCapacityUnavailable
                   : message,
         );
       }
@@ -112,7 +111,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() => _messages.add(const _ChatMessage(
-        'Could not connect to WiseSell AI. Check your internet connection and try again.',
+        l.agentConnectionError,
         false,
       )));
     } finally {
@@ -122,6 +121,34 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
       }
     }
   }
+
+  String _languageForCode(String code) => switch (code) {
+    'am' => 'Amharic',
+    'om' => 'Afaan Oromo',
+    'ti' => 'Tigrinya',
+    'so' => 'Somali',
+    _ => 'English',
+  };
+
+  String _agentName(String id, AppLocalizations l) => switch (id) {
+    'marketing' => l.agentDigitalMarketing,
+    'content' => l.agentContentMarketing,
+    'seo' => l.agentSeo,
+    'social' => l.agentSocialMediaMarketing,
+    'video' => l.agentVideoAudioMarketing,
+    'inventory' => l.agentInventoryManagement,
+    _ => l.agentBusinessAssistant,
+  };
+
+  String _agentDescription(String id, AppLocalizations l) => switch (id) {
+    'marketing' => l.agentDigitalMarketingDescription,
+    'content' => l.agentContentMarketingDescription,
+    'seo' => l.agentSeoDescription,
+    'social' => l.agentSocialMediaDescription,
+    'video' => l.agentVideoAudioDescription,
+    'inventory' => l.agentInventoryDescription,
+    _ => l.agentBusinessAssistantDescription,
+  };
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -137,8 +164,10 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final localeCode = Localizations.localeOf(context).languageCode;
     return Scaffold(
-      appBar: AppBar(title: const Text('WiseSell AI Agent Workspace')),
+      appBar: AppBar(title: Text(l.agentWorkspaceTitle)),
       body: SafeArea(
         child: Column(
           children: [
@@ -155,10 +184,10 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Your connected AI business team',
+                  Text(l.agentHeroTitle,
                       style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
                   SizedBox(height: 6),
-                  Text('Choose an agent, describe your business task and get an actionable response.',
+                  Text(l.agentHeroDescription,
                       style: TextStyle(color: Colors.white, height: 1.4)),
                 ],
               ),
@@ -172,7 +201,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: ChoiceChip(
                     avatar: Icon(agent.icon, size: 17),
-                    label: Text(agent.name),
+                    label: Text(_agentName(agent.id, l)),
                     selected: _selectedAgent == agent.id,
                     onSelected: _busy ? null : (_) => setState(() => _selectedAgent = agent.id),
                   ),
@@ -183,17 +212,21 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
               child: Row(
                 children: [
-                  Expanded(child: Text(_agent.description, style: const TextStyle(color: Colors.blueGrey, fontSize: 12))),
+                  Expanded(child: Text(_agentDescription(_agent.id, l), style: const TextStyle(color: Colors.blueGrey, fontSize: 12))),
                   const SizedBox(width: 8),
                   DropdownButton<String>(
-                    value: _language,
+                    value: localeCode,
                     underline: const SizedBox.shrink(),
                     isDense: true,
-                    items: _languages.map((language) => DropdownMenuItem(
-                      value: language, child: Text(language, style: const TextStyle(fontSize: 12)),
-                    )).toList(),
+                    items: [
+                      DropdownMenuItem(value: 'en', child: Text(l.english, style: const TextStyle(fontSize: 12))),
+                      DropdownMenuItem(value: 'am', child: Text(l.amharic, style: const TextStyle(fontSize: 12))),
+                      DropdownMenuItem(value: 'om', child: Text(l.afaanOromo, style: const TextStyle(fontSize: 12))),
+                      DropdownMenuItem(value: 'ti', child: Text(l.tigrinya, style: const TextStyle(fontSize: 12))),
+                      DropdownMenuItem(value: 'so', child: Text(l.somali, style: const TextStyle(fontSize: 12))),
+                    ],
                     onChanged: _busy ? null : (value) {
-                      if (value != null) setState(() => _language = value);
+                      if (value != null) widget.onLocaleChanged(Locale(value));
                     },
                   ),
                 ],
@@ -202,7 +235,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
             const Divider(height: 1),
             Expanded(
               child: _messages.isEmpty
-                  ? _buildWelcome()
+                  ? _buildWelcome(l)
                   : ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.all(16),
@@ -216,7 +249,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
                               child: Row(mainAxisSize: MainAxisSize.min, children: [
                                 SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                                 SizedBox(width: 10),
-                                Text('WiseSell AI is thinking…'),
+                                Text(l.agentThinking),
                               ]),
                             ),
                           );
@@ -241,7 +274,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
                       textCapitalization: TextCapitalization.sentences,
                       onSubmitted: (_) => _send(),
                       decoration: const InputDecoration(
-                        hintText: 'Ask your business question…',
+                        hintText: l.agentPromptHint,
                         border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
                         contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       ),
@@ -258,7 +291,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
             ),
             const Padding(
               padding: EdgeInsets.only(bottom: 6),
-              child: Text('AI drafts and recommendations · Cloudflare AI free-plan limits apply',
+              child: Text(l.agentFooter,
                   style: TextStyle(fontSize: 10, color: Colors.blueGrey)),
             ),
           ],
@@ -267,7 +300,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
     );
   }
 
-  Widget _buildWelcome() {
+  Widget _buildWelcome(AppLocalizations l) {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(28),
@@ -276,17 +309,17 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
           children: [
             const Icon(Icons.auto_awesome, size: 48, color: AppTheme.orange),
             const SizedBox(height: 12),
-            const Text('What would you like to grow today?',
+            Text(l.agentWelcomeTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppTheme.navy)),
             const SizedBox(height: 8),
-            const Text('Try one of these prompts. Include accurate business details for more useful advice.',
+            Text(l.agentWelcomeDescription,
                 textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey)),
             const SizedBox(height: 18),
-            _suggestion('Create a 7-day marketing plan for my shop.'),
-            _suggestion('Write an Amharic and English product description.'),
-            _suggestion('How can I improve my website SEO?'),
-            _suggestion('Review my stock list and identify items to reorder.'),
+            _suggestion(l.agentSuggestionMarketing),
+            _suggestion(l.agentSuggestionProduct),
+            _suggestion(l.agentSuggestionSeo),
+            _suggestion(l.agentSuggestionInventory),
           ],
         ),
       ),
