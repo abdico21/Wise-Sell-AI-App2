@@ -110,7 +110,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
       setState(() => _messages.add(_ChatMessage(error.message, false)));
     } catch (_) {
       if (!mounted) return;
-      setState(() => _messages.add(const _ChatMessage(
+      setState(() => _messages.add(_ChatMessage(
         l.agentConnectionError,
         false,
       )));
@@ -181,7 +181,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
                 ),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l.agentHeroTitle,
