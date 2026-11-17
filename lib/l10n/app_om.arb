@@ -183,5 +183,18 @@
   "category": "Ramaddii",
   "sellingPrice": "Gatii gurgurtaa (ETB)",
   "quantityInStock": "Baay'ina kuusaa keessa jiru",
-  "validNonNegativeNumber": "Lakkoofsa sirrii zeeroo yookaan zeeroo ol ta'e galchaa"
+  "validNonNegativeNumber": "Lakkoofsa sirrii zeeroo yookaan zeeroo ol ta'e galchaa",
+  "salesRecorded": "Gurgurtaa galmaa'e",
+  "unitsSold": "Baay'ina gurgurame",
+  "recordedRevenue": "Galii galmaa'e",
+  "recentSales": "Gurgurtaa dhihoo",
+  "justRecorded": "Amma galmaa'e",
+  "customerLabel": "Maamila: {name}",
+  "startRecordingSales": "Gurgurtaa galmeessuu jalqabaa",
+  "recordSalesInstruction": "Oomisha kuusaa keessaa filadhaa, baay'ina gurgurame galchaa; WiseSell kuusaa keessan ni haaromsa.",
+  "selectedCustomerUnavailable": "Maamilli filatame hin jiru.",
+  "productNoLongerExists": "Oomishni kun amma hin jiru.",
+  "productAccessDenied": "Eeyyamni oomisha kanaa dhorkameera.",
+  "insufficientStock": "Kuusaan gahaan hin jiru.",
+  "couldNotRecordSale": "Gurgurtaa galmeessuu hin dandeenye. Walqunnamtii fi seera Firestore mirkaneessaa."
 }
