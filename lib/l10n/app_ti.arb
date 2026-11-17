@@ -211,5 +211,16 @@
   "lowStockAlerts": "መጠንቀቕታ ትሑት ክምችት",
   "noLowStockProducts": "ትሑት ክምችት ዘለዎም ፍርያት የለዉን",
   "allTrackedProductsAboveFive": "ኩሎም ዝከታተሉ ፍርያት ልዕሊ 5 ኣሃዱታት ኣለዎም።",
-  "analyticsDisclaimer": "ትንተናታት ኣብ ዝተመዝገበ መሸጣን ክምችትን WiseSell ዝተመርኮሱ እዮም። ናይ ደገ ገበያ ትንበያ ኣይኮኑን።"
+  "analyticsDisclaimer": "ትንተናታት ኣብ ዝተመዝገበ መሸጣን ክምችትን WiseSell ዝተመርኮሱ እዮም። ናይ ደገ ገበያ ትንበያ ኣይኮኑን።",
+  "averageSale": "ማእከላይ መሸጣ",
+  "stockOnHand": "ኣብ ኢድ ዘሎ ክምችት",
+  "units": "ኣሃዱታት",
+  "items": "ኣቕሑ",
+  "quantityLeft": "{count} ተሪፉ",
+  "lifetimeValue": "ጠቕላላ ዋጋ ዕድመ",
+  "purchases": "ዕድጊ",
+  "unitsPurchased": "ዝተዓደጉ ኣሃዱታት",
+  "purchaseHistory": "ታሪኽ ዕድጊ",
+  "dateUnavailable": "ዕለት ኣይርከብን",
+  "unitCount": "{count} ኣሃዱ"
 }
