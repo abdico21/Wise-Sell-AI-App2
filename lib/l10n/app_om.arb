@@ -175,5 +175,13 @@
   "customersCount": "Maamiltoota",
   "withEmail": "Imeelii qaban",
   "yourCustomers": "Maamiltoota keessan",
-  "searchResults": "Bu'aa barbaacha"
+  "searchResults": "Bu'aa barbaacha",
+  "productsCount": "Oomisha",
+  "unitsInStock": "Baay'ina kuusaa keessa jiru",
+  "productName": "Maqaa oomishaa",
+  "skuProductCode": "SKU / koodii oomishaa",
+  "category": "Ramaddii",
+  "sellingPrice": "Gatii gurgurtaa (ETB)",
+  "quantityInStock": "Baay'ina kuusaa keessa jiru",
+  "validNonNegativeNumber": "Lakkoofsa sirrii zeeroo yookaan zeeroo ol ta'e galchaa"
 }
