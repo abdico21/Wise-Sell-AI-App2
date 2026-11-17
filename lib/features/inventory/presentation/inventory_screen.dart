@@ -98,9 +98,9 @@ class InventoryScreen extends StatelessWidget {
                           _confirmDelete(context, doc.reference);
                         }
                       },
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(value: 'edit', child: Text('Edit')),
-                        PopupMenuItem(value: 'delete', child: Text('Delete')),
+                      itemBuilder: (_) => [
+                        PopupMenuItem(value: 'edit', child: Text(l.edit)),
+                        PopupMenuItem(value: 'delete', child: Text(l.delete)),
                       ],
                     ),
                   ),
