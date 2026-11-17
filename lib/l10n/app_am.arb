@@ -222,5 +222,22 @@
   "unitsPurchased": "የተገዙ አሃዶች",
   "purchaseHistory": "የግዢ ታሪክ",
   "dateUnavailable": "ቀኑ አይገኝም",
-  "unitCount": "COUNT_VALUE አሃድ"
+  "unitCount": "COUNT_VALUE አሃድ",
+  "tagline": "በብልሃት ይሽጡ · በስፋት ያድጉ",
+  "marketplaceDescription": "ምርቶችን ማግኘት፣ የገዢና ሻጭ መደብሮች እና የገበያ ትዕዛዞች።",
+  "sellerStorefronts": "የሻጭ መደብሮች",
+  "productListingsSearch": "የምርት ዝርዝሮችና ፍለጋ",
+  "buyerEnquiriesOrders": "የገዢ ጥያቄዎችና ትዕዛዞች",
+  "notificationsTitle": "ማሳወቂያዎች",
+  "notificationsNotConfigured": "በዚህ መሠረታዊ ስሪት ማሳወቂያዎች አልተዋቀሩም።",
+  "orderUpdates": "የትዕዛዝ ዝመናዎች",
+  "lowStockAlertItems": "ዝቅተኛ ክምችት ማስጠንቀቂያዎች",
+  "businessReminders": "የንግድ ማስታወሻዎች",
+  "salesMarketingTitle": "ሽያጭና ግብይት",
+  "campaignCreationNotActive": "የዘመቻ ፈጠራና በማህበራዊ አውታረ መረቦች ላይ ማተም በዚህ ስሪት አይሰሩም።",
+  "productDescriptionsAdCopy": "የምርት መግለጫዎችና የማስታወቂያ ጽሑፎች",
+  "campaignPlanning": "የዘመቻ እቅድ",
+  "socialChannelIntegrations": "የማህበራዊ ሚዲያ ቻናሎች ግንኙነት",
+  "plannedCapabilities": "የታቀዱ ችሎታዎች",
+  "featurePlaceholderDisclaimer": "ይህ ገጽ የአሰሳ ቦታ ምሳሌ ነው፤ የተጠናቀቀ ወይም የተገናኘ አገልግሎት አይደለም።"
 }
