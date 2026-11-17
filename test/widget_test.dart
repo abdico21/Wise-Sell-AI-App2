@@ -11,7 +11,7 @@ void main() {
   });
 
   testWidgets(
-    'WiseSell switches Oromo, Amharic and Tigrinya without losing framework localizations',
+    'WiseSell switches Oromo, Amharic, Somali and Tigrinya without losing framework localizations',
     (tester) async {
       await tester.pumpWidget(const WiseSellApp());
       await tester.pumpAndSettle();
@@ -45,7 +45,19 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.language_rounded));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('ትግርኛ'));
+      await tester.tap(find.text('ሶማሊ'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Goobta shaqada ganacsiga'), findsOneWidget);
+      expect(find.text('Kaaliyaha AI'), findsOneWidget);
+      _expectFrameworkLocalizations(tester);
+
+      preferences = await SharedPreferences.getInstance();
+      expect(preferences.getString('wisesell_language_code'), 'so');
+
+      await tester.tap(find.byIcon(Icons.language_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tigrinya'));
       await tester.pumpAndSettle();
 
       expect(find.text('ቦታ ስራሕ ንግዲ'), findsOneWidget);
