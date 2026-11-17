@@ -49,6 +49,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
 
   Future<void> _send() async {
     final l = AppLocalizations.of(context)!;
+    final requestLanguage = _languageForCode(Localizations.localeOf(context).languageCode);
     final prompt = _promptController.text.trim();
     if (prompt.length < 3 || _busy) return;
     final user = FirebaseAuth.instance.currentUser;
@@ -80,7 +81,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
         body: jsonEncode({
           'agent': _selectedAgent,
           'prompt': prompt,
-          'language': _languageForCode(Localizations.localeOf(context).languageCode),
+          'language': requestLanguage,
         }),
       ).timeout(const Duration(seconds: 50));
 
