@@ -175,5 +175,13 @@
   "customersCount": "ዓማዊል",
   "withEmail": "ኢመይል ዘለዎም",
   "yourCustomers": "ዓማዊልኩም",
-  "searchResults": "ውጽኢት ድለያ"
+  "searchResults": "ውጽኢት ድለያ",
+  "productsCount": "ፍርያት",
+  "unitsInStock": "ኣብ ክምችት ዘሎ ብዝሒ",
+  "productName": "ስም ፍርያት",
+  "skuProductCode": "SKU / ኮድ ፍርያት",
+  "category": "ምድብ",
+  "sellingPrice": "ዋጋ መሸጣ (ETB)",
+  "quantityInStock": "ኣብ ክምችት ዘሎ ብዝሒ",
+  "validNonNegativeNumber": "ቅኑዕ ዜሮ ወይ ካብ ዜሮ ዝዓቢ ቁጽሪ ኣእትዉ"
 }
