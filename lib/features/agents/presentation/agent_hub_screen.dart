@@ -242,13 +242,13 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
                       itemCount: _messages.length + (_busy ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == _messages.length) {
-                          return const Align(
+                          return Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(12),
                               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                                SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                                const SizedBox(width: 10),
                                 Text(l.agentThinking),
                               ]),
                             ),
@@ -273,7 +273,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
                       maxLines: 5,
                       textCapitalization: TextCapitalization.sentences,
                       onSubmitted: (_) => _send(),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: l.agentPromptHint,
                         border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
                         contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -289,8 +289,8 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
                 ],
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 6),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
               child: Text(l.agentFooter,
                   style: TextStyle(fontSize: 10, color: Colors.blueGrey)),
             ),
