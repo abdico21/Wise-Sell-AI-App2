@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/business_profile_service.dart';
 import '../../inventory/presentation/inventory_screen.dart';
 import '../../sales/presentation/sales_screen.dart';
@@ -68,12 +69,12 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
       ));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Business profile saved securely.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.businessProfileSaved)),
         );
       }
     } catch (_) {
       setState(() => _error =
-          'Could not save your profile. Check your connection and Firestore rules.');
+          AppLocalizations.of(context)!.businessProfileSaveFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -81,15 +82,14 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Business workspace')),
+      appBar: AppBar(title: Text(l.businessWorkspaceTitle)),
       body: StreamBuilder<BusinessProfile?>(
         stream: _service.watchMyProfile(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
-              child: Text('Unable to load your business profile.'),
-            );
+            return Center(child: Text(l.unableLoadBusinessProfile));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -105,13 +105,13 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   color: AppTheme.navy,
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.storefront_rounded,
                         color: Colors.white, size: 32),
                     SizedBox(height: 12),
-                    Text('Your business, connected',
+                    Text(l.businessConnected,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 21,
@@ -119,7 +119,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                         )),
                     SizedBox(height: 6),
                     Text(
-                      'Save your business details to personalize your WiseSell workspace.',
+                      l.businessSaveIntro,
                       style: TextStyle(color: Colors.white70, height: 1.4),
                     ),
                   ],
@@ -127,7 +127,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                hasProfile ? 'Edit business details' : 'Set up your business',
+                hasProfile ? l.editBusinessDetails : l.setupBusiness,
                 style: const TextStyle(
                   color: AppTheme.navy,
                   fontSize: 20,
@@ -139,16 +139,16 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    _field(_businessName, 'Business name',
+                    _field(_businessName, l.businessName,
                         Icons.business_outlined),
-                    _field(_ownerName, 'Owner / contact person',
+                    _field(_ownerName, l.ownerContact,
                         Icons.person_outline),
-                    _field(_businessType, 'Business type / industry',
+                    _field(_businessType, l.businessType,
                         Icons.category_outlined),
-                    _field(_phone, 'Phone number', Icons.phone_outlined,
+                    _field(_phone, l.phoneNumber, Icons.phone_outlined,
                         keyboard: TextInputType.phone),
-                    _field(_city, 'City', Icons.location_city_outlined),
-                    _field(_country, 'Country', Icons.public_outlined),
+                    _field(_city, l.city, Icons.location_city_outlined),
+                    _field(_country, l.country, Icons.public_outlined),
                   ],
                 ),
               ),
@@ -166,7 +166,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.save_outlined),
-                label: Text(_saving ? 'Saving...' : 'Save business profile'),
+                label: Text(_saving ? l.saving : l.saveBusinessProfile),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.blue,
                   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -178,7 +178,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const BusinessDashboardScreen()),
                 ),
                 icon: const Icon(Icons.analytics_outlined),
-                label: const Text('Business performance dashboard'),
+                label: Text(l.businessPerformanceDashboard),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
@@ -190,7 +190,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const InventoryScreen()),
                 ),
                 icon: const Icon(Icons.inventory_2_outlined),
-                label: const Text('Manage product inventory'),
+                label: Text(l.manageProductInventory),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
@@ -202,7 +202,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const SalesScreen()),
                 ),
                 icon: const Icon(Icons.point_of_sale_outlined),
-                label: const Text('Manage sales and orders'),
+                label: Text(l.manageSalesOrders),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
@@ -214,15 +214,15 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const CustomersScreen()),
                 ),
                 icon: const Icon(Icons.people_alt_outlined),
-                label: const Text('Manage customers (CRM)'),
+                label: Text(l.manageCustomersCrm),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Your profile is stored under your signed-in account. Only that account should be allowed to read or edit it.',
+              Text(
+                l.profilePrivacyNote,
                 style: TextStyle(color: Colors.blueGrey, fontSize: 12),
               ),
             ],
