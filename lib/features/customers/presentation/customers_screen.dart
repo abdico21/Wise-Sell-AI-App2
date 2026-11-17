@@ -270,7 +270,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                 (sum, sale) =>
                     sum + ((sale.data()['quantity'] as num?)?.toInt() ?? 0),
               );
-              final name = customer['name'] as String? ?? 'Customer';
+              final name = customer['name'] as String? ?? l.customerName;
               final phone = customer['phone'] as String? ?? '';
               final email = customer['email'] as String? ?? '';
               final company = customer['company'] as String? ?? '';
@@ -301,7 +301,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                     children: [
                       Expanded(
                         child: _summaryCard(
-                          'Lifetime value',
+                          l.lifetimeValue,
                           'ETB ${lifetimeValue.toStringAsFixed(2)}',
                           Icons.payments_outlined,
                         ),
@@ -309,7 +309,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: _summaryCard(
-                          'Purchases',
+                          l.purchases,
                           '${sales.length}',
                           Icons.receipt_long_outlined,
                         ),
@@ -318,13 +318,13 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   ),
                   const SizedBox(height: 10),
                   _summaryCard(
-                    'Units purchased',
+                    l.unitsPurchased,
                     '$totalUnits',
                     Icons.shopping_bag_outlined,
                   ),
                   const SizedBox(height: 18),
-                  const Text(
-                    'Purchase history',
+                  Text(
+                    l.purchaseHistory,
                     style: TextStyle(
                       color: AppTheme.navy,
                       fontSize: 19,
@@ -348,7 +348,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                           (data['total'] as num?)?.toDouble() ?? 0;
                       final timestamp = data['createdAt'] as Timestamp?;
                       final date = timestamp == null
-                          ? 'Date unavailable'
+                          ? l.dateUnavailable
                           : '${timestamp.toDate().day.toString().padLeft(2, '0')}/'
                             '${timestamp.toDate().month.toString().padLeft(2, '0')}/'
                             '${timestamp.toDate().year}';
@@ -358,10 +358,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             child: Icon(Icons.shopping_bag_outlined),
                           ),
                           title: Text(
-                            data['productName'] as String? ?? 'Product',
+                            data['productName'] as String? ?? l.product,
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
-                          subtitle: Text('$quantity unit(s) • $date'),
+                          subtitle: Text('${l.unitCount.replaceAll('{count}', '$quantity')} • $date'),
                           trailing: Text(
                             'ETB ${total.toStringAsFixed(2)}',
                             style: const TextStyle(
