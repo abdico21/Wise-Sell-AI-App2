@@ -164,5 +164,16 @@
   "unitSellingPrice": "Qiimaha iibka halkii xabbo: ETB {price}",
   "saleRecordedStockUpdated": "Iibka waa la diiwaangeliyey, kaydkana waa la cusboonaysiiyey.",
   "recording": "Waa la diiwaangelinayaa...",
-  "confirmSale": "Xaqiiji iibka"
+  "confirmSale": "Xaqiiji iibka",
+  "customerName": "Magaca macmiilka",
+  "companyOrganization": "Shirkad / urur",
+  "notes": "Qoraallo",
+  "requiredField": "Goob khasab ah",
+  "customerAdded": "Macmiilka waa lagu daray.",
+  "customerUpdated": "Macmiilka waa la cusboonaysiiyey.",
+  "couldNotSaveCustomer": "Lama kaydin karin macmiilka. Hubi xiriirka iyo xeerarka Firestore.",
+  "customersCount": "Macaamiisha",
+  "withEmail": "Kuwa iimayl leh",
+  "yourCustomers": "Macaamiishaada",
+  "searchResults": "Natiijooyinka raadinta"
 }
