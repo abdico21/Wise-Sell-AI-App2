@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/home/presentation/home_screen.dart';
@@ -14,6 +15,39 @@ class WiseSellApp extends StatefulWidget {
 
 class _WiseSellAppState extends State<WiseSellApp> {
   Locale _locale = const Locale('en');
+  bool _localeReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreLocale();
+  }
+
+  Future<void> _restoreLocale() async {
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      final savedCode = preferences.getString('wisesell_language_code');
+      final savedLocale = _supportedLocales.where((locale) => locale.languageCode == savedCode).firstOrNull;
+      if (savedLocale != null && mounted) {
+        setState(() => _locale = savedLocale);
+      }
+    } catch (_) {
+      // Keep English as a safe fallback when local storage is unavailable.
+    } finally {
+      if (mounted) setState(() => _localeReady = true);
+    }
+  }
+
+  Future<void> _changeLocale(Locale locale) async {
+    if (!_supportedLocales.any((supported) => supported.languageCode == locale.languageCode)) return;
+    setState(() => _locale = locale);
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString('wisesell_language_code', locale.languageCode);
+    } catch (_) {
+      // The selected language remains active for this session if saving fails.
+    }
+  }
 
   static const _supportedLocales = [
     Locale('en'),
@@ -37,9 +71,9 @@ class _WiseSellAppState extends State<WiseSellApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: HomeScreen(
-        onLocaleChanged: (locale) => setState(() => _locale = locale),
-      ),
+      home: _localeReady
+          ? HomeScreen(onLocaleChanged: _changeLocale)
+          : const Scaffold(body: Center(child: CircularProgressIndicator())),
     );
   }
 }
