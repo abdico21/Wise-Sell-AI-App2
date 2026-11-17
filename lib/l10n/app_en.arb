@@ -211,5 +211,16 @@
   "lowStockAlerts": "Low-stock alerts",
   "noLowStockProducts": "No low-stock products",
   "allTrackedProductsAboveFive": "All tracked products have more than 5 units.",
-  "analyticsDisclaimer": "Analytics are calculated from your recorded WiseSell sales and inventory. They are not external market forecasts."
+  "analyticsDisclaimer": "Analytics are calculated from your recorded WiseSell sales and inventory. They are not external market forecasts.",
+  "averageSale": "Average sale",
+  "stockOnHand": "Stock on hand",
+  "units": "units",
+  "items": "items",
+  "quantityLeft": "{count} left",
+  "lifetimeValue": "Lifetime value",
+  "purchases": "Purchases",
+  "unitsPurchased": "Units purchased",
+  "purchaseHistory": "Purchase history",
+  "dateUnavailable": "Date unavailable",
+  "unitCount": "{count} unit(s)"
 }
