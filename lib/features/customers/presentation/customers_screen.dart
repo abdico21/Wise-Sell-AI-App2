@@ -46,7 +46,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
         .where('uid', isEqualTo: user.uid);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Customer CRM')),
+      appBar: AppBar(title: Text(l.customerCrm)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCustomerEditor(context, user.uid),
         icon: const Icon(Icons.person_add_alt_1),
@@ -336,7 +336,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 32),
                       child: Center(
-                        child: Text('No purchases recorded for this customer yet.'),
+                        child: Text(l.noPurchasesYet),
                       ),
                     )
                   else
