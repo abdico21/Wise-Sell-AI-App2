@@ -484,7 +484,7 @@ class BusinessDashboardScreen extends StatelessWidget {
                           leading: const Icon(Icons.warning_amber_rounded,
                               color: Colors.deepOrange),
                           title: Text(data['name'] as String? ?? l.product),
-                          trailing: Text(l.quantityLeft.replaceAll('{count}', '$quantity'),
+                          trailing: Text(l.quantityLeft.replaceAll('COUNT_VALUE', '$quantity'),
                               style: const TextStyle(color: Colors.deepOrange,
                                   fontWeight: FontWeight.w800)),
                         ),
