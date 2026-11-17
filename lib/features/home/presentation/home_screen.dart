@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
         description: 'Product discovery, buyer and seller storefronts, and marketplace orders.',
         plannedItems: ['Seller storefronts', 'Product listings and search', 'Buyer enquiries and orders'],
       ),
-      const AgentHubScreen(),
+      AgentHubScreen(onLocaleChanged: widget.onLocaleChanged),
     ];
 
     return Scaffold(
@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               actions: [
                 IconButton(
-                  tooltip: 'Account',
+                  tooltip: l.profile,
                   onPressed: () => _open(const AuthScreen()),
                   icon: const Icon(Icons.account_circle_outlined),
                 ),
