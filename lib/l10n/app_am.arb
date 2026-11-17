@@ -211,5 +211,16 @@
   "lowStockAlerts": "ዝቅተኛ ክምችት ማስጠንቀቂያዎች",
   "noLowStockProducts": "ዝቅተኛ ክምችት ያላቸው ምርቶች የሉም",
   "allTrackedProductsAboveFive": "ሁሉም የተከታተሉ ምርቶች ከ5 በላይ አሃዶች አሏቸው።",
-  "analyticsDisclaimer": "ትንታኔዎች በWiseSell የተመዘገቡ ሽያጮችና ክምችት ላይ የተመሰረቱ ናቸው። የውጭ ገበያ ትንበያዎች አይደሉም።"
+  "analyticsDisclaimer": "ትንታኔዎች በWiseSell የተመዘገቡ ሽያጮችና ክምችት ላይ የተመሰረቱ ናቸው። የውጭ ገበያ ትንበያዎች አይደሉም።",
+  "averageSale": "አማካይ ሽያጭ",
+  "stockOnHand": "በእጅ ያለ ክምችት",
+  "units": "አሃዶች",
+  "items": "እቃዎች",
+  "quantityLeft": "{count} ቀርቷል",
+  "lifetimeValue": "የህይወት ዘመን ዋጋ",
+  "purchases": "ግዢዎች",
+  "unitsPurchased": "የተገዙ አሃዶች",
+  "purchaseHistory": "የግዢ ታሪክ",
+  "dateUnavailable": "ቀኑ አይገኝም",
+  "unitCount": "{count} አሃድ"
 }
