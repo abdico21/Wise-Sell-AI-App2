@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 IconButton(
                   tooltip: l.notifications,
-                  onPressed: () => _open(const FeatureStatusScreen(
+                  onPressed: () => _open(FeatureStatusScreen(
                     title: l.notificationsTitle,
                     description: l.notificationsNotConfigured,
                     plannedItems: [l.orderUpdates, l.lowStockAlertItems, l.businessReminders],
@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _FeatureTile(icon: Icons.shopping_bag_outlined, title: l.marketplace,
                 detail: l.productsOrders, onTap: () => setState(() => _selectedIndex = 1)),
               _FeatureTile(icon: Icons.campaign_outlined, title: l.marketing,
-                detail: l.socialCampaigns, onTap: () => _open(const FeatureStatusScreen(
+                detail: l.socialCampaigns, onTap: () => _open(FeatureStatusScreen(
                   title: l.salesMarketingTitle,
                   description: l.campaignCreationNotActive,
                   plannedItems: [l.productDescriptionsAdCopy, l.campaignPlanning, l.socialChannelIntegrations],
