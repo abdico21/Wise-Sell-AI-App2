@@ -23,13 +23,13 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
   );
 
   static const _agents = <_AgentInfo>[
-    _AgentInfo(Icons.business_center_outlined, 'Business Assistant', 'business', 'Coordinates specialist agents and turns advice into a business action plan.'),
-    _AgentInfo(Icons.campaign_outlined, 'Digital Marketing', 'marketing', 'Campaign plans, audiences, budgets and measurable KPIs.'),
-    _AgentInfo(Icons.edit_note_rounded, 'Content Marketing', 'content', 'Product descriptions, articles, captions and content calendars.'),
-    _AgentInfo(Icons.search_rounded, 'SEO', 'seo', 'Keyword themes, search intent and practical website SEO advice.'),
-    _AgentInfo(Icons.share_outlined, 'Social Media Marketing', 'social', 'Channel-specific post drafts, replies and publishing calendars.'),
-    _AgentInfo(Icons.movie_creation_outlined, 'Video & Audio Marketing', 'video', 'Scripts, storyboards, voice-over copy and audio concepts.'),
-    _AgentInfo(Icons.inventory_2_outlined, 'Inventory Management', 'inventory', 'Stock analysis and replenishment suggestions from supplied data.'),
+    _AgentInfo(Icons.business_center_outlined, 'business'),
+    _AgentInfo(Icons.campaign_outlined, 'marketing'),
+    _AgentInfo(Icons.edit_note_rounded, 'content'),
+    _AgentInfo(Icons.search_rounded, 'seo'),
+    _AgentInfo(Icons.share_outlined, 'social'),
+    _AgentInfo(Icons.movie_creation_outlined, 'video'),
+    _AgentInfo(Icons.inventory_2_outlined, 'inventory'),
   ];
 
   final _promptController = TextEditingController();
@@ -372,11 +372,9 @@ class _ChatMessage {
 }
 
 class _AgentInfo {
-  const _AgentInfo(this.icon, this.name, this.id, this.description);
+  const _AgentInfo(this.icon, this.id);
   final IconData icon;
-  final String name;
   final String id;
-  final String description;
 }
 
 class _AgentRequestException implements Exception {
