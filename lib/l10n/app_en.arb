@@ -175,5 +175,13 @@
   "customersCount": "Customers",
   "withEmail": "With email",
   "yourCustomers": "Your customers",
-  "searchResults": "Search results"
+  "searchResults": "Search results",
+  "productsCount": "Products",
+  "unitsInStock": "Units in stock",
+  "productName": "Product name",
+  "skuProductCode": "SKU / product code",
+  "category": "Category",
+  "sellingPrice": "Selling price (ETB)",
+  "quantityInStock": "Quantity in stock",
+  "validNonNegativeNumber": "Enter a valid non-negative number"
 }
