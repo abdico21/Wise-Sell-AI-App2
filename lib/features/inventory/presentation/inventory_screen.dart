@@ -174,11 +174,11 @@ class InventoryScreen extends StatelessWidget {
             child: Form(
               key: formKey,
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                _input(name, l.productName),
-                _input(sku, l.skuProductCode, required: false),
-                _input(category, l.category, required: false),
-                _input(price, l.sellingPrice, numeric: true),
-                _input(quantity, l.quantityInStock, numeric: true, integer: true),
+                _input(name, l.productName, l),
+                _input(sku, l.skuProductCode, l, required: false),
+                _input(category, l.category, l, required: false),
+                _input(price, l.sellingPrice, l, numeric: true),
+                _input(quantity, l.quantityInStock, l, numeric: true, integer: true),
               ]),
             ),
           ),
@@ -226,7 +226,7 @@ class InventoryScreen extends StatelessWidget {
     name.dispose(); sku.dispose(); category.dispose(); price.dispose(); quantity.dispose();
   }
 
-  Widget _input(TextEditingController controller, String label,
+  Widget _input(TextEditingController controller, String label, AppLocalizations l,
       {bool required = true, bool numeric = false, bool integer = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -236,10 +236,10 @@ class InventoryScreen extends StatelessWidget {
         decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
         validator: (value) {
           final text = value?.trim() ?? '';
-          if (required && text.isEmpty) return AppLocalizations.of(context)!.requiredField;
+          if (required && text.isEmpty) return l.requiredField;
           if (numeric && text.isNotEmpty) {
             final parsed = integer ? int.tryParse(text) : double.tryParse(text);
-            if (parsed == null || parsed < 0) return AppLocalizations.of(context)!.validNonNegativeNumber;
+            if (parsed == null || parsed < 0) return l.validNonNegativeNumber;
           }
           return null;
         },
