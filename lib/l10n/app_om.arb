@@ -164,5 +164,16 @@
   "unitSellingPrice": "Gatii gurgurtaa tokkoo: ETB {price}",
   "saleRecordedStockUpdated": "Gurgurtaan galmaa'eera; kuusaanis haaromfameera.",
   "recording": "Galmeessaa jira...",
-  "confirmSale": "Gurgurtaa mirkaneessi"
+  "confirmSale": "Gurgurtaa mirkaneessi",
+  "customerName": "Maqaa maamilaa",
+  "companyOrganization": "Dhaabbata / gurmaa'ina",
+  "notes": "Yaadannoo",
+  "requiredField": "Dirree barbaachisaa",
+  "customerAdded": "Maamilli dabalameera.",
+  "customerUpdated": "Maamilli haaromfameera.",
+  "couldNotSaveCustomer": "Maamila kuusuu hin dandeenye. Walqunnamtii fi seera Firestore mirkaneessaa.",
+  "customersCount": "Maamiltoota",
+  "withEmail": "Imeelii qaban",
+  "yourCustomers": "Maamiltoota keessan",
+  "searchResults": "Bu'aa barbaacha"
 }
