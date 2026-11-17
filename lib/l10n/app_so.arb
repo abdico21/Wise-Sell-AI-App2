@@ -211,5 +211,16 @@
   "lowStockAlerts": "Digniinaha kaydka yar",
   "noLowStockProducts": "Ma jiraan alaab kaydkoodu yar yahay",
   "allTrackedProductsAboveFive": "Dhammaan alaabta la raadraaco waxay leeyihiin in ka badan 5 xabbo.",
-  "analyticsDisclaimer": "Falanqayntu waxay ku salaysan tahay iibka iyo kaydka WiseSell ee aad diiwaangelisay. Ma aha saadaal suuq oo dibadeed."
+  "analyticsDisclaimer": "Falanqayntu waxay ku salaysan tahay iibka iyo kaydka WiseSell ee aad diiwaangelisay. Ma aha saadaal suuq oo dibadeed.",
+  "averageSale": "Celceliska iibka",
+  "stockOnHand": "Kaydka hadda jira",
+  "units": "xabbo",
+  "items": "shay",
+  "quantityLeft": "{count} ayaa hadhay",
+  "lifetimeValue": "Qiimaha guud ee muddada",
+  "purchases": "Iibsiyada",
+  "unitsPurchased": "Tirada la iibsaday",
+  "purchaseHistory": "Taariikhda iibsiga",
+  "dateUnavailable": "Taariikh lama hayo",
+  "unitCount": "{count} xabbo"
 }
