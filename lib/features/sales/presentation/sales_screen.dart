@@ -127,7 +127,7 @@ class SalesScreen extends StatelessWidget {
                       [
                         '$quantity × ETB ${unitPrice.toStringAsFixed(2)}',
                         if ((data['customerName'] as String? ?? '').isNotEmpty)
-                          l.customerLabel.replaceAll('{name}', data['customerName'] as String),
+                          l.customerLabel.replaceAll('NAME_VALUE', data['customerName'] as String),
                         date,
                       ].join(' • '),
                     ),
@@ -338,7 +338,7 @@ class SalesScreen extends StatelessWidget {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: l.quantitySold,
-                      helperText: l.availableStock.replaceAll('{count}', '$stock'),
+                      helperText: l.availableStock.replaceAll('COUNT_VALUE', '$stock'),
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
@@ -354,7 +354,7 @@ class SalesScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      l.unitSellingPrice.replaceAll('{price}', price.toStringAsFixed(2)),
+                      l.unitSellingPrice.replaceAll('PRICE_VALUE', price.toStringAsFixed(2)),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
