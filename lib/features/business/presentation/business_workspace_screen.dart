@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/business_profile_service.dart';
 import '../../inventory/presentation/inventory_screen.dart';
 import '../../sales/presentation/sales_screen.dart';
@@ -68,12 +69,12 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
       ));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Business profile saved securely.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.businessProfileSaved)),
         );
       }
     } catch (_) {
       setState(() => _error =
-          'Could not save your profile. Check your connection and Firestore rules.');
+          AppLocalizations.of(context)!.businessProfileSaveFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -81,15 +82,14 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Business workspace')),
+      appBar: AppBar(title: Text(l.businessWorkspaceTitle)),
       body: StreamBuilder<BusinessProfile?>(
         stream: _service.watchMyProfile(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
-              child: Text('Unable to load your business profile.'),
-            );
+            return Center(child: Text(l.unableLoadBusinessProfile));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -105,13 +105,13 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   color: AppTheme.navy,
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.storefront_rounded,
                         color: Colors.white, size: 32),
                     SizedBox(height: 12),
-                    Text('Your business, connected',
+                    Text(l.businessConnected,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 21,
@@ -119,7 +119,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                         )),
                     SizedBox(height: 6),
                     Text(
-                      'Save your business details to personalize your WiseSell workspace.',
+                      l.businessSaveIntro,
                       style: TextStyle(color: Colors.white70, height: 1.4),
                     ),
                   ],
@@ -127,7 +127,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                hasProfile ? 'Edit business details' : 'Set up your business',
+                hasProfile ? l.editBusinessDetails : l.setupBusiness,
                 style: const TextStyle(
                   color: AppTheme.navy,
                   fontSize: 20,
@@ -139,16 +139,16 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    _field(_businessName, 'Business name',
+                    _field(_businessName, l.businessName,
                         Icons.business_outlined),
-                    _field(_ownerName, 'Owner / contact person',
+                    _field(_ownerName, l.ownerContact,
                         Icons.person_outline),
-                    _field(_businessType, 'Business type / industry',
+                    _field(_businessType, l.businessType,
                         Icons.category_outlined),
-                    _field(_phone, 'Phone number', Icons.phone_outlined,
+                    _field(_phone, l.phoneNumber, Icons.phone_outlined,
                         keyboard: TextInputType.phone),
-                    _field(_city, 'City', Icons.location_city_outlined),
-                    _field(_country, 'Country', Icons.public_outlined),
+                    _field(_city, l.city, Icons.location_city_outlined),
+                    _field(_country, l.country, Icons.public_outlined),
                   ],
                 ),
               ),
@@ -166,7 +166,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.save_outlined),
-                label: Text(_saving ? 'Saving...' : 'Save business profile'),
+                label: Text(_saving ? l.saving : l.saveBusinessProfile),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.blue,
                   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -178,7 +178,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const BusinessDashboardScreen()),
                 ),
                 icon: const Icon(Icons.analytics_outlined),
-                label: const Text('Business performance dashboard'),
+                label: Text(l.businessPerformanceDashboard),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
@@ -190,7 +190,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const InventoryScreen()),
                 ),
                 icon: const Icon(Icons.inventory_2_outlined),
-                label: const Text('Manage product inventory'),
+                label: Text(l.manageProductInventory),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
@@ -202,7 +202,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const SalesScreen()),
                 ),
                 icon: const Icon(Icons.point_of_sale_outlined),
-                label: const Text('Manage sales and orders'),
+                label: Text(l.manageSalesOrders),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
@@ -214,15 +214,15 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
                   MaterialPageRoute<void>(builder: (_) => const CustomersScreen()),
                 ),
                 icon: const Icon(Icons.people_alt_outlined),
-                label: const Text('Manage customers (CRM)'),
+                label: Text(l.manageCustomersCrm),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   minimumSize: const Size.fromHeight(48),
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Your profile is stored under your signed-in account. Only that account should be allowed to read or edit it.',
+              Text(
+                l.profilePrivacyNote,
                 style: TextStyle(color: Colors.blueGrey, fontSize: 12),
               ),
             ],
@@ -250,7 +250,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
           border: const OutlineInputBorder(),
         ),
         validator: (value) =>
-            (value == null || value.trim().isEmpty) ? 'Required field' : null,
+            (value == null || value.trim().isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
       ),
     );
   }
@@ -262,11 +262,12 @@ class BusinessDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Business dashboard')),
-        body: const Center(child: Text('Sign in to view business performance.')),
+        appBar: AppBar(title: Text(l.businessDashboardTitle)),
+        body: Center(child: Text(l.signInToViewBusinessPerformance)),
       );
     }
 
@@ -278,12 +279,12 @@ class BusinessDashboardScreen extends StatelessWidget {
         .where('uid', isEqualTo: user.uid);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Business performance')),
+      appBar: AppBar(title: Text(l.businessPerformanceTitle)),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: salesQuery.snapshots(),
         builder: (context, salesSnapshot) {
           if (salesSnapshot.hasError) {
-            return const Center(child: Text('Could not load sales analytics. Check Firestore rules.'));
+            return Center(child: Text(l.couldNotLoadSalesAnalytics));
           }
           if (!salesSnapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -329,7 +330,7 @@ class BusinessDashboardScreen extends StatelessWidget {
             stream: productsQuery.snapshots(),
             builder: (context, productsSnapshot) {
               if (productsSnapshot.hasError) {
-                return const Center(child: Text('Could not load inventory analytics.'));
+                return Center(child: Text(l.couldNotLoadInventoryAnalytics));
               }
               if (!productsSnapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -358,40 +359,40 @@ class BusinessDashboardScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Your business at a glance',
+                        Text(l.yourBusinessAtAGlance,
                             style: TextStyle(color: Colors.white70, fontSize: 13)),
                         const SizedBox(height: 8),
                         Text('ETB ${revenue.toStringAsFixed(2)}',
                             style: const TextStyle(color: Colors.white,
                                 fontSize: 27, fontWeight: FontWeight.w800)),
-                        const Text('Total recorded sales revenue',
+                        Text(l.totalRecordedSalesRevenue,
                             style: TextStyle(color: Colors.white70)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 14),
                   Row(children: [
-                    Expanded(child: _dashboardMetric('Sales', '${sales.length}',
+                    Expanded(child: _dashboardMetric(l.sales, '${sales.length}',
                         Icons.receipt_long_outlined)),
                     const SizedBox(width: 10),
-                    Expanded(child: _dashboardMetric('Units sold', '$units',
+                    Expanded(child: _dashboardMetric(l.unitsSold, '$units',
                         Icons.shopping_bag_outlined)),
                   ]),
                   const SizedBox(height: 10),
                   Row(children: [
-                    Expanded(child: _dashboardMetric('Average sale',
+                    Expanded(child: _dashboardMetric(l.averageSale,
                         'ETB ${averageSale.toStringAsFixed(0)}',
                         Icons.price_check_outlined)),
                     const SizedBox(width: 10),
-                    Expanded(child: _dashboardMetric('Products', '${products.length}',
+                    Expanded(child: _dashboardMetric(l.productsCount, '${products.length}',
                         Icons.inventory_2_outlined)),
                   ]),
                   const SizedBox(height: 10),
-                  _dashboardMetric('Stock on hand',
-                      '$stockUnits units • ETB ${stockValue.toStringAsFixed(2)}',
+                  _dashboardMetric(l.stockOnHand,
+                      '$stockUnits ${l.units} • ETB ${stockValue.toStringAsFixed(2)}',
                       Icons.warehouse_outlined),
                   const SizedBox(height: 20),
-                  const Text('Revenue • last 7 days',
+                  Text(l.revenueLast7Days,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
                           color: AppTheme.navy)),
                   const SizedBox(height: 12),
@@ -433,14 +434,14 @@ class BusinessDashboardScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Text('Top-selling products',
+                  Text(l.topSellingProducts,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
                           color: AppTheme.navy)),
                   const SizedBox(height: 8),
                   if (topProducts.isEmpty)
-                    const Card(child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('Your top products will appear after you record sales.'),
+                    Card(child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l.topProductsWillAppear),
                     ))
                   else
                     ...topProducts.take(5).map((entry) => Card(
@@ -448,13 +449,13 @@ class BusinessDashboardScreen extends StatelessWidget {
                         leading: const Icon(Icons.trending_up, color: AppTheme.blue),
                         title: Text(entry.key,
                             style: const TextStyle(fontWeight: FontWeight.w700)),
-                        trailing: Text('${entry.value} units',
+                        trailing: Text('${entry.value} ${l.units}',
                             style: const TextStyle(fontWeight: FontWeight.w800)),
                       ),
                     )),
                   const SizedBox(height: 18),
                   Row(children: [
-                    const Expanded(child: Text('Low-stock alerts',
+                    Expanded(child: Text(l.lowStockAlerts,
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
                             color: AppTheme.navy))),
                     if (lowStock.isNotEmpty)
@@ -462,17 +463,17 @@ class BusinessDashboardScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(color: Colors.orange.shade100,
                             borderRadius: BorderRadius.circular(20)),
-                        child: Text('${lowStock.length} items',
+                        child: Text('${lowStock.length} ${l.items}',
                             style: TextStyle(color: Colors.orange.shade900,
                                 fontWeight: FontWeight.w700, fontSize: 12)),
                       ),
                   ]),
                   const SizedBox(height: 8),
                   if (lowStock.isEmpty)
-                    const Card(child: ListTile(
-                      leading: Icon(Icons.check_circle_outline, color: Colors.green),
-                      title: Text('No low-stock products'),
-                      subtitle: Text('All tracked products have more than 5 units.'),
+                    Card(child: ListTile(
+                      leading: const Icon(Icons.check_circle_outline, color: Colors.green),
+                      title: Text(l.noLowStockProducts),
+                      subtitle: Text(l.allTrackedProductsAboveFive),
                     ))
                   else
                     ...lowStock.map((doc) {
@@ -482,15 +483,15 @@ class BusinessDashboardScreen extends StatelessWidget {
                         child: ListTile(
                           leading: const Icon(Icons.warning_amber_rounded,
                               color: Colors.deepOrange),
-                          title: Text(data['name'] as String? ?? 'Product'),
-                          trailing: Text('$quantity left',
+                          title: Text(data['name'] as String? ?? l.product),
+                          trailing: Text(l.quantityLeft.replaceAll('COUNT_VALUE', '$quantity'),
                               style: const TextStyle(color: Colors.deepOrange,
                                   fontWeight: FontWeight.w800)),
                         ),
                       );
                     }),
                   const SizedBox(height: 16),
-                  Text('Analytics are calculated from your recorded WiseSell sales and inventory. They are not external market forecasts.',
+                  Text(l.analyticsDisclaimer,
                       style: TextStyle(color: Colors.blueGrey.shade600,
                           fontSize: 12)),
                 ],

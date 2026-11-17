@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key});
@@ -31,11 +32,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Customer CRM')),
-        body: const Center(child: Text('Sign in to manage customers.')),
+        appBar: AppBar(title: Text(l.customerCrm)),
+        body: Center(child: Text(l.signInManageCustomers)),
       );
     }
 
@@ -44,19 +46,17 @@ class _CustomersScreenState extends State<CustomersScreen> {
         .where('uid', isEqualTo: user.uid);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Customer CRM')),
+      appBar: AppBar(title: Text(l.customerCrm)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCustomerEditor(context, user.uid),
         icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('Add customer'),
+        label: Text(l.addCustomer),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: customersQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
-              child: Text('Could not load customers. Check Firestore rules.'),
-            );
+            return Center(child: Text(l.couldNotLoadCustomers));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -91,7 +91,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                 children: [
                   Expanded(
                     child: _summaryCard(
-                      'Customers',
+                      l.customersCount,
                       '${allCustomers.length}',
                       Icons.people_alt_outlined,
                     ),
@@ -99,7 +99,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _summaryCard(
-                      'With email',
+                      l.withEmail,
                       '$withEmail',
                       Icons.mark_email_read_outlined,
                     ),
@@ -110,7 +110,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search name, company, phone or email',
+                  hintText: l.searchCustomers,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _search.isEmpty
                       ? null
@@ -123,7 +123,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                _search.isEmpty ? 'Your customers' : 'Search results',
+                _search.isEmpty ? l.yourCustomers : l.searchResults,
                 style: const TextStyle(
                   color: AppTheme.navy,
                   fontSize: 19,
@@ -211,9 +211,9 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             _confirmDelete(context, doc.reference);
                           }
                         },
-                        itemBuilder: (_) => const [
-                          PopupMenuItem(value: 'edit', child: Text('Edit')),
-                          PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(value: 'edit', child: Text(l.edit)),
+                          PopupMenuItem(value: 'delete', child: Text(l.delete)),
                         ],
                       ),
                     ),
@@ -233,6 +233,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
     String customerId,
     Map<String, dynamic> customer,
   ) async {
+    final l = AppLocalizations.of(context)!;
     final salesQuery = FirebaseFirestore.instance
         .collection('sales')
         .where('uid', isEqualTo: uid)
@@ -241,14 +242,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (detailContext) => Scaffold(
-          appBar: AppBar(title: const Text('Customer activity')),
+          appBar: AppBar(title: Text(l.customerActivity)),
           body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: salesQuery.snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Center(
-                  child: Text('Could not load customer purchase history.'),
-                );
+                return Center(child: Text(l.couldNotLoadPurchaseHistory));
               }
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -271,7 +270,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                 (sum, sale) =>
                     sum + ((sale.data()['quantity'] as num?)?.toInt() ?? 0),
               );
-              final name = customer['name'] as String? ?? 'Customer';
+              final name = customer['name'] as String? ?? l.customerName;
               final phone = customer['phone'] as String? ?? '';
               final email = customer['email'] as String? ?? '';
               final company = customer['company'] as String? ?? '';
@@ -302,7 +301,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                     children: [
                       Expanded(
                         child: _summaryCard(
-                          'Lifetime value',
+                          l.lifetimeValue,
                           'ETB ${lifetimeValue.toStringAsFixed(2)}',
                           Icons.payments_outlined,
                         ),
@@ -310,7 +309,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: _summaryCard(
-                          'Purchases',
+                          l.purchases,
                           '${sales.length}',
                           Icons.receipt_long_outlined,
                         ),
@@ -319,13 +318,13 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   ),
                   const SizedBox(height: 10),
                   _summaryCard(
-                    'Units purchased',
+                    l.unitsPurchased,
                     '$totalUnits',
                     Icons.shopping_bag_outlined,
                   ),
                   const SizedBox(height: 18),
-                  const Text(
-                    'Purchase history',
+                  Text(
+                    l.purchaseHistory,
                     style: TextStyle(
                       color: AppTheme.navy,
                       fontSize: 19,
@@ -334,10 +333,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   ),
                   const SizedBox(height: 8),
                   if (sales.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 32),
                       child: Center(
-                        child: Text('No purchases recorded for this customer yet.'),
+                        child: Text(l.noPurchasesYet),
                       ),
                     )
                   else
@@ -349,7 +348,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                           (data['total'] as num?)?.toDouble() ?? 0;
                       final timestamp = data['createdAt'] as Timestamp?;
                       final date = timestamp == null
-                          ? 'Date unavailable'
+                          ? l.dateUnavailable
                           : '${timestamp.toDate().day.toString().padLeft(2, '0')}/'
                             '${timestamp.toDate().month.toString().padLeft(2, '0')}/'
                             '${timestamp.toDate().year}';
@@ -359,10 +358,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             child: Icon(Icons.shopping_bag_outlined),
                           ),
                           title: Text(
-                            data['productName'] as String? ?? 'Product',
+                            data['productName'] as String? ?? l.product,
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
-                          subtitle: Text('$quantity unit(s) • $date'),
+                          subtitle: Text('${l.unitCount.replaceAll('COUNT_VALUE', '$quantity')} • $date'),
                           trailing: Text(
                             'ETB ${total.toStringAsFixed(2)}',
                             style: const TextStyle(
@@ -422,6 +421,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
     String? docId,
     Map<String, dynamic>? initial,
   }) async {
+    final l = AppLocalizations.of(context)!;
     final formKey = GlobalKey<FormState>();
     final name = TextEditingController(text: initial?['name'] as String? ?? '');
     final company = TextEditingController(text: initial?['company'] as String? ?? '');
@@ -434,30 +434,30 @@ class _CustomersScreenState extends State<CustomersScreen> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(docId == null ? 'Add customer' : 'Edit customer'),
+          title: Text(docId == null ? l.addCustomer : l.editCustomer),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _editorField(name, 'Customer name', required: true),
-                  _editorField(company, 'Company / organization', required: false),
+                  _editorField(name, l.customerName, required: true),
+                  _editorField(company, l.companyOrganization, required: false),
                   _editorField(
                     phone,
-                    'Phone number',
+                    l.phoneNumber,
                     required: false,
                     keyboard: TextInputType.phone,
                   ),
                   _editorField(
                     email,
-                    'Email address',
+                    l.emailAddress,
                     required: false,
                     keyboard: TextInputType.emailAddress,
                   ),
                   _editorField(
                     notes,
-                    'Notes',
+                    l.notes,
                     required: false,
                     maxLines: 3,
                   ),
@@ -468,7 +468,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
           actions: [
             TextButton(
               onPressed: saving ? null : () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+              child: Text(l.cancel),
             ),
             FilledButton(
               onPressed: saving
@@ -503,8 +503,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             SnackBar(
                               content: Text(
                                 docId == null
-                                    ? 'Customer added.'
-                                    : 'Customer updated.',
+                                    ? l.customerAdded
+                                    : l.customerUpdated,
                               ),
                             ),
                           );
@@ -512,15 +512,11 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       } catch (_) {
                         setDialogState(() => saving = false);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Could not save customer. Check your connection and Firestore rules.',
-                            ),
-                          ),
+                          SnackBar(content: Text(l.couldNotSaveCustomer)),
                         );
                       }
                     },
-              child: Text(saving ? 'Saving...' : 'Save customer'),
+              child: Text(saving ? l.saving : l.saveCustomer),
             ),
           ],
         ),
@@ -553,11 +549,11 @@ class _CustomersScreenState extends State<CustomersScreen> {
           ),
           validator: (value) {
             final text = value?.trim() ?? '';
-            if (required && text.isEmpty) return 'Required field';
+            if (required && text.isEmpty) return AppLocalizations.of(context)!.requiredField;
             if (label == 'Email address' &&
                 text.isNotEmpty &&
                 !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(text)) {
-              return 'Enter a valid email address';
+              return AppLocalizations.of(context)!.enterValidEmail;
             }
             return null;
           },
@@ -568,19 +564,20 @@ class _CustomersScreenState extends State<CustomersScreen> {
     BuildContext context,
     DocumentReference<Map<String, dynamic>> reference,
   ) async {
+    final l = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete customer?'),
-        content: const Text('This removes the customer record from your CRM.'),
+        title: Text(l.deleteCustomerQuestion),
+        content: Text(l.removeCustomerWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -591,7 +588,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
       } catch (_) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not delete customer.')),
+            SnackBar(content: Text(l.couldNotDeleteCustomer)),
           );
         }
       }

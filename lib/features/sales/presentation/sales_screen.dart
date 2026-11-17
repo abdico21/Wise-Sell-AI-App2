@@ -3,17 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SalesScreen extends StatelessWidget {
   const SalesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Sales')),
-        body: const Center(child: Text('Sign in to record sales.')),
+        appBar: AppBar(title: Text(l.sales)),
+        body: Center(child: Text(l.signInRecordSales)),
       );
     }
 
@@ -21,19 +23,17 @@ class SalesScreen extends StatelessWidget {
         .collection('sales')
         .where('uid', isEqualTo: user.uid);
     return Scaffold(
-      appBar: AppBar(title: const Text('Sales management')),
+      appBar: AppBar(title: Text(l.salesManagement)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showRecordSale(context, user.uid),
         icon: const Icon(Icons.add_shopping_cart),
-        label: const Text('Record sale'),
+        label: Text(l.recordSale),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: salesQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
-              child: Text('Could not load sales. Check Firestore rules.'),
-            );
+            return Center(child: Text(l.couldNotLoadSales));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -68,7 +68,7 @@ class SalesScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _metricCard(
-                      'Sales recorded',
+                      l.salesRecorded,
                       '${docs.length}',
                       Icons.receipt_long_outlined,
                     ),
@@ -76,7 +76,7 @@ class SalesScreen extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _metricCard(
-                      'Units sold',
+                      l.unitsSold,
                       '$unitsSold',
                       Icons.shopping_bag_outlined,
                     ),
@@ -85,13 +85,13 @@ class SalesScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               _metricCard(
-                'Recorded revenue',
+                l.recordedRevenue,
                 'ETB ${totalRevenue.toStringAsFixed(2)}',
                 Icons.payments_outlined,
               ),
               const SizedBox(height: 18),
-              const Text(
-                'Recent sales',
+              Text(
+                l.recentSales,
                 style: TextStyle(
                   color: AppTheme.navy,
                   fontSize: 19,
@@ -108,7 +108,7 @@ class SalesScreen extends StatelessWidget {
                     quantity * unitPrice;
                 final timestamp = data['createdAt'] as Timestamp?;
                 final date = timestamp == null
-                    ? 'Just recorded'
+                    ? l.justRecorded
                     : _formatDate(timestamp.toDate());
                 return Card(
                   child: ListTile(
@@ -127,7 +127,7 @@ class SalesScreen extends StatelessWidget {
                       [
                         '$quantity × ETB ${unitPrice.toStringAsFixed(2)}',
                         if ((data['customerName'] as String? ?? '').isNotEmpty)
-                          'Customer: ${data['customerName']}',
+                          l.customerLabel.replaceAll('NAME_VALUE', data['customerName'] as String),
                         date,
                       ].join(' • '),
                     ),
@@ -187,7 +187,9 @@ class SalesScreen extends StatelessWidget {
         ),
       );
 
-  Widget _emptyState(BuildContext context, String uid) => Center(
+  Widget _emptyState(BuildContext context, String uid) {
+    final l = AppLocalizations.of(context)!;
+    return Center(
         child: Padding(
           padding: const EdgeInsets.all(28),
           child: Column(
@@ -199,8 +201,8 @@ class SalesScreen extends StatelessWidget {
                 color: AppTheme.blue,
               ),
               const SizedBox(height: 14),
-              const Text(
-                'Start recording sales',
+              Text(
+                l.startRecordingSales,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -208,22 +210,24 @@ class SalesScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Choose an inventory product, enter the quantity sold, and WiseSell will update your stock.',
+              Text(
+                l.recordSalesInstruction,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 18),
               FilledButton.icon(
                 onPressed: () => _showRecordSale(context, uid),
                 icon: const Icon(Icons.add_shopping_cart),
-                label: const Text('Record first sale'),
+                label: Text(l.recordFirstSale),
               ),
             ],
           ),
         ),
       );
+  }
 
   Future<void> _showRecordSale(BuildContext context, String uid) async {
+    final l = AppLocalizations.of(context)!;
     final productsRef = FirebaseFirestore.instance.collection('products');
     final productsSnapshot = await productsRef.where('uid', isEqualTo: uid).get();
     if (!context.mounted) return;
@@ -231,7 +235,7 @@ class SalesScreen extends StatelessWidget {
     final products = productsSnapshot.docs;
     if (products.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Add a product to inventory before recording a sale.')),
+        SnackBar(content: Text(l.addProductBeforeSale)),
       );
       return;
     }
@@ -241,7 +245,7 @@ class SalesScreen extends StatelessWidget {
     }).toList();
     if (available.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No products are currently in stock.')),
+        SnackBar(content: Text(l.noProductsInStock)),
       );
       return;
     }
@@ -269,7 +273,7 @@ class SalesScreen extends StatelessWidget {
               (selectedData['quantity'] as num?)?.toInt() ?? 0;
           final price = (selectedData['price'] as num?)?.toDouble() ?? 0;
           return AlertDialog(
-            title: const Text('Record a sale'),
+            title: Text(l.recordASale),
             content: Form(
               key: formKey,
               child: Column(
@@ -278,8 +282,8 @@ class SalesScreen extends StatelessWidget {
                   DropdownButtonFormField<String>(
                     value: selectedId,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Product',
+                    decoration: InputDecoration(
+                      labelText: l.product,
                       border: OutlineInputBorder(),
                     ),
                     items: available.map((doc) {
@@ -289,7 +293,7 @@ class SalesScreen extends StatelessWidget {
                           (data['quantity'] as num?)?.toInt() ?? 0;
                       return DropdownMenuItem(
                         value: doc.id,
-                        child: Text('$name ($count in stock)',
+                        child: Text('$name ($count ${l.unitsInStock})',
                             overflow: TextOverflow.ellipsis),
                       );
                     }).toList(),
@@ -305,14 +309,14 @@ class SalesScreen extends StatelessWidget {
                   DropdownButtonFormField<String?>(
                     value: selectedCustomerId,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Customer (optional)',
+                    decoration: InputDecoration(
+                      labelText: l.customerOptional,
                       border: OutlineInputBorder(),
                     ),
                     items: [
-                      const DropdownMenuItem<String?>(
+                      DropdownMenuItem<String?>(
                         value: null,
-                        child: Text('Walk-in / no customer'),
+                        child: Text(l.walkInNoCustomer),
                       ),
                       ...customers.map((doc) => DropdownMenuItem<String?>(
                             value: doc.id,
@@ -333,16 +337,16 @@ class SalesScreen extends StatelessWidget {
                     controller: quantityController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Quantity sold',
-                      helperText: 'Available stock: $stock',
+                      labelText: l.quantitySold,
+                      helperText: l.availableStock.replaceAll('COUNT_VALUE', '$stock'),
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
                       final quantity = int.tryParse(value?.trim() ?? '');
                       if (quantity == null || quantity <= 0) {
-                        return 'Enter a quantity greater than zero';
+                        return l.enterPositiveQuantity;
                       }
-                      if (quantity > stock) return 'Not enough stock available';
+                      if (quantity > stock) return l.notEnoughStock;
                       return null;
                     },
                   ),
@@ -350,7 +354,7 @@ class SalesScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Unit selling price: ETB ${price.toStringAsFixed(2)}',
+                      l.unitSellingPrice.replaceAll('PRICE_VALUE', price.toStringAsFixed(2)),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -361,7 +365,7 @@ class SalesScreen extends StatelessWidget {
               TextButton(
                 onPressed:
                     saving ? null : () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
+                child: Text(l.cancel),
               ),
               FilledButton(
                 onPressed: saving
@@ -391,19 +395,19 @@ class SalesScreen extends StatelessWidget {
                                 (freshCustomer == null ||
                                     !freshCustomer.exists ||
                                     freshCustomer.data()?['uid'] != uid)) {
-                              throw StateError('Selected customer is unavailable.');
+                              throw StateError(l.selectedCustomerUnavailable);
                             }
                             if (!freshProduct.exists) {
-                              throw StateError('Product no longer exists.');
+                              throw StateError(l.productNoLongerExists);
                             }
                             final data = freshProduct.data()!;
                             if (data['uid'] != uid) {
-                              throw StateError('Product access denied.');
+                              throw StateError(l.productAccessDenied);
                             }
                             final currentStock =
                                 (data['quantity'] as num?)?.toInt() ?? 0;
                             if (currentStock < quantity) {
-                              throw StateError('Insufficient stock.');
+                              throw StateError(l.insufficientStock);
                             }
                             final currentPrice =
                                 (data['price'] as num?)?.toDouble() ?? 0;
@@ -433,8 +437,8 @@ class SalesScreen extends StatelessWidget {
                           }
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Sale recorded and stock updated.'),
+                              SnackBar(
+                                content: Text(l.saleRecordedStockUpdated),
                               ),
                             );
                           }
@@ -442,13 +446,13 @@ class SalesScreen extends StatelessWidget {
                           setDialogState(() => saving = false);
                           final message = error is StateError
                               ? error.message
-                              : 'Could not record sale. Check your connection and Firestore rules.';
+                              : l.couldNotRecordSale;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(message)),
                           );
                         }
                       },
-                child: Text(saving ? 'Recording...' : 'Confirm sale'),
+                child: Text(saving ? l.recording : l.confirmSale),
               ),
             ],
           );

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../business/presentation/business_workspace_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -56,7 +57,7 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() => _errorMessage = _messageFor(error.code));
     } catch (_) {
       setState(() {
-        _errorMessage = 'Something went wrong. Please try again.';
+        _errorMessage = AppLocalizations.of(context)!.authGenericError;
       });
     } finally {
       if (mounted) setState(() => _isBusy = false);
@@ -64,30 +65,31 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   String _messageFor(String code) {
+    final l = AppLocalizations.of(context)!;
     switch (code) {
       case 'email-already-in-use':
-        return 'An account already exists for this email.';
+        return l.authEmailExists;
       case 'invalid-email':
-        return 'Enter a valid email address.';
+        return l.enterValidEmail;
       case 'weak-password':
-        return 'Choose a stronger password (at least 6 characters).';
+        return l.authChooseStrongerPassword;
       case 'user-not-found':
       case 'wrong-password':
       case 'invalid-credential':
-        return 'Email or password is incorrect.';
+        return l.authCredentialsIncorrect;
       case 'network-request-failed':
-        return 'Network error. Check your connection and try again.';
+        return l.authNetworkError;
       case 'too-many-requests':
-        return 'Too many attempts. Please wait and try again.';
+        return l.authTooManyAttempts;
       default:
-        return 'Authentication failed. Please try again.';
+        return l.authFailed;
     }
   }
 
   Future<void> _resetPassword() async {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      setState(() => _errorMessage = 'Enter your email above first.');
+      setState(() => _errorMessage = AppLocalizations.of(context)!.authEnterEmailFirst);
       return;
     }
     setState(() {
@@ -98,7 +100,7 @@ class _AuthScreenState extends State<AuthScreen> {
       await _auth.sendPasswordResetEmail(email: email);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset email sent.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.passwordResetSent)),
         );
       }
     } on FirebaseAuthException catch (error) {
@@ -112,16 +114,17 @@ class _AuthScreenState extends State<AuthScreen> {
     await _auth.signOut();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You have signed out.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.signedOut)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final user = _auth.currentUser;
     return Scaffold(
-      appBar: AppBar(title: const Text('WiseSell account')),
+      appBar: AppBar(title: Text(l.accountTitle)),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -137,13 +140,14 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Widget _buildForm() {
+    final l = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Icon(Icons.storefront_rounded, size: 52, color: AppTheme.blue),
         const SizedBox(height: 16),
         Text(
-          _isRegistering ? 'Create your business account' : 'Welcome back',
+          _isRegistering ? l.authCreateBusinessAccount : l.authWelcomeBack,
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 24,
@@ -154,8 +158,8 @@ class _AuthScreenState extends State<AuthScreen> {
         const SizedBox(height: 8),
         Text(
           _isRegistering
-              ? 'Start managing your business with WiseSell AI.'
-              : 'Sign in to access your WiseSell workspace.',
+              ? l.authRegisterIntro
+              : l.authSignInIntro,
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.blueGrey.shade600),
         ),
@@ -169,15 +173,15 @@ class _AuthScreenState extends State<AuthScreen> {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(
-                  labelText: 'Email address',
+                decoration: InputDecoration(
+                  labelText: l.emailAddress,
                   prefixIcon: Icon(Icons.email_outlined),
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   final email = value?.trim() ?? '';
                   if (email.isEmpty || !email.contains('@')) {
-                    return 'Enter a valid email address.';
+                    return l.enterValidEmail;
                   }
                   return null;
                 },
@@ -192,7 +196,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     : const [AutofillHints.password],
                 onFieldSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: l.password,
                   prefixIcon: const Icon(Icons.lock_outline),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
@@ -208,7 +212,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 validator: (value) {
                   if ((value ?? '').length < 6) {
-                    return 'Password must be at least 6 characters.';
+                    return l.passwordMinLength;
                   }
                   return null;
                 },
@@ -237,12 +241,12 @@ class _AuthScreenState extends State<AuthScreen> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(_isRegistering ? 'Create account' : 'Sign in'),
+              : Text(_isRegistering ? l.authCreateAccount : l.authSignIn),
         ),
         if (!_isRegistering)
           TextButton(
             onPressed: _isBusy ? null : _resetPassword,
-            child: const Text('Forgot password?'),
+            child: Text(l.forgotPassword),
           ),
         TextButton(
           onPressed: _isBusy
@@ -253,8 +257,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   }),
           child: Text(
             _isRegistering
-                ? 'Already have an account? Sign in'
-                : 'New to WiseSell? Create an account',
+                ? l.authAlreadyHaveAccount
+                : l.authNewToWiseSell,
           ),
         ),
       ],
@@ -262,18 +266,19 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Widget _buildAccount(User user) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Icon(Icons.account_circle_rounded, size: 64, color: AppTheme.blue),
         const SizedBox(height: 16),
-        const Text(
-          'You are signed in',
+        Text(
+          l.authSignedIn,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
-        Text(user.email ?? 'WiseSell user', textAlign: TextAlign.center),
+        Text(user.email ?? l.appTitle, textAlign: TextAlign.center),
         const SizedBox(height: 24),
         FilledButton.icon(
           onPressed: () => Navigator.of(context).push(
@@ -282,14 +287,14 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ),
           icon: const Icon(Icons.storefront_outlined),
-          label: const Text('Open business workspace'),
+          label: Text(l.openBusinessWorkspace),
           style: FilledButton.styleFrom(backgroundColor: AppTheme.blue),
         ),
         const SizedBox(height: 10),
         OutlinedButton.icon(
           onPressed: _signOut,
           icon: const Icon(Icons.logout_rounded),
-          label: const Text('Sign out'),
+          label: Text(l.signOut),
         ),
       ],
     );

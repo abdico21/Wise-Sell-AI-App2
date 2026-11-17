@@ -32,12 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final l = AppLocalizations.of(context)!;
     final pages = <Widget>[
       _buildHome(context, l),
-      const FeatureStatusScreen(
-        title: 'Marketplace',
-        description: 'Product discovery, buyer and seller storefronts, and marketplace orders.',
-        plannedItems: ['Seller storefronts', 'Product listings and search', 'Buyer enquiries and orders'],
+      FeatureStatusScreen(
+        title: l.marketplace,
+        description: l.marketplaceDescription,
+        plannedItems: [l.sellerStorefronts, l.productListingsSearch, l.buyerEnquiriesOrders],
       ),
-      const AgentHubScreen(),
+      AgentHubScreen(onLocaleChanged: widget.onLocaleChanged),
     ];
 
     return Scaffold(
@@ -55,14 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(l.appTitle, style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.4)),
-                      const Text('Sell Smarter · Grow Bigger', style: TextStyle(fontSize: 9, color: AppTheme.orange, fontWeight: FontWeight.w700)),
+                      Text(l.tagline, style: TextStyle(fontSize: 9, color: AppTheme.orange, fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ],
               ),
               actions: [
                 IconButton(
-                  tooltip: 'Account',
+                  tooltip: l.profile,
                   onPressed: () => _open(const AuthScreen()),
                   icon: const Icon(Icons.account_circle_outlined),
                 ),
@@ -80,10 +80,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 IconButton(
                   tooltip: l.notifications,
-                  onPressed: () => _open(const FeatureStatusScreen(
-                    title: 'Notifications',
-                    description: 'Notifications are not configured in this foundation build.',
-                    plannedItems: ['Order updates', 'Low-stock alerts', 'Business reminders'],
+                  onPressed: () => _open(FeatureStatusScreen(
+                    title: l.notificationsTitle,
+                    description: l.notificationsNotConfigured,
+                    plannedItems: [l.orderUpdates, l.lowStockAlertItems, l.businessReminders],
                   )),
                   icon: const Icon(Icons.notifications_none_rounded),
                 ),
@@ -168,19 +168,19 @@ class _HomeScreenState extends State<HomeScreen> {
               _FeatureTile(icon: Icons.shopping_bag_outlined, title: l.marketplace,
                 detail: l.productsOrders, onTap: () => setState(() => _selectedIndex = 1)),
               _FeatureTile(icon: Icons.campaign_outlined, title: l.marketing,
-                detail: l.socialCampaigns, onTap: () => _open(const FeatureStatusScreen(
-                  title: 'Sales and Marketing',
-                  description: 'Campaign creation and social-network publishing are not active in this build.',
-                  plannedItems: ['Product descriptions and ad copy', 'Campaign planning', 'Social channel integrations'],
+                detail: l.socialCampaigns, onTap: () => _open(FeatureStatusScreen(
+                  title: l.salesMarketingTitle,
+                  description: l.campaignCreationNotActive,
+                  plannedItems: [l.productDescriptionsAdCopy, l.campaignPlanning, l.socialChannelIntegrations],
                 ))),
               _FeatureTile(icon: Icons.inventory_2_outlined, title: l.inventory,
                 detail: l.stockManagement, onTap: () => _open(const InventoryScreen())),
-              _FeatureTile(icon: Icons.point_of_sale_outlined, title: 'Sales',
-                detail: 'Record sales and view revenue', onTap: () => _open(const SalesScreen())),
-              _FeatureTile(icon: Icons.people_outline, title: 'Customers',
-                detail: 'Manage your customer list', onTap: () => _open(const CustomersScreen())),
-              _FeatureTile(icon: Icons.business_outlined, title: 'Business profile',
-                detail: 'Set up your business workspace', onTap: () => _open(const BusinessWorkspaceScreen())),
+              _FeatureTile(icon: Icons.point_of_sale_outlined, title: l.sales,
+                detail: l.recordSalesRevenue, onTap: () => _open(const SalesScreen())),
+              _FeatureTile(icon: Icons.people_outline, title: l.customers,
+                detail: l.manageCustomerList, onTap: () => _open(const CustomersScreen())),
+              _FeatureTile(icon: Icons.business_outlined, title: l.businessProfile,
+                detail: l.setupBusinessWorkspace, onTap: () => _open(const BusinessWorkspaceScreen())),
             ],
           ),
           const SizedBox(height: 24),
@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.rocket_launch_outlined, color: AppTheme.orange, size: 30),
                   const SizedBox(width: 14),
                   Expanded(child: Text(
-                    'Your mobile foundation is connected. Open the available business tools below; AI, marketplace and marketing services still need implementation.',
+                    l.mobileFoundationMessage,
                     style: const TextStyle(height: 1.4),
                   )),
                 ],
