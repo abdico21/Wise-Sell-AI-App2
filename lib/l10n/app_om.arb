@@ -196,5 +196,20 @@
   "productNoLongerExists": "Oomishni kun amma hin jiru.",
   "productAccessDenied": "Eeyyamni oomisha kanaa dhorkameera.",
   "insufficientStock": "Kuusaan gahaan hin jiru.",
-  "couldNotRecordSale": "Gurgurtaa galmeessuu hin dandeenye. Walqunnamtii fi seera Firestore mirkaneessaa."
+  "couldNotRecordSale": "Gurgurtaa galmeessuu hin dandeenye. Walqunnamtii fi seera Firestore mirkaneessaa.",
+  "editCustomer": "Maamila gulaali",
+  "businessDashboardTitle": "Daashboordii daldalaa",
+  "signInToViewBusinessPerformance": "Raawwii daldalaa ilaaluuf seenaa.",
+  "businessPerformanceTitle": "Raawwii daldalaa",
+  "couldNotLoadSalesAnalytics": "Xiinxala gurgurtaa fe'uu hin dandeenye. Seera Firestore mirkaneessaa.",
+  "couldNotLoadInventoryAnalytics": "Xiinxala kuusaa fe'uu hin dandeenye.",
+  "yourBusinessAtAGlance": "Haala daldala keessanii gabaabinaan",
+  "totalRecordedSalesRevenue": "Galii gurgurtaa waliigalaa galmaa'e",
+  "revenueLast7Days": "Galii • guyyoota 7 darban",
+  "topSellingProducts": "Oomishaalee baay'inaan gurguraman",
+  "topProductsWillAppear": "Erga gurgurtaa galmeessitanii booda oomishaaleen gurgurtaa olaanaa qaban ni mul'atu.",
+  "lowStockAlerts": "Akeekkachiisa kuusaa xiqqaa",
+  "noLowStockProducts": "Oomishni kuusaa xiqqaa qabu hin jiru",
+  "allTrackedProductsAboveFive": "Oomishaaleen hordofaman hundi yuunitii 5 ol qabu.",
+  "analyticsDisclaimer": "Xiinxalli kun gurgurtaa fi kuusaa WiseSell keessatti galmaa'e irratti hundaa'a. Tilmaama gabaa alaa miti."
 }
