@@ -438,7 +438,7 @@ class SalesScreen extends StatelessWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Sale recorded and stock updated.'),
+                                content: Text(l.saleRecordedStockUpdated),
                               ),
                             );
                           }
