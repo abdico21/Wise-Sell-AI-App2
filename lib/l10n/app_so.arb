@@ -183,5 +183,18 @@
   "category": "Qaybta",
   "sellingPrice": "Qiimaha iibka (ETB)",
   "quantityInStock": "Tirada kaydka ku jirta",
-  "validNonNegativeNumber": "Geli tiro sax ah oo eber ama ka weyn"
+  "validNonNegativeNumber": "Geli tiro sax ah oo eber ama ka weyn",
+  "salesRecorded": "Iibka la diiwaangeliyey",
+  "unitsSold": "Tirada la iibiyey",
+  "recordedRevenue": "Dakhli la diiwaangeliyey",
+  "recentSales": "Iibkii ugu dambeeyey",
+  "justRecorded": "Hadda la diiwaangeliyey",
+  "customerLabel": "Macmiil: {name}",
+  "startRecordingSales": "Bilow diiwaangelinta iibka",
+  "recordSalesInstruction": "Dooro alaab kaydka ku jirta, geli tirada la iibiyey, WiseSell-na wuxuu cusboonaysiin doonaa kaydkaaga.",
+  "selectedCustomerUnavailable": "Macmiilka la doortay lama heli karo.",
+  "productNoLongerExists": "Alaabtani hadda ma jirto.",
+  "productAccessDenied": "Gelitaanka alaabta waa la diiday.",
+  "insufficientStock": "Kayd ku filan ma jiro.",
+  "couldNotRecordSale": "Lama diiwaangelin karin iibka. Hubi xiriirka iyo xeerarka Firestore."
 }
