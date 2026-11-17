@@ -175,5 +175,13 @@
   "customersCount": "Macaamiisha",
   "withEmail": "Kuwa iimayl leh",
   "yourCustomers": "Macaamiishaada",
-  "searchResults": "Natiijooyinka raadinta"
+  "searchResults": "Natiijooyinka raadinta",
+  "productsCount": "Alaabta",
+  "unitsInStock": "Tirada kaydka ku jirta",
+  "productName": "Magaca alaabta",
+  "skuProductCode": "SKU / koodhka alaabta",
+  "category": "Qaybta",
+  "sellingPrice": "Qiimaha iibka (ETB)",
+  "quantityInStock": "Tirada kaydka ku jirta",
+  "validNonNegativeNumber": "Geli tiro sax ah oo eber ama ka weyn"
 }
