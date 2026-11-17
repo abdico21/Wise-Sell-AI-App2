@@ -211,5 +211,16 @@
   "lowStockAlerts": "Akeekkachiisa kuusaa xiqqaa",
   "noLowStockProducts": "Oomishni kuusaa xiqqaa qabu hin jiru",
   "allTrackedProductsAboveFive": "Oomishaaleen hordofaman hundi yuunitii 5 ol qabu.",
-  "analyticsDisclaimer": "Xiinxalli kun gurgurtaa fi kuusaa WiseSell keessatti galmaa'e irratti hundaa'a. Tilmaama gabaa alaa miti."
+  "analyticsDisclaimer": "Xiinxalli kun gurgurtaa fi kuusaa WiseSell keessatti galmaa'e irratti hundaa'a. Tilmaama gabaa alaa miti.",
+  "averageSale": "Gurgurtaa giddugaleessaa",
+  "stockOnHand": "Kuusaa harkaa jiru",
+  "units": "yuunitii",
+  "items": "meeshaalee",
+  "quantityLeft": "{count} hafe",
+  "lifetimeValue": "Gatii jireenya guutuu",
+  "purchases": "Bittaa",
+  "unitsPurchased": "Yuunitii bitame",
+  "purchaseHistory": "Seenaa bittaa",
+  "dateUnavailable": "Guyyaan hin jiru",
+  "unitCount": "Yuunitii {count}"
 }
