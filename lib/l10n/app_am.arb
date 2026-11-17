@@ -164,5 +164,16 @@
   "unitSellingPrice": "የአንዱ መሸጫ ዋጋ: ETB {price}",
   "saleRecordedStockUpdated": "ሽያጩ ተመዝግቧል፣ ክምችቱም ተዘምኗል።",
   "recording": "በመመዝገብ ላይ...",
-  "confirmSale": "ሽያጩን አረጋግጥ"
+  "confirmSale": "ሽያጩን አረጋግጥ",
+  "customerName": "የደንበኛ ስም",
+  "companyOrganization": "ኩባንያ / ድርጅት",
+  "notes": "ማስታወሻዎች",
+  "requiredField": "አስፈላጊ መስክ",
+  "customerAdded": "ደንበኛው ታክሏል።",
+  "customerUpdated": "ደንበኛው ተዘምኗል።",
+  "couldNotSaveCustomer": "ደንበኛውን ማስቀመጥ አልተቻለም። ግንኙነትዎንና Firestore ደንቦችን ያረጋግጡ።",
+  "customersCount": "ደንበኞች",
+  "withEmail": "ኢሜይል ያላቸው",
+  "yourCustomers": "ደንበኞችዎ",
+  "searchResults": "የፍለጋ ውጤቶች"
 }
