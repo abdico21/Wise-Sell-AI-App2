@@ -32,10 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final l = AppLocalizations.of(context)!;
     final pages = <Widget>[
       _buildHome(context, l),
-      const FeatureStatusScreen(
-        title: 'Marketplace',
-        description: 'Product discovery, buyer and seller storefronts, and marketplace orders.',
-        plannedItems: ['Seller storefronts', 'Product listings and search', 'Buyer enquiries and orders'],
+      FeatureStatusScreen(
+        title: l.marketplace,
+        description: l.marketplaceDescription,
+        plannedItems: [l.sellerStorefronts, l.productListingsSearch, l.buyerEnquiriesOrders],
       ),
       AgentHubScreen(onLocaleChanged: widget.onLocaleChanged),
     ];
@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(l.appTitle, style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.4)),
-                      const Text('Sell Smarter · Grow Bigger', style: TextStyle(fontSize: 9, color: AppTheme.orange, fontWeight: FontWeight.w700)),
+                      Text(l.tagline, style: TextStyle(fontSize: 9, color: AppTheme.orange, fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ],
@@ -81,9 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   tooltip: l.notifications,
                   onPressed: () => _open(const FeatureStatusScreen(
-                    title: 'Notifications',
-                    description: 'Notifications are not configured in this foundation build.',
-                    plannedItems: ['Order updates', 'Low-stock alerts', 'Business reminders'],
+                    title: l.notificationsTitle,
+                    description: l.notificationsNotConfigured,
+                    plannedItems: [l.orderUpdates, l.lowStockAlertItems, l.businessReminders],
                   )),
                   icon: const Icon(Icons.notifications_none_rounded),
                 ),
@@ -169,9 +169,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 detail: l.productsOrders, onTap: () => setState(() => _selectedIndex = 1)),
               _FeatureTile(icon: Icons.campaign_outlined, title: l.marketing,
                 detail: l.socialCampaigns, onTap: () => _open(const FeatureStatusScreen(
-                  title: 'Sales and Marketing',
-                  description: 'Campaign creation and social-network publishing are not active in this build.',
-                  plannedItems: ['Product descriptions and ad copy', 'Campaign planning', 'Social channel integrations'],
+                  title: l.salesMarketingTitle,
+                  description: l.campaignCreationNotActive,
+                  plannedItems: [l.productDescriptionsAdCopy, l.campaignPlanning, l.socialChannelIntegrations],
                 ))),
               _FeatureTile(icon: Icons.inventory_2_outlined, title: l.inventory,
                 detail: l.stockManagement, onTap: () => _open(const InventoryScreen())),
