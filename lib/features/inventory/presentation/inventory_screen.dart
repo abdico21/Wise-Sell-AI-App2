@@ -3,34 +3,36 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class InventoryScreen extends StatelessWidget {
   const InventoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Inventory')),
-        body: const Center(child: Text('Sign in to manage your products.')),
+        appBar: AppBar(title: Text(l.inventory)),
+        body: Center(child: Text(l.signInManageProducts)),
       );
     }
     final products = FirebaseFirestore.instance.collection('products')
         .where('uid', isEqualTo: user.uid);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Product inventory')),
+      appBar: AppBar(title: Text(l.productInventory)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showProductEditor(context, user.uid),
         icon: const Icon(Icons.add),
-        label: const Text('Add product'),
+        label: Text(l.addProduct),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: products.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Could not load inventory. Check Firestore rules.'));
+            return Center(child: Text(l.couldNotLoadInventory));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -57,19 +59,19 @@ class InventoryScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
               Row(children: [
-                Expanded(child: _summaryCard('Products', '${docs.length}', Icons.inventory_2_outlined)),
+                Expanded(child: _summaryCard(l.productsCount, '${docs.length}', Icons.inventory_2_outlined)),
                 const SizedBox(width: 10),
-                Expanded(child: _summaryCard('Units in stock', '$totalUnits', Icons.warehouse_outlined)),
+                Expanded(child: _summaryCard(l.unitsInStock, '$totalUnits', Icons.warehouse_outlined)),
               ]),
               const SizedBox(height: 10),
-              _summaryCard('Stock value', '${inventoryValue.toStringAsFixed(2)}', Icons.payments_outlined),
+              _summaryCard(l.stockValue, '${inventoryValue.toStringAsFixed(2)}', Icons.payments_outlined),
               const SizedBox(height: 18),
-              const Text('Your products', style: TextStyle(
+              Text(l.yourProducts, style: const TextStyle(
                 color: AppTheme.navy, fontSize: 19, fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
               ...docs.map((doc) {
                 final data = doc.data();
-                final name = data['name'] as String? ?? 'Unnamed product';
+                final name = data['name'] as String? ?? l.productName;
                 final sku = data['sku'] as String? ?? '';
                 final category = data['category'] as String? ?? '';
                 final price = (data['price'] as num?)?.toDouble() ?? 0;
@@ -83,9 +85,9 @@ class InventoryScreen extends StatelessWidget {
                         color: lowStock ? Colors.deepOrange : AppTheme.blue),
                     ),
                     title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text('${category.isEmpty ? 'General' : category}'
+                    subtitle: Text('${category.isEmpty ? l.general : category}'
                       '${sku.isEmpty ? '' : ' • $sku'}\n'
-                      'ETB ${price.toStringAsFixed(2)}  •  $quantity in stock',
+                      'ETB ${price.toStringAsFixed(2)}  •  $quantity ${l.unitsInStock}',
                       maxLines: 2),
                     isThreeLine: true,
                     trailing: PopupMenuButton<String>(
@@ -111,24 +113,27 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _emptyState(BuildContext context) => Center(
+  Widget _emptyState(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Center(
     child: Padding(
       padding: const EdgeInsets.all(28),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         const Icon(Icons.inventory_2_outlined, size: 58, color: AppTheme.blue),
         const SizedBox(height: 14),
-        const Text('Your inventory is ready',
+        Text(l.yourInventoryReady,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppTheme.navy)),
         const SizedBox(height: 8),
-        const Text('Add your first product to track prices and stock levels.',
+        Text(l.addFirstProductDescription,
           textAlign: TextAlign.center),
         const SizedBox(height: 18),
         FilledButton.icon(
           onPressed: () => _showProductEditor(context, FirebaseAuth.instance.currentUser!.uid),
-          icon: const Icon(Icons.add), label: const Text('Add first product')),
+          icon: const Icon(Icons.add), label: Text(l.addFirstProduct)),
       ]),
     ),
   );
+  }
 
   Widget _summaryCard(String label, String value, IconData icon) => Card(
     child: Padding(
@@ -151,6 +156,7 @@ class InventoryScreen extends StatelessWidget {
     String? docId,
     Map<String, dynamic>? initial,
   }) async {
+    final l = AppLocalizations.of(context)!;
     final formKey = GlobalKey<FormState>();
     final name = TextEditingController(text: initial?['name'] as String? ?? '');
     final sku = TextEditingController(text: initial?['sku'] as String? ?? '');
@@ -163,22 +169,22 @@ class InventoryScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(docId == null ? 'Add product' : 'Edit product'),
+          title: Text(docId == null ? l.addProduct : l.edit),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                _input(name, 'Product name'),
-                _input(sku, 'SKU / product code', required: false),
-                _input(category, 'Category', required: false),
-                _input(price, 'Selling price (ETB)', numeric: true),
-                _input(quantity, 'Quantity in stock', numeric: true, integer: true),
+                _input(name, l.productName),
+                _input(sku, l.skuProductCode, required: false),
+                _input(category, l.category, required: false),
+                _input(price, l.sellingPrice, numeric: true),
+                _input(quantity, l.quantityInStock, numeric: true, integer: true),
               ]),
             ),
           ),
           actions: [
             TextButton(onPressed: saving ? null : () => Navigator.pop(dialogContext),
-              child: const Text('Cancel')),
+              child: Text(l.cancel)),
             FilledButton(
               onPressed: saving ? null : () async {
                 if (!formKey.currentState!.validate()) return;
@@ -203,15 +209,15 @@ class InventoryScreen extends StatelessWidget {
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(docId == null ? 'Product added.' : 'Product updated.')));
+                      SnackBar(content: Text(docId == null ? l.productAdded : l.productUpdated)));
                   }
                 } catch (_) {
                   setDialogState(() => saving = false);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Could not save product. Check your connection and Firestore rules.')));
+                    SnackBar(content: Text(l.couldNotSaveProduct)));
                 }
               },
-              child: Text(saving ? 'Saving...' : 'Save'),
+              child: Text(saving ? l.saving : l.save),
             ),
           ],
         ),
@@ -230,10 +236,10 @@ class InventoryScreen extends StatelessWidget {
         decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
         validator: (value) {
           final text = value?.trim() ?? '';
-          if (required && text.isEmpty) return 'Required field';
+          if (required && text.isEmpty) return AppLocalizations.of(context)!.requiredField;
           if (numeric && text.isNotEmpty) {
             final parsed = integer ? int.tryParse(text) : double.tryParse(text);
-            if (parsed == null || parsed < 0) return 'Enter a valid non-negative number';
+            if (parsed == null || parsed < 0) return AppLocalizations.of(context)!.validNonNegativeNumber;
           }
           return null;
         },
@@ -243,14 +249,15 @@ class InventoryScreen extends StatelessWidget {
 
   Future<void> _confirmDelete(BuildContext context,
       DocumentReference<Map<String, dynamic>> reference) async {
+    final l = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete product?'),
-        content: const Text('This removes the product from your inventory.'),
+        title: Text(l.deleteProductQuestion),
+        content: Text(l.removeProductWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l.delete)),
         ],
       ),
     );
@@ -260,7 +267,7 @@ class InventoryScreen extends StatelessWidget {
       } catch (_) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not delete product. Check Firestore rules.')));
+            SnackBar(content: Text(l.couldNotDeleteProduct)));
         }
       }
     }
