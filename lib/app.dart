@@ -86,14 +86,18 @@ class _WiseSellAppState extends State<WiseSellApp> {
       localizationsDelegates: const [
         AppLocalizations.delegate,
         // Flutter's built-in Material, Widgets and Cupertino delegates do not
-        // include Afaan Oromo ('om') or Tigrinya ('ti'). Keep app text in the
-        // selected language while using English framework labels for controls.
+        // include Afaan Oromo ('om'), Tigrinya ('ti') or Somali ('so'). Keep
+        // app text in the selected language while using English framework
+        // labels for standard Flutter controls.
         _OromoMaterialLocalizationsDelegate(),
         _OromoWidgetsLocalizationsDelegate(),
         _OromoCupertinoLocalizationsDelegate(),
         _TigrinyaMaterialLocalizationsDelegate(),
         _TigrinyaWidgetsLocalizationsDelegate(),
         _TigrinyaCupertinoLocalizationsDelegate(),
+        _SomaliMaterialLocalizationsDelegate(),
+        _SomaliWidgetsLocalizationsDelegate(),
+        _SomaliCupertinoLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -193,4 +197,49 @@ class _TigrinyaCupertinoLocalizationsDelegate
 
   @override
   bool shouldReload(_TigrinyaCupertinoLocalizationsDelegate old) => false;
+}
+
+class _SomaliMaterialLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _SomaliMaterialLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'so';
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) =>
+      GlobalMaterialLocalizations.delegate.load(const Locale('en'));
+
+  @override
+  bool shouldReload(_SomaliMaterialLocalizationsDelegate old) => false;
+}
+
+class _SomaliWidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _SomaliWidgetsLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'so';
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) =>
+      GlobalWidgetsLocalizations.delegate.load(const Locale('en'));
+
+  @override
+  bool shouldReload(_SomaliWidgetsLocalizationsDelegate old) => false;
+}
+
+class _SomaliCupertinoLocalizationsDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _SomaliCupertinoLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'so';
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+      GlobalCupertinoLocalizations.delegate.load(const Locale('en'));
+
+  @override
+  bool shouldReload(_SomaliCupertinoLocalizationsDelegate old) => false;
 }
