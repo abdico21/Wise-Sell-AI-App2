@@ -361,7 +361,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             data['productName'] as String? ?? l.product,
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
-                          subtitle: Text('${l.unitCount.replaceAll('{count}', '$quantity')} • $date'),
+                          subtitle: Text('${l.unitCount.replaceAll('COUNT_VALUE', '$quantity')} • $date'),
                           trailing: Text(
                             'ETB ${total.toStringAsFixed(2)}',
                             style: const TextStyle(
