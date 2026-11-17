@@ -278,7 +278,7 @@ class _AuthScreenState extends State<AuthScreen> {
           style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
-        Text(user.email ?? 'WiseSell user', textAlign: TextAlign.center),
+        Text(user.email ?? l.appTitle, textAlign: TextAlign.center),
         const SizedBox(height: 24),
         FilledButton.icon(
           onPressed: () => Navigator.of(context).push(
