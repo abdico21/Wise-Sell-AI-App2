@@ -10,30 +10,48 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('WiseSell switches language and restores it after restart', (tester) async {
-    await tester.pumpWidget(const WiseSellApp());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'WiseSell switches Oromo and Amharic without losing framework localizations',
+    (tester) async {
+      await tester.pumpWidget(const WiseSellApp());
+      await tester.pumpAndSettle();
 
-    expect(find.text('Business workspace'), findsOneWidget);
-    expect(find.text('AI Assistant'), findsOneWidget);
+      expect(find.text('Business workspace'), findsOneWidget);
+      expect(find.text('AI Assistant'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.language_rounded));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Amharic'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.language_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Afaan Oromo'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('የንግድ ስራ ቦታ'), findsOneWidget);
-    expect(find.text('AI ረዳት'), findsOneWidget);
+      expect(find.text('Iddoo hojii daldalaa'), findsOneWidget);
+      expect(find.text('Gargaaraa AI'), findsOneWidget);
 
-    final preferences = await SharedPreferences.getInstance();
-    expect(preferences.getString('wisesell_language_code'), 'am');
+      final navigationContext = tester.element(find.byType(NavigationBar));
+      expect(MaterialLocalizations.of(navigationContext), isNotNull);
+      expect(WidgetsLocalizations.of(navigationContext), isNotNull);
 
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(const WiseSellApp());
-    await tester.pumpAndSettle();
+      var preferences = await SharedPreferences.getInstance();
+      expect(preferences.getString('wisesell_language_code'), 'om');
 
-    expect(find.text('የንግድ ስራ ቦታ'), findsOneWidget);
-    expect(find.text('AI ረዳት'), findsOneWidget);
-  });
+      await tester.tap(find.byIcon(Icons.language_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Amaariffa'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('የንግድ ስራ ቦታ'), findsOneWidget);
+      expect(find.text('AI ረዳት'), findsOneWidget);
+
+      preferences = await SharedPreferences.getInstance();
+      expect(preferences.getString('wisesell_language_code'), 'am');
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const WiseSellApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('የንግድ ስራ ቦታ'), findsOneWidget);
+      expect(find.text('AI ረዳት'), findsOneWidget);
+    },
+  );
 }
