@@ -222,5 +222,22 @@
   "unitsPurchased": "ዝተዓደጉ ኣሃዱታት",
   "purchaseHistory": "ታሪኽ ዕድጊ",
   "dateUnavailable": "ዕለት ኣይርከብን",
-  "unitCount": "COUNT_VALUE ኣሃዱ"
+  "unitCount": "COUNT_VALUE ኣሃዱ",
+  "tagline": "ብጥበብ ሽጡ · ብዓቢ ዕበዩ",
+  "marketplaceDescription": "ምርካብ ፍርያት፣ መደብር ዓዳግን ሸያጥን፣ ከምኡውን ትእዛዝ ዕዳጋ።",
+  "sellerStorefronts": "መደብራት ሸየጥቲ",
+  "productListingsSearch": "ዝርዝር ፍርያትን ድለያን",
+  "buyerEnquiriesOrders": "ሕቶታትን ትእዛዛትን ዓደግቲ",
+  "notificationsTitle": "ምልክታታት",
+  "notificationsNotConfigured": "ኣብዚ መሰረታዊ ህንጸት ምልክታታት ኣይተዳለዉን።",
+  "orderUpdates": "ሓድሽ ሓበሬታ ትእዛዝ",
+  "lowStockAlertItems": "መጠንቀቕታ ትሑት ክምችት",
+  "businessReminders": "መዘኻኸሪ ንግዲ",
+  "salesMarketingTitle": "መሸጣን ማርኬቲንግን",
+  "campaignCreationNotActive": "ምፍጣር ወፍሪን ኣብ ማሕበራዊ መርበባት ምሕታምን ኣብዚ ህንጸት ኣይሰርሕን።",
+  "productDescriptionsAdCopy": "መግለጺ ፍርያትን ጽሑፍ ማስታወቂያን",
+  "campaignPlanning": "ትልሚ ወፍሪ",
+  "socialChannelIntegrations": "ምትእስሳር ቻነላት ማሕበራዊ ሚዲያ",
+  "plannedCapabilities": "ዝተሓሰቡ ክእለታት",
+  "featurePlaceholderDisclaimer": "እዚ ገጽ መርኣያ መርሓ ገጽ እዩ፤ ዝተዛዘመ ወይ ዝተኣሳሰረ ኣገልግሎት ኣይኮነን።"
 }
