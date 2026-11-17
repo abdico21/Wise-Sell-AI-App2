@@ -439,8 +439,8 @@ class BusinessDashboardScreen extends StatelessWidget {
                           color: AppTheme.navy)),
                   const SizedBox(height: 8),
                   if (topProducts.isEmpty)
-                    const Card(child: Padding(
-                      padding: EdgeInsets.all(16),
+                    Card(child: Padding(
+                      padding: const EdgeInsets.all(16),
                       child: Text(l.topProductsWillAppear),
                     ))
                   else
@@ -470,8 +470,8 @@ class BusinessDashboardScreen extends StatelessWidget {
                   ]),
                   const SizedBox(height: 8),
                   if (lowStock.isEmpty)
-                    const Card(child: ListTile(
-                      leading: Icon(Icons.check_circle_outline, color: Colors.green),
+                    Card(child: ListTile(
+                      leading: const Icon(Icons.check_circle_outline, color: Colors.green),
                       title: Text(l.noLowStockProducts),
                       subtitle: Text(l.allTrackedProductsAboveFive),
                     ))
