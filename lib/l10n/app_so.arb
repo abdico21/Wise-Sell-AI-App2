@@ -196,5 +196,20 @@
   "productNoLongerExists": "Alaabtani hadda ma jirto.",
   "productAccessDenied": "Gelitaanka alaabta waa la diiday.",
   "insufficientStock": "Kayd ku filan ma jiro.",
-  "couldNotRecordSale": "Lama diiwaangelin karin iibka. Hubi xiriirka iyo xeerarka Firestore."
+  "couldNotRecordSale": "Lama diiwaangelin karin iibka. Hubi xiriirka iyo xeerarka Firestore.",
+  "editCustomer": "Wax ka beddel macmiilka",
+  "businessDashboardTitle": "Dashboard-ka ganacsiga",
+  "signInToViewBusinessPerformance": "Gal si aad u aragto waxqabadka ganacsiga.",
+  "businessPerformanceTitle": "Waxqabadka ganacsiga",
+  "couldNotLoadSalesAnalytics": "Lama soo rari karo falanqaynta iibka. Hubi xeerarka Firestore.",
+  "couldNotLoadInventoryAnalytics": "Lama soo rari karo falanqaynta kaydka.",
+  "yourBusinessAtAGlance": "Guudmarka ganacsigaaga",
+  "totalRecordedSalesRevenue": "Wadarta dakhliga iibka la diiwaangeliyey",
+  "revenueLast7Days": "Dakhli • 7dii maalmood ee u dambeeyey",
+  "topSellingProducts": "Alaabta ugu iibka badan",
+  "topProductsWillAppear": "Alaabtaada ugu iibka badan halkan ayay ka muuqan doonaan markaad diiwaangeliso iib.",
+  "lowStockAlerts": "Digniinaha kaydka yar",
+  "noLowStockProducts": "Ma jiraan alaab kaydkoodu yar yahay",
+  "allTrackedProductsAboveFive": "Dhammaan alaabta la raadraaco waxay leeyihiin in ka badan 5 xabbo.",
+  "analyticsDisclaimer": "Falanqayntu waxay ku salaysan tahay iibka iyo kaydka WiseSell ee aad diiwaangelisay. Ma aha saadaal suuq oo dibadeed."
 }
