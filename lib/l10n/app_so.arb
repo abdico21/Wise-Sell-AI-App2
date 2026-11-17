@@ -222,5 +222,22 @@
   "unitsPurchased": "Tirada la iibsaday",
   "purchaseHistory": "Taariikhda iibsiga",
   "dateUnavailable": "Taariikh lama hayo",
-  "unitCount": "COUNT_VALUE xabbo"
+  "unitCount": "COUNT_VALUE xabbo",
+  "tagline": "Si xeel dheer u iibi · Si weyn u koboc",
+  "marketplaceDescription": "Helitaanka alaabta, dukaamada iibiyaha iyo iibsadaha, iyo dalabaadka suuqa.",
+  "sellerStorefronts": "Dukaamada iibiyeyaasha",
+  "productListingsSearch": "Liisaska alaabta iyo raadinta",
+  "buyerEnquiriesOrders": "Su'aalaha iyo dalabaadka iibsadayaasha",
+  "notificationsTitle": "Ogeysiisyada",
+  "notificationsNotConfigured": "Ogeysiisyada laguma darin dhismahan aasaasiga ah.",
+  "orderUpdates": "Cusboonaysiinta dalabka",
+  "lowStockAlertItems": "Digniinaha kaydka yar",
+  "businessReminders": "Xusuusinta ganacsiga",
+  "salesMarketingTitle": "Iibka iyo Suuqgeynta",
+  "campaignCreationNotActive": "Abuurista ololaha iyo daabacaadda baraha bulshada kama shaqeeyaan dhismahan.",
+  "productDescriptionsAdCopy": "Sharaxaadaha alaabta iyo qoraalka xayeysiiska",
+  "campaignPlanning": "Qorshaynta ololaha",
+  "socialChannelIntegrations": "Isku xirka kanaallada bulshada",
+  "plannedCapabilities": "Awoodaha la qorsheeyey",
+  "featurePlaceholderDisclaimer": "Shaashaddani waa meel hagitaan ah, ma aha adeeg dhammeystiran ama ku xiran."
 }
