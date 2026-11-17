@@ -11,7 +11,7 @@ void main() {
   });
 
   testWidgets(
-    'WiseSell switches Oromo and Amharic without losing framework localizations',
+    'WiseSell switches Oromo, Amharic and Tigrinya without losing framework localizations',
     (tester) async {
       await tester.pumpWidget(const WiseSellApp());
       await tester.pumpAndSettle();
@@ -26,10 +26,7 @@ void main() {
 
       expect(find.text('Iddoo hojii daldalaa'), findsOneWidget);
       expect(find.text('Gargaaraa AI'), findsOneWidget);
-
-      final navigationContext = tester.element(find.byType(NavigationBar));
-      expect(MaterialLocalizations.of(navigationContext), isNotNull);
-      expect(WidgetsLocalizations.of(navigationContext), isNotNull);
+      _expectFrameworkLocalizations(tester);
 
       var preferences = await SharedPreferences.getInstance();
       expect(preferences.getString('wisesell_language_code'), 'om');
@@ -41,17 +38,36 @@ void main() {
 
       expect(find.text('የንግድ ስራ ቦታ'), findsOneWidget);
       expect(find.text('AI ረዳት'), findsOneWidget);
+      _expectFrameworkLocalizations(tester);
 
       preferences = await SharedPreferences.getInstance();
       expect(preferences.getString('wisesell_language_code'), 'am');
+
+      await tester.tap(find.byIcon(Icons.language_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ትግርኛ'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ቦታ ስራሕ ንግዲ'), findsOneWidget);
+      expect(find.text('AI ሓጋዚ'), findsOneWidget);
+      _expectFrameworkLocalizations(tester);
+
+      preferences = await SharedPreferences.getInstance();
+      expect(preferences.getString('wisesell_language_code'), 'ti');
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
       await tester.pumpWidget(const WiseSellApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('የንግድ ስራ ቦታ'), findsOneWidget);
-      expect(find.text('AI ረዳት'), findsOneWidget);
+      expect(find.text('ቦታ ስራሕ ንግዲ'), findsOneWidget);
+      expect(find.text('AI ሓጋዚ'), findsOneWidget);
     },
   );
+}
+
+void _expectFrameworkLocalizations(WidgetTester tester) {
+  final navigationContext = tester.element(find.byType(NavigationBar));
+  expect(MaterialLocalizations.of(navigationContext), isNotNull);
+  expect(WidgetsLocalizations.of(navigationContext), isNotNull);
 }
