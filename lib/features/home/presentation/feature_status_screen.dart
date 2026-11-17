@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class FeatureStatusScreen extends StatelessWidget {
   const FeatureStatusScreen({
@@ -16,6 +17,7 @@ class FeatureStatusScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
@@ -38,7 +40,7 @@ class FeatureStatusScreen extends StatelessWidget {
             Text(description, textAlign: TextAlign.center,
               style: TextStyle(color: Colors.blueGrey.shade700, height: 1.5)),
             const SizedBox(height: 28),
-            const Text('Planned capabilities', style: TextStyle(
+            Text(l.plannedCapabilities, style: const TextStyle(
               color: AppTheme.navy, fontSize: 18, fontWeight: FontWeight.w800,
             )),
             const SizedBox(height: 10),
@@ -49,8 +51,8 @@ class FeatureStatusScreen extends StatelessWidget {
               ),
             )),
             const SizedBox(height: 18),
-            const Text(
-              'This screen is a navigation placeholder, not a completed or connected service.',
+            Text(
+              l.featurePlaceholderDisclaimer,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: Colors.blueGrey),
             ),
