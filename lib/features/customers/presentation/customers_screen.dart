@@ -333,8 +333,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   ),
                   const SizedBox(height: 8),
                   if (sales.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 32),
                       child: Center(
                         child: Text(l.noPurchasesYet),
                       ),
