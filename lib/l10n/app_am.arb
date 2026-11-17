@@ -183,5 +183,18 @@
   "category": "ምድብ",
   "sellingPrice": "የመሸጫ ዋጋ (ETB)",
   "quantityInStock": "በክምችት ያለ ብዛት",
-  "validNonNegativeNumber": "ትክክለኛ ዜሮ ወይም ከዜሮ በላይ ቁጥር ያስገቡ"
+  "validNonNegativeNumber": "ትክክለኛ ዜሮ ወይም ከዜሮ በላይ ቁጥር ያስገቡ",
+  "salesRecorded": "የተመዘገቡ ሽያጮች",
+  "unitsSold": "የተሸጡ ብዛቶች",
+  "recordedRevenue": "የተመዘገበ ገቢ",
+  "recentSales": "የቅርብ ሽያጮች",
+  "justRecorded": "አሁን ተመዝግቧል",
+  "customerLabel": "ደንበኛ: {name}",
+  "startRecordingSales": "ሽያጮችን መመዝገብ ይጀምሩ",
+  "recordSalesInstruction": "ከክምችት ውስጥ ምርት ይምረጡ፣ የተሸጠውን ብዛት ያስገቡ፣ WiseSell ክምችትዎን ያዘምናል።",
+  "selectedCustomerUnavailable": "የተመረጠው ደንበኛ አይገኝም።",
+  "productNoLongerExists": "ምርቱ ከእንግዲህ የለም።",
+  "productAccessDenied": "የምርቱ መዳረሻ ተከልክሏል።",
+  "insufficientStock": "በቂ ክምችት የለም።",
+  "couldNotRecordSale": "ሽያጩን መመዝገብ አልተቻለም። ግንኙነትዎንና Firestore ደንቦችን ያረጋግጡ።"
 }
