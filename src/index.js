@@ -171,6 +171,67 @@ export default {
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
 
+    if (url.pathname === "/api/agents/orchestrate" && request.method === "POST") {
+      const projectId = env.FIREBASE_PROJECT_ID;
+      if (!projectId) return json({ error: "Firebase project ID is not configured." }, 503, origin);
+      let user;
+      try { user = await firebaseUser(request, projectId); }
+      catch (e) { return json({ error: "Authentication failed", detail: e.message }, 401, origin); }
+
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Request body must be valid JSON." }, 400, origin); }
+      const message = typeof body.message === "string" ? body.message.trim() : "";
+      if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
+
+      const specialistIds = ["sales-agent", "digital-marketing", "seo-content", "social-media", "video-audio"];
+      const requested = Array.isArray(body.agents) ? body.agents : specialistIds;
+      if (!requested.length || requested.length > specialistIds.length ||
+          requested.some(id => !specialistIds.includes(id)) ||
+          new Set(requested).size !== requested.length) {
+        return json({ error: "agents must contain unique specialist agent IDs only." }, 400, origin);
+      }
+
+      const businessContext = body.businessContext == null ? "" :
+        (typeof body.businessContext === "string" ? body.businessContext : JSON.stringify(body.businessContext)).slice(0, 3000);
+      const sharedBrief = [
+        "WISE SELL AI TEAM TASK",
+        "User's business request: " + message,
+        businessContext ? "Shared business context: " + businessContext : "",
+        "Work only within your specialist role. Give actionable findings that the other agents and coordinator can use. State assumptions; do not invent business metrics or claim external actions."
+      ].filter(Boolean).join("\n\n");
+
+      try {
+        const contributions = await Promise.all(requested.map(async id => {
+          const specialist = AGENTS.find(agent => agent.id === id);
+          const generated = await generateAgentAnswer(specialist, user, sharedBrief, env);
+          return { agent: id, answer: generated.answer, provider: generated.provider, mode: generated.mode };
+        }));
+
+        const coordinator = AGENTS.find(agent => agent.id === "business-assistant");
+        const synthesisInput = [
+          "Coordinate the following specialist work into one coherent business action plan.",
+          "Original user request: " + message,
+          businessContext ? "Business context: " + businessContext : "",
+          "Specialist contributions:",
+          ...contributions.map(item => "\n[" + item.agent + "]\n" + item.answer),
+          "Resolve conflicts, remove repetition, prioritize actions, identify dependencies, and give the user one clear next-step checklist. Do not claim that recommendations have been executed."
+        ].filter(Boolean).join("\n\n");
+        const final = await generateAgentAnswer(coordinator, user, synthesisInput, env);
+        return json({
+          ok: true,
+          coordinator: "business-assistant",
+          requestedAgents: requested,
+          contributions,
+          answer: final.answer,
+          provider: final.provider,
+          mode: final.mode,
+          notice: "Agents generated recommendations only; no external posting, messaging, purchases, or account changes were performed."
+        }, 200, origin);
+      } catch (e) {
+        return json({ error: "Agent orchestration failed.", detail: e.message }, 502, origin);
+      }
+    }
+
     if ((url.pathname.startsWith("/api/agents/") || ["/api/ai/business-growth", "/api/ai/marketing-advisor", "/api/ai/lead-qualify"].includes(url.pathname)) && request.method === "POST") {
       const projectId = env.FIREBASE_PROJECT_ID;
       if (!projectId) return json({ error: "Firebase project ID is not configured." }, 503, origin);
