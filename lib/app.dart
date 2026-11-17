@@ -86,11 +86,14 @@ class _WiseSellAppState extends State<WiseSellApp> {
       localizationsDelegates: const [
         AppLocalizations.delegate,
         // Flutter's built-in Material, Widgets and Cupertino delegates do not
-        // include Afaan Oromo ('om'). Keep app text in Oromo while providing
-        // English framework labels/direction for standard Flutter controls.
+        // include Afaan Oromo ('om') or Tigrinya ('ti'). Keep app text in the
+        // selected language while using English framework labels for controls.
         _OromoMaterialLocalizationsDelegate(),
         _OromoWidgetsLocalizationsDelegate(),
         _OromoCupertinoLocalizationsDelegate(),
+        _TigrinyaMaterialLocalizationsDelegate(),
+        _TigrinyaWidgetsLocalizationsDelegate(),
+        _TigrinyaCupertinoLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -145,4 +148,49 @@ class _OromoCupertinoLocalizationsDelegate
 
   @override
   bool shouldReload(_OromoCupertinoLocalizationsDelegate old) => false;
+}
+
+class _TigrinyaMaterialLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _TigrinyaMaterialLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ti';
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) =>
+      GlobalMaterialLocalizations.delegate.load(const Locale('en'));
+
+  @override
+  bool shouldReload(_TigrinyaMaterialLocalizationsDelegate old) => false;
+}
+
+class _TigrinyaWidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _TigrinyaWidgetsLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ti';
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) =>
+      GlobalWidgetsLocalizations.delegate.load(const Locale('en'));
+
+  @override
+  bool shouldReload(_TigrinyaWidgetsLocalizationsDelegate old) => false;
+}
+
+class _TigrinyaCupertinoLocalizationsDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _TigrinyaCupertinoLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ti';
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+      GlobalCupertinoLocalizations.delegate.load(const Locale('en'));
+
+  @override
+  bool shouldReload(_TigrinyaCupertinoLocalizationsDelegate old) => false;
 }
