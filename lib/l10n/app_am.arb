@@ -175,5 +175,13 @@
   "customersCount": "ደንበኞች",
   "withEmail": "ኢሜይል ያላቸው",
   "yourCustomers": "ደንበኞችዎ",
-  "searchResults": "የፍለጋ ውጤቶች"
+  "searchResults": "የፍለጋ ውጤቶች",
+  "productsCount": "ምርቶች",
+  "unitsInStock": "በክምችት ያሉ ብዛቶች",
+  "productName": "የምርት ስም",
+  "skuProductCode": "SKU / የምርት ኮድ",
+  "category": "ምድብ",
+  "sellingPrice": "የመሸጫ ዋጋ (ETB)",
+  "quantityInStock": "በክምችት ያለ ብዛት",
+  "validNonNegativeNumber": "ትክክለኛ ዜሮ ወይም ከዜሮ በላይ ቁጥር ያስገቡ"
 }
