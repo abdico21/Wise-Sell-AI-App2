@@ -164,5 +164,16 @@
   "unitSellingPrice": "Unit selling price: ETB {price}",
   "saleRecordedStockUpdated": "Sale recorded and stock updated.",
   "recording": "Recording...",
-  "confirmSale": "Confirm sale"
+  "confirmSale": "Confirm sale",
+  "customerName": "Customer name",
+  "companyOrganization": "Company / organization",
+  "notes": "Notes",
+  "requiredField": "Required field",
+  "customerAdded": "Customer added.",
+  "customerUpdated": "Customer updated.",
+  "couldNotSaveCustomer": "Could not save customer. Check your connection and Firestore rules.",
+  "customersCount": "Customers",
+  "withEmail": "With email",
+  "yourCustomers": "Your customers",
+  "searchResults": "Search results"
 }
