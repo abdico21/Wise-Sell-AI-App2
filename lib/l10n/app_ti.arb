@@ -196,5 +196,20 @@
   "productNoLongerExists": "እቲ ፍርያት ድሕሪ ሕጂ የለን።",
   "productAccessDenied": "ፍቓድ ምእታው ፍርያት ተኸልኪሉ።",
   "insufficientStock": "እኹል ክምችት የለን።",
-  "couldNotRecordSale": "መሸጣ ምምዝጋብ ኣይተኻእለን። ምትእስሳርን ሕግታት Firestoreን ኣረጋግጹ።"
+  "couldNotRecordSale": "መሸጣ ምምዝጋብ ኣይተኻእለን። ምትእስሳርን ሕግታት Firestoreን ኣረጋግጹ።",
+  "editCustomer": "ዓሚል ኣስተኻኽል",
+  "businessDashboardTitle": "ዳሽቦርድ ንግዲ",
+  "signInToViewBusinessPerformance": "ኣፈጻጽማ ንግዲ ንምርኣይ እተዉ።",
+  "businessPerformanceTitle": "ኣፈጻጽማ ንግዲ",
+  "couldNotLoadSalesAnalytics": "ትንተና መሸጣ ምጽዓን ኣይተኻእለን። ሕግታት Firestore ኣረጋግጹ።",
+  "couldNotLoadInventoryAnalytics": "ትንተና ክምችት ምጽዓን ኣይተኻእለን።",
+  "yourBusinessAtAGlance": "ሓፈሻዊ ርእይቶ ንግድኹም",
+  "totalRecordedSalesRevenue": "ጠቕላላ ዝተመዝገበ ኣታዊ መሸጣ",
+  "revenueLast7Days": "ኣታዊ • ዝሓለፉ 7 መዓልታት",
+  "topSellingProducts": "ብዙሕ ዝሽየጡ ፍርያት",
+  "topProductsWillAppear": "መሸጣ ምስ መዝገብኩም እቶም ብዙሕ ዝሽየጡ ፍርያት ክረኣዩ እዮም።",
+  "lowStockAlerts": "መጠንቀቕታ ትሑት ክምችት",
+  "noLowStockProducts": "ትሑት ክምችት ዘለዎም ፍርያት የለዉን",
+  "allTrackedProductsAboveFive": "ኩሎም ዝከታተሉ ፍርያት ልዕሊ 5 ኣሃዱታት ኣለዎም።",
+  "analyticsDisclaimer": "ትንተናታት ኣብ ዝተመዝገበ መሸጣን ክምችትን WiseSell ዝተመርኮሱ እዮም። ናይ ደገ ገበያ ትንበያ ኣይኮኑን።"
 }
