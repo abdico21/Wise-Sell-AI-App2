@@ -164,5 +164,16 @@
   "unitSellingPrice": "ዋጋ መሸጣ ሓደ: ETB {price}",
   "saleRecordedStockUpdated": "መሸጣ ተመዝጊቡ፣ ክምችት ድማ ተሓዲሱ።",
   "recording": "ይምዝገብ ኣሎ...",
-  "confirmSale": "መሸጣ ኣረጋግጹ"
+  "confirmSale": "መሸጣ ኣረጋግጹ",
+  "customerName": "ስም ዓሚል",
+  "companyOrganization": "ኩባንያ / ትካል",
+  "notes": "መዘኻኸሪ",
+  "requiredField": "ኣድላዪ መስክ",
+  "customerAdded": "ዓሚል ተወሲኹ።",
+  "customerUpdated": "ዓሚል ተሓዲሱ።",
+  "couldNotSaveCustomer": "ዓሚል ምቕማጥ ኣይተኻእለን። ምትእስሳርን ሕግታት Firestoreን ኣረጋግጹ።",
+  "customersCount": "ዓማዊል",
+  "withEmail": "ኢመይል ዘለዎም",
+  "yourCustomers": "ዓማዊልኩም",
+  "searchResults": "ውጽኢት ድለያ"
 }
