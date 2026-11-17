@@ -27,8 +27,11 @@ class _WiseSellAppState extends State<WiseSellApp> {
     try {
       final preferences = await SharedPreferences.getInstance();
       final savedCode = preferences.getString('wisesell_language_code');
-      final savedLocale = _supportedLocales.where((locale) => locale.languageCode == savedCode).firstOrNull;
-      if (savedLocale != null && mounted) {
+      if (savedCode != null && mounted) {
+        final savedLocale = _supportedLocales.firstWhere(
+          (locale) => locale.languageCode == savedCode,
+          orElse: () => const Locale('en'),
+        );
         setState(() => _locale = savedLocale);
       }
     } catch (_) {
