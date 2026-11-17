@@ -196,5 +196,20 @@
   "productNoLongerExists": "ምርቱ ከእንግዲህ የለም።",
   "productAccessDenied": "የምርቱ መዳረሻ ተከልክሏል።",
   "insufficientStock": "በቂ ክምችት የለም።",
-  "couldNotRecordSale": "ሽያጩን መመዝገብ አልተቻለም። ግንኙነትዎንና Firestore ደንቦችን ያረጋግጡ።"
+  "couldNotRecordSale": "ሽያጩን መመዝገብ አልተቻለም። ግንኙነትዎንና Firestore ደንቦችን ያረጋግጡ።",
+  "editCustomer": "ደንበኛ አርትዕ",
+  "businessDashboardTitle": "የንግድ ዳሽቦርድ",
+  "signInToViewBusinessPerformance": "የንግድ አፈጻጸምን ለማየት ይግቡ።",
+  "businessPerformanceTitle": "የንግድ አፈጻጸም",
+  "couldNotLoadSalesAnalytics": "የሽያጭ ትንታኔን መጫን አልተቻለም። Firestore ደንቦችን ያረጋግጡ።",
+  "couldNotLoadInventoryAnalytics": "የክምችት ትንታኔን መጫን አልተቻለም።",
+  "yourBusinessAtAGlance": "የንግድዎ አጠቃላይ እይታ",
+  "totalRecordedSalesRevenue": "ጠቅላላ የተመዘገበ የሽያጭ ገቢ",
+  "revenueLast7Days": "ገቢ • ያለፉት 7 ቀናት",
+  "topSellingProducts": "በብዛት የሚሸጡ ምርቶች",
+  "topProductsWillAppear": "ሽያጭ ከመመዝገብዎ በኋላ ከፍተኛ ሽያጭ ያላቸው ምርቶች ይታያሉ።",
+  "lowStockAlerts": "ዝቅተኛ ክምችት ማስጠንቀቂያዎች",
+  "noLowStockProducts": "ዝቅተኛ ክምችት ያላቸው ምርቶች የሉም",
+  "allTrackedProductsAboveFive": "ሁሉም የተከታተሉ ምርቶች ከ5 በላይ አሃዶች አሏቸው።",
+  "analyticsDisclaimer": "ትንታኔዎች በWiseSell የተመዘገቡ ሽያጮችና ክምችት ላይ የተመሰረቱ ናቸው። የውጭ ገበያ ትንበያዎች አይደሉም።"
 }
