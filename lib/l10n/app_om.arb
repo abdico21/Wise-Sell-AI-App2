@@ -222,5 +222,22 @@
   "unitsPurchased": "Yuunitii bitame",
   "purchaseHistory": "Seenaa bittaa",
   "dateUnavailable": "Guyyaan hin jiru",
-  "unitCount": "Yuunitii COUNT_VALUE"
+  "unitCount": "Yuunitii COUNT_VALUE",
+  "tagline": "Ogeessaadhaan gurguraa · Bal'inaan guddadhaa",
+  "marketplaceDescription": "Oomisha barbaaduu, bakka gurgurtootaa fi bitattootaa, akkasumas ajaja gabaa.",
+  "sellerStorefronts": "Iddoo gurgurtootaa",
+  "productListingsSearch": "Tarree oomishaa fi barbaacha",
+  "buyerEnquiriesOrders": "Gaaffii fi ajaja bitattootaa",
+  "notificationsTitle": "Beeksisa",
+  "notificationsNotConfigured": "Beeksisni ijaarsa bu'uuraa kana keessatti hin qophoofne.",
+  "orderUpdates": "Haaromsa ajajaa",
+  "lowStockAlertItems": "Akeekkachiisa kuusaa xiqqaa",
+  "businessReminders": "Yaadachiisa daldalaa",
+  "salesMarketingTitle": "Gurgurtaa fi Beeksisa",
+  "campaignCreationNotActive": "Uumuu duulaa fi miidiyaa hawaasaa irratti maxxansuun ijaarsa kana keessatti hin hojjetu.",
+  "productDescriptionsAdCopy": "Ibsa oomishaa fi barruu beeksisaa",
+  "campaignPlanning": "Karoora duulaa",
+  "socialChannelIntegrations": "Walitti hidhamiinsa chaanaalii miidiyaa hawaasaa",
+  "plannedCapabilities": "Dandeettiiwwan karoorfaman",
+  "featurePlaceholderDisclaimer": "Fuulli kun bakka qajeelchaaf qofa; tajaajila xumurame yookaan walqabate miti."
 }
