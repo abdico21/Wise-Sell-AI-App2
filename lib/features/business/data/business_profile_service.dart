@@ -64,14 +64,17 @@ class BusinessProfileService {
 
   Future<void> saveMyProfile(BusinessProfile profile) async {
     final user = _auth.currentUser;
-    if (user == null) throw StateError('Sign in before saving a business profile.');
-    final reference = _profileRef(user.uid);
-    final existing = await reference.get();
-    await reference.set({
+    if (user == null) {
+      throw StateError('Sign in before saving a business profile.');
+    }
+
+    // A merge write creates the document when it does not exist and updates it
+    // when it does. Avoid a pre-save read: new users may not yet have a profile
+    // document, and that read can be denied by Firestore security rules.
+    await _profileRef(user.uid).set({
       ...profile.toMap(),
       'uid': user.uid,
       'email': user.email,
-      if (!existing.exists) 'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
 }
