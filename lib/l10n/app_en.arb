@@ -183,5 +183,18 @@
   "category": "Category",
   "sellingPrice": "Selling price (ETB)",
   "quantityInStock": "Quantity in stock",
-  "validNonNegativeNumber": "Enter a valid non-negative number"
+  "validNonNegativeNumber": "Enter a valid non-negative number",
+  "salesRecorded": "Sales recorded",
+  "unitsSold": "Units sold",
+  "recordedRevenue": "Recorded revenue",
+  "recentSales": "Recent sales",
+  "justRecorded": "Just recorded",
+  "customerLabel": "Customer: {name}",
+  "startRecordingSales": "Start recording sales",
+  "recordSalesInstruction": "Choose an inventory product, enter the quantity sold, and WiseSell will update your stock.",
+  "selectedCustomerUnavailable": "Selected customer is unavailable.",
+  "productNoLongerExists": "Product no longer exists.",
+  "productAccessDenied": "Product access denied.",
+  "insufficientStock": "Insufficient stock.",
+  "couldNotRecordSale": "Could not record sale. Check your connection and Firestore rules."
 }
