@@ -250,7 +250,7 @@ class _BusinessWorkspaceScreenState extends State<BusinessWorkspaceScreen> {
           border: const OutlineInputBorder(),
         ),
         validator: (value) =>
-            (value == null || value.trim().isEmpty) ? 'Required field' : null,
+            (value == null || value.trim().isEmpty) ? AppLocalizations.of(context)!.requiredField : null,
       ),
     );
   }
@@ -262,11 +262,12 @@ class BusinessDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Business dashboard')),
-        body: const Center(child: Text('Sign in to view business performance.')),
+        appBar: AppBar(title: Text(l.businessDashboardTitle)),
+        body: Center(child: Text(l.signInToViewBusinessPerformance)),
       );
     }
 
@@ -278,12 +279,12 @@ class BusinessDashboardScreen extends StatelessWidget {
         .where('uid', isEqualTo: user.uid);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Business performance')),
+      appBar: AppBar(title: Text(l.businessPerformanceTitle)),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: salesQuery.snapshots(),
         builder: (context, salesSnapshot) {
           if (salesSnapshot.hasError) {
-            return const Center(child: Text('Could not load sales analytics. Check Firestore rules.'));
+            return Center(child: Text(l.couldNotLoadSalesAnalytics));
           }
           if (!salesSnapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -329,7 +330,7 @@ class BusinessDashboardScreen extends StatelessWidget {
             stream: productsQuery.snapshots(),
             builder: (context, productsSnapshot) {
               if (productsSnapshot.hasError) {
-                return const Center(child: Text('Could not load inventory analytics.'));
+                return Center(child: Text(l.couldNotLoadInventoryAnalytics));
               }
               if (!productsSnapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -358,40 +359,40 @@ class BusinessDashboardScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Your business at a glance',
+                        Text(l.yourBusinessAtAGlance,
                             style: TextStyle(color: Colors.white70, fontSize: 13)),
                         const SizedBox(height: 8),
                         Text('ETB ${revenue.toStringAsFixed(2)}',
                             style: const TextStyle(color: Colors.white,
                                 fontSize: 27, fontWeight: FontWeight.w800)),
-                        const Text('Total recorded sales revenue',
+                        Text(l.totalRecordedSalesRevenue,
                             style: TextStyle(color: Colors.white70)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 14),
                   Row(children: [
-                    Expanded(child: _dashboardMetric('Sales', '${sales.length}',
+                    Expanded(child: _dashboardMetric(l.sales, '${sales.length}',
                         Icons.receipt_long_outlined)),
                     const SizedBox(width: 10),
-                    Expanded(child: _dashboardMetric('Units sold', '$units',
+                    Expanded(child: _dashboardMetric(l.unitsSold, '$units',
                         Icons.shopping_bag_outlined)),
                   ]),
                   const SizedBox(height: 10),
                   Row(children: [
-                    Expanded(child: _dashboardMetric('Average sale',
+                    Expanded(child: _dashboardMetric(l.averageSale,
                         'ETB ${averageSale.toStringAsFixed(0)}',
                         Icons.price_check_outlined)),
                     const SizedBox(width: 10),
-                    Expanded(child: _dashboardMetric('Products', '${products.length}',
+                    Expanded(child: _dashboardMetric(l.productsCount, '${products.length}',
                         Icons.inventory_2_outlined)),
                   ]),
                   const SizedBox(height: 10),
-                  _dashboardMetric('Stock on hand',
-                      '$stockUnits units • ETB ${stockValue.toStringAsFixed(2)}',
+                  _dashboardMetric(l.stockOnHand,
+                      '$stockUnits ${l.units} • ETB ${stockValue.toStringAsFixed(2)}',
                       Icons.warehouse_outlined),
                   const SizedBox(height: 20),
-                  const Text('Revenue • last 7 days',
+                  Text(l.revenueLast7Days,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
                           color: AppTheme.navy)),
                   const SizedBox(height: 12),
@@ -433,14 +434,14 @@ class BusinessDashboardScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Text('Top-selling products',
+                  Text(l.topSellingProducts,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
                           color: AppTheme.navy)),
                   const SizedBox(height: 8),
                   if (topProducts.isEmpty)
                     const Card(child: Padding(
                       padding: EdgeInsets.all(16),
-                      child: Text('Your top products will appear after you record sales.'),
+                      child: Text(l.topProductsWillAppear),
                     ))
                   else
                     ...topProducts.take(5).map((entry) => Card(
@@ -448,13 +449,13 @@ class BusinessDashboardScreen extends StatelessWidget {
                         leading: const Icon(Icons.trending_up, color: AppTheme.blue),
                         title: Text(entry.key,
                             style: const TextStyle(fontWeight: FontWeight.w700)),
-                        trailing: Text('${entry.value} units',
+                        trailing: Text('${entry.value} ${l.units}',
                             style: const TextStyle(fontWeight: FontWeight.w800)),
                       ),
                     )),
                   const SizedBox(height: 18),
                   Row(children: [
-                    const Expanded(child: Text('Low-stock alerts',
+                    Expanded(child: Text(l.lowStockAlerts,
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
                             color: AppTheme.navy))),
                     if (lowStock.isNotEmpty)
@@ -462,7 +463,7 @@ class BusinessDashboardScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(color: Colors.orange.shade100,
                             borderRadius: BorderRadius.circular(20)),
-                        child: Text('${lowStock.length} items',
+                        child: Text('${lowStock.length} ${l.items}',
                             style: TextStyle(color: Colors.orange.shade900,
                                 fontWeight: FontWeight.w700, fontSize: 12)),
                       ),
@@ -471,8 +472,8 @@ class BusinessDashboardScreen extends StatelessWidget {
                   if (lowStock.isEmpty)
                     const Card(child: ListTile(
                       leading: Icon(Icons.check_circle_outline, color: Colors.green),
-                      title: Text('No low-stock products'),
-                      subtitle: Text('All tracked products have more than 5 units.'),
+                      title: Text(l.noLowStockProducts),
+                      subtitle: Text(l.allTrackedProductsAboveFive),
                     ))
                   else
                     ...lowStock.map((doc) {
@@ -482,15 +483,15 @@ class BusinessDashboardScreen extends StatelessWidget {
                         child: ListTile(
                           leading: const Icon(Icons.warning_amber_rounded,
                               color: Colors.deepOrange),
-                          title: Text(data['name'] as String? ?? 'Product'),
-                          trailing: Text('$quantity left',
+                          title: Text(data['name'] as String? ?? l.product),
+                          trailing: Text(l.quantityLeft.replaceAll('{count}', '$quantity'),
                               style: const TextStyle(color: Colors.deepOrange,
                                   fontWeight: FontWeight.w800)),
                         ),
                       );
                     }),
                   const SizedBox(height: 16),
-                  Text('Analytics are calculated from your recorded WiseSell sales and inventory. They are not external market forecasts.',
+                  Text(l.analyticsDisclaimer,
                       style: TextStyle(color: Colors.blueGrey.shade600,
                           fontSize: 12)),
                 ],
