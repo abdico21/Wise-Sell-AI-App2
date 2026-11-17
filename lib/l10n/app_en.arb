@@ -222,5 +222,22 @@
   "unitsPurchased": "Units purchased",
   "purchaseHistory": "Purchase history",
   "dateUnavailable": "Date unavailable",
-  "unitCount": "COUNT_VALUE unit(s)"
+  "unitCount": "COUNT_VALUE unit(s)",
+  "tagline": "Sell Smarter · Grow Bigger",
+  "marketplaceDescription": "Product discovery, buyer and seller storefronts, and marketplace orders.",
+  "sellerStorefronts": "Seller storefronts",
+  "productListingsSearch": "Product listings and search",
+  "buyerEnquiriesOrders": "Buyer enquiries and orders",
+  "notificationsTitle": "Notifications",
+  "notificationsNotConfigured": "Notifications are not configured in this foundation build.",
+  "orderUpdates": "Order updates",
+  "lowStockAlertItems": "Low-stock alerts",
+  "businessReminders": "Business reminders",
+  "salesMarketingTitle": "Sales and Marketing",
+  "campaignCreationNotActive": "Campaign creation and social-network publishing are not active in this build.",
+  "productDescriptionsAdCopy": "Product descriptions and ad copy",
+  "campaignPlanning": "Campaign planning",
+  "socialChannelIntegrations": "Social channel integrations",
+  "plannedCapabilities": "Planned capabilities",
+  "featurePlaceholderDisclaimer": "This screen is a navigation placeholder, not a completed or connected service."
 }
