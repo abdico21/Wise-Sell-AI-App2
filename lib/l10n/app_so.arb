@@ -273,5 +273,8 @@
   "marketplaceRequested": "La codsaday",
   "marketplaceAddStockFirst": "Marka hore ku dar alaab kaydka ku jirta.",
   "marketplaceListingPublished": "Alaabta waxaa lagu daabacay suuqa.",
-  "marketplaceRequestDisclaimer": "Tani waxay diraysaa codsi dalab oo keliya. Lacag ma qaaddo mana kaydiso alaabta; iibiyuhu waa inuu si gaar ah u xaqiijiyaa helitaanka iyo bixinta."
+  "marketplaceRequestDisclaimer": "Tani waxay diraysaa codsi dalab oo keliya. Lacag ma qaaddo mana kaydiso alaabta; iibiyuhu waa inuu si gaar ah u xaqiijiyaa helitaanka iyo bixinta.",
+  "marketplaceLoadFailed": "Suuqa lama soo rari karin. Hubi xiriirkaaga iyo xeerarka Firestore.",
+  "marketplaceBuyer": "Iibsade",
+  "marketplacePublish": "Daabac"
 }
