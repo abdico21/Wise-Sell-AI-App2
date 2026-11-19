@@ -8,9 +8,14 @@ import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 
 class AgentHubScreen extends StatefulWidget {
-  const AgentHubScreen({required this.onLocaleChanged, super.key});
+  const AgentHubScreen({
+    required this.onLocaleChanged,
+    this.initialAgent = 'business',
+    super.key,
+  });
 
   final ValueChanged<Locale> onLocaleChanged;
+  final String initialAgent;
 
   @override
   State<AgentHubScreen> createState() => _AgentHubScreenState();
@@ -35,7 +40,9 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
   final _promptController = TextEditingController();
   final _scrollController = ScrollController();
   final List<_ChatMessage> _messages = [];
-  String _selectedAgent = 'business';
+  late String _selectedAgent = _agents.any((agent) => agent.id == widget.initialAgent)
+      ? widget.initialAgent
+      : 'business';
   bool _busy = false;
 
   _AgentInfo get _agent => _agents.firstWhere((agent) => agent.id == _selectedAgent);
