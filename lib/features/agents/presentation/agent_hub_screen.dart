@@ -19,7 +19,7 @@ class AgentHubScreen extends StatefulWidget {
 class _AgentHubScreenState extends State<AgentHubScreen> {
   static const _apiBaseUrl = String.fromEnvironment(
     'WISESELL_API_BASE_URL',
-    defaultValue: 'https://wisesell-ai-api.iamabdu3.workers.dev',
+    defaultValue: 'https://wise-sell-ai-app2.abdico-veiws22.workers.dev',
   );
 
   static const _agents = <_AgentInfo>[
@@ -73,15 +73,13 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
         throw _AgentRequestException(l.agentSessionExpired);
       }
       final response = await http.post(
-        Uri.parse('$_apiBaseUrl/v1/agent'),
+        Uri.parse('$_apiBaseUrl/api/agents/${_apiAgentId(_selectedAgent)}'),
         headers: {
           'content-type': 'application/json',
           'authorization': 'Bearer $idToken',
         },
         body: jsonEncode({
-          'agent': _selectedAgent,
-          'prompt': prompt,
-          'language': requestLanguage,
+          'message': 'Please respond in $requestLanguage.\n\n$prompt',
         }),
       ).timeout(const Duration(seconds: 50));
 
@@ -122,6 +120,15 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
       }
     }
   }
+
+  String _apiAgentId(String id) => switch (id) {
+    'business' || 'inventory' => 'business-assistant',
+    'marketing' => 'digital-marketing',
+    'content' || 'seo' => 'seo-content',
+    'social' => 'social-media',
+    'video' => 'video-audio',
+    _ => 'business-assistant',
+  };
 
   String _languageForCode(String code) => switch (code) {
     'am' => 'Amharic',
