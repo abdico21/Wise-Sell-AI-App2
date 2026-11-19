@@ -273,5 +273,8 @@
   "marketplaceRequested": "Gaafatame",
   "marketplaceAddStockFirst": "Dura oomisha kuusaa keessa jiru galchi.",
   "marketplaceListingPublished": "Oomishni gabaa irratti maxxanfame.",
-  "marketplaceRequestDisclaimer": "Kun gaaffii ajajaa qofa erga. Kaffaltii hin fudhatu, kuusaas hin qabatu; gurguraan argama oomishaa fi kaffaltii addaan mirkaneessuu qaba."
+  "marketplaceRequestDisclaimer": "Kun gaaffii ajajaa qofa erga. Kaffaltii hin fudhatu, kuusaas hin qabatu; gurguraan argama oomishaa fi kaffaltii addaan mirkaneessuu qaba.",
+  "marketplaceLoadFailed": "Gabaan hin fe’amne. Walqunnamtii fi seerota Firestore mirkaneessi.",
+  "marketplaceBuyer": "Bitaa",
+  "marketplacePublish": "Maxxansi"
 }
