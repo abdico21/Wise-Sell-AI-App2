@@ -500,7 +500,6 @@ Future<void> _publishProduct(BuildContext context, String uid) async {
     builder: (dialogContext) => StatefulBuilder(
       builder: (context, setDialogState) {
         final selected = available.firstWhere((doc) => doc.id == selectedId);
-        final data = selected.data();
         return AlertDialog(
           title: Text(l.marketplacePublishProduct),
           content: DropdownButtonFormField<String>(
