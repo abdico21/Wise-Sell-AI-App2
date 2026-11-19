@@ -168,10 +168,9 @@ class _HomeScreenState extends State<HomeScreen> {
               _FeatureTile(icon: Icons.shopping_bag_outlined, title: l.marketplace,
                 detail: l.productsOrders, onTap: () => setState(() => _selectedIndex = 1)),
               _FeatureTile(icon: Icons.campaign_outlined, title: l.marketing,
-                detail: l.socialCampaigns, onTap: () => _open(FeatureStatusScreen(
-                  title: l.salesMarketingTitle,
-                  description: l.campaignCreationNotActive,
-                  plannedItems: [l.productDescriptionsAdCopy, l.campaignPlanning, l.socialChannelIntegrations],
+                detail: l.socialCampaigns, onTap: () => _open(AgentHubScreen(
+                  onLocaleChanged: widget.onLocaleChanged,
+                  initialAgent: 'marketing',
                 ))),
               _FeatureTile(icon: Icons.inventory_2_outlined, title: l.inventory,
                 detail: l.stockManagement, onTap: () => _open(const InventoryScreen())),
