@@ -272,5 +272,6 @@
   "marketplaceCompleted": "ተጠናቋል",
   "marketplaceRequested": "ተጠይቋል",
   "marketplaceAddStockFirst": "መጀመሪያ በክምችት ያለ ምርት ያክሉ።",
-  "marketplaceListingPublished": "ምርቱ በገበያ ላይ ቀርቧል።"
+  "marketplaceListingPublished": "ምርቱ በገበያ ላይ ቀርቧል።",
+  "marketplaceRequestDisclaimer": "ይህ የትዕዛዝ ጥያቄ ብቻ ይልካል። ክፍያ አይወስድም ወይም እቃ አያስይዝም፤ ሻጩ ተገኝነትንና ክፍያን በተለይ ማረጋገጥ አለበት።"
 }
