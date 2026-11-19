@@ -90,7 +90,14 @@ class _BrowseTab extends StatelessWidget {
 
         return ListView(
           padding: const EdgeInsets.all(16),
-          children: listings.map((doc) {
+          children: [
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.info_outline, color: AppTheme.blue),
+                title: Text(l.marketplaceRequestDisclaimer),
+              ),
+            ),
+            ...listings.map((doc) {
             final data = doc.data();
             final sellerUid = data['sellerUid'] as String? ?? '';
             final name = data['productName'] as String? ?? l.product;
@@ -154,6 +161,7 @@ class _BrowseTab extends StatelessWidget {
               ),
             );
           }).toList(),
+          ],
         );
       },
     );
