@@ -272,5 +272,6 @@
   "marketplaceCompleted": "ተዛዚሙ",
   "marketplaceRequested": "ተሓቲቱ",
   "marketplaceAddStockFirst": "ቅድሚኡ ኣብ ክምችት ዘሎ ፍርያት ወስኹ።",
-  "marketplaceListingPublished": "ፍርያት ኣብ ዕዳጋ ቀሪቡ።"
+  "marketplaceListingPublished": "ፍርያት ኣብ ዕዳጋ ቀሪቡ።",
+  "marketplaceRequestDisclaimer": "እዚ ሕቶ ትእዛዝ ጥራይ ይልእኽ። ክፍሊት ኣይወስድን ወይ ክምችት ኣይሕዝን፤ ሻጢ ተረኽቦ ፍርያትን ክፍሊትን ብፍሉይ ከረጋግጽ ኣለዎ።"
 }
