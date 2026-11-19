@@ -273,5 +273,8 @@
   "marketplaceRequested": "ተጠይቋል",
   "marketplaceAddStockFirst": "መጀመሪያ በክምችት ያለ ምርት ያክሉ።",
   "marketplaceListingPublished": "ምርቱ በገበያ ላይ ቀርቧል።",
-  "marketplaceRequestDisclaimer": "ይህ የትዕዛዝ ጥያቄ ብቻ ይልካል። ክፍያ አይወስድም ወይም እቃ አያስይዝም፤ ሻጩ ተገኝነትንና ክፍያን በተለይ ማረጋገጥ አለበት።"
+  "marketplaceRequestDisclaimer": "ይህ የትዕዛዝ ጥያቄ ብቻ ይልካል። ክፍያ አይወስድም ወይም እቃ አያስይዝም፤ ሻጩ ተገኝነትንና ክፍያን በተለይ ማረጋገጥ አለበት።",
+  "marketplaceLoadFailed": "ገበያውን መጫን አልተቻለም። ግንኙነትዎን እና የFirestore ደንቦችን ያረጋግጡ።",
+  "marketplaceBuyer": "ገዢ",
+  "marketplacePublish": "አቅርብ"
 }
