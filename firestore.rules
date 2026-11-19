@@ -71,19 +71,38 @@ service cloud.firestore {
 
     match /marketplace_orders/{orderId} {
       allow create: if request.auth != null
+                    && request.resource.data.keys().hasAll([
+                      'buyerUid', 'buyerName', 'sellerUid', 'listingId',
+                      'productName', 'quantity', 'unitPrice', 'total',
+                      'note', 'status', 'createdAt', 'updatedAt'
+                    ])
+                    && request.resource.data.keys().hasOnly([
+                      'buyerUid', 'buyerName', 'sellerUid', 'listingId',
+                      'productName', 'quantity', 'unitPrice', 'total',
+                      'note', 'status', 'createdAt', 'updatedAt'
+                    ])
                     && request.resource.data.buyerUid == request.auth.uid
+                    && request.resource.data.buyerName is string
+                    && request.resource.data.buyerName.size() <= 120
                     && request.resource.data.sellerUid is string
                     && request.resource.data.sellerUid != request.auth.uid
                     && request.resource.data.listingId is string
                     && exists(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId))
                     && get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.isActive == true
                     && get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.sellerUid == request.resource.data.sellerUid
+                    && request.resource.data.productName == get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.productName
                     && request.resource.data.quantity is int
                     && request.resource.data.quantity > 0
                     && request.resource.data.quantity <= get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.quantityAvailable
                     && request.resource.data.unitPrice == get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.price
+                    && request.resource.data.unitPrice is number
+                    && request.resource.data.unitPrice >= 0
                     && request.resource.data.total == request.resource.data.quantity * request.resource.data.unitPrice
-                    && request.resource.data.status == 'requested';
+                    && request.resource.data.note is string
+                    && request.resource.data.note.size() <= 500
+                    && request.resource.data.status == 'requested'
+                    && request.resource.data.createdAt == request.time
+                    && request.resource.data.updatedAt == request.time;
       allow read: if request.auth != null
                   && (resource.data.buyerUid == request.auth.uid
                       || resource.data.sellerUid == request.auth.uid);
@@ -91,7 +110,11 @@ service cloud.firestore {
                     && resource.data.sellerUid == request.auth.uid
                     && request.resource.data.diff(resource.data).affectedKeys()
                         .hasOnly(['status', 'updatedAt'])
-                    && request.resource.data.status in ['accepted', 'rejected', 'completed'];
+                    && request.resource.data.updatedAt == request.time
+                    && ((resource.data.status == 'requested'
+                         && request.resource.data.status in ['accepted', 'rejected'])
+                        || (resource.data.status == 'accepted'
+                            && request.resource.data.status == 'completed'));
       allow delete: if false;
     }
 
