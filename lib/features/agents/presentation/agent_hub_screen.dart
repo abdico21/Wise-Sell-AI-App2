@@ -8,9 +8,14 @@ import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 
 class AgentHubScreen extends StatefulWidget {
-  const AgentHubScreen({required this.onLocaleChanged, super.key});
+  const AgentHubScreen({
+    required this.onLocaleChanged,
+    this.initialAgent = 'business',
+    super.key,
+  });
 
   final ValueChanged<Locale> onLocaleChanged;
+  final String initialAgent;
 
   @override
   State<AgentHubScreen> createState() => _AgentHubScreenState();
@@ -19,7 +24,7 @@ class AgentHubScreen extends StatefulWidget {
 class _AgentHubScreenState extends State<AgentHubScreen> {
   static const _apiBaseUrl = String.fromEnvironment(
     'WISESELL_API_BASE_URL',
-    defaultValue: 'https://wise-sell-ai-app2.abdico-veiws22.workers.dev',
+    defaultValue: 'https://wisesell-ai-api.iamabdu3.workers.dev',
   );
 
   static const _agents = <_AgentInfo>[
@@ -35,7 +40,9 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
   final _promptController = TextEditingController();
   final _scrollController = ScrollController();
   final List<_ChatMessage> _messages = [];
-  String _selectedAgent = 'business';
+  late String _selectedAgent = _agents.any((agent) => agent.id == widget.initialAgent)
+      ? widget.initialAgent
+      : 'business';
   bool _busy = false;
 
   _AgentInfo get _agent => _agents.firstWhere((agent) => agent.id == _selectedAgent);
@@ -73,13 +80,15 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
         throw _AgentRequestException(l.agentSessionExpired);
       }
       final response = await http.post(
-        Uri.parse('$_apiBaseUrl/api/agents/${_apiAgentId(_selectedAgent)}'),
+        Uri.parse('$_apiBaseUrl/v1/agent'),
         headers: {
           'content-type': 'application/json',
           'authorization': 'Bearer $idToken',
         },
         body: jsonEncode({
-          'message': 'Please respond in $requestLanguage.\n\n$prompt',
+          'agent': _selectedAgent,
+          'prompt': prompt,
+          'language': requestLanguage,
         }),
       ).timeout(const Duration(seconds: 50));
 
@@ -120,15 +129,6 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
       }
     }
   }
-
-  String _apiAgentId(String id) => switch (id) {
-    'business' || 'inventory' => 'business-assistant',
-    'marketing' => 'digital-marketing',
-    'content' || 'seo' => 'seo-content',
-    'social' => 'social-media',
-    'video' => 'video-audio',
-    _ => 'business-assistant',
-  };
 
   String _languageForCode(String code) => switch (code) {
     'am' => 'Amharic',
