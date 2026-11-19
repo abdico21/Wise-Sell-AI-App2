@@ -272,5 +272,6 @@
   "marketplaceCompleted": "Completed",
   "marketplaceRequested": "Requested",
   "marketplaceAddStockFirst": "Add an in-stock product to your inventory first.",
-  "marketplaceListingPublished": "Product published to the marketplace."
+  "marketplaceListingPublished": "Product published to the marketplace.",
+  "marketplaceRequestDisclaimer": "This sends an order request only. It does not take payment or reserve stock; the seller must confirm availability and payment separately."
 }
