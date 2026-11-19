@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/flutter-mobile-foundation
+      - fix/free-workers-ai-mobile-integration
   pull_request:
     branches:
       - main
