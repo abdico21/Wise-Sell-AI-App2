@@ -10,6 +10,7 @@ import '../../sales/presentation/sales_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import 'feature_status_screen.dart';
 import '../../agents/presentation/agent_hub_screen.dart';
+import '../../marketplace/presentation/marketplace_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({required this.onLocaleChanged, super.key});
@@ -32,11 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final l = AppLocalizations.of(context)!;
     final pages = <Widget>[
       _buildHome(context, l),
-      FeatureStatusScreen(
-        title: l.marketplace,
-        description: l.marketplaceDescription,
-        plannedItems: [l.sellerStorefronts, l.productListingsSearch, l.buyerEnquiriesOrders],
-      ),
+      const MarketplaceScreen(),
       AgentHubScreen(onLocaleChanged: widget.onLocaleChanged),
     ];
 
