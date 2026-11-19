@@ -1,6 +1,6 @@
 import { importX509, jwtVerify } from "jose";
 
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+const MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const AGENTS = {
   business: "You are the WiseSell Business Assistant and coordinator. Synthesize relevant marketing, content, SEO, social, video/audio, sales and inventory advice into one prioritized business plan.",
   marketing: "You are WiseSell Digital Marketing Strategist. Create practical campaign plans, audience hypotheses, channel mix, suggested budget ranges, KPIs and experiments. Never claim a campaign was launched.",
