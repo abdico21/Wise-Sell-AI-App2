@@ -11,7 +11,14 @@ class MarketplaceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final user = FirebaseAuth.instance.currentUser;
+    // Widget tests and first-run previews may render before Firebase is initialized.
+    // In that case, show the signed-out state instead of throwing during build.
+    User? user;
+    try {
+      user = FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      user = null;
+    }
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l.marketplace)),
