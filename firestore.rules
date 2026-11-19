@@ -40,6 +40,58 @@ service cloud.firestore {
       allow update: if false;
     }
 
+
+    match /marketplace_listings/{listingId} {
+      allow read: if resource.data.isActive == true
+                  || (request.auth != null
+                      && resource.data.sellerUid == request.auth.uid);
+      allow create: if request.auth != null
+                    && request.resource.data.sellerUid == request.auth.uid
+                    && request.resource.data.productId is string
+                    && exists(/databases/$(database)/documents/products/$(request.resource.data.productId))
+                    && get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.uid == request.auth.uid
+                    && request.resource.data.productName is string
+                    && request.resource.data.price is number
+                    && request.resource.data.price >= 0
+                    && request.resource.data.quantityAvailable is int
+                    && request.resource.data.quantityAvailable > 0
+                    && request.resource.data.isActive == true;
+      allow update: if request.auth != null
+                    && resource.data.sellerUid == request.auth.uid
+                    && request.resource.data.sellerUid == request.auth.uid
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['isActive', 'updatedAt'])
+                    && request.resource.data.isActive is bool;
+      allow delete: if request.auth != null
+                    && resource.data.sellerUid == request.auth.uid;
+    }
+
+    match /marketplace_orders/{orderId} {
+      allow create: if request.auth != null
+                    && request.resource.data.buyerUid == request.auth.uid
+                    && request.resource.data.sellerUid is string
+                    && request.resource.data.sellerUid != request.auth.uid
+                    && request.resource.data.listingId is string
+                    && exists(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId))
+                    && get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.isActive == true
+                    && get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.sellerUid == request.resource.data.sellerUid
+                    && request.resource.data.quantity is int
+                    && request.resource.data.quantity > 0
+                    && request.resource.data.quantity <= get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.quantityAvailable
+                    && request.resource.data.unitPrice == get(/databases/$(database)/documents/marketplace_listings/$(request.resource.data.listingId)).data.price
+                    && request.resource.data.total == request.resource.data.quantity * request.resource.data.unitPrice
+                    && request.resource.data.status == 'requested';
+      allow read: if request.auth != null
+                  && (resource.data.buyerUid == request.auth.uid
+                      || resource.data.sellerUid == request.auth.uid);
+      allow update: if request.auth != null
+                    && resource.data.sellerUid == request.auth.uid
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['status', 'updatedAt'])
+                    && request.resource.data.status in ['accepted', 'rejected', 'completed'];
+      allow delete: if false;
+    }
+
     match /customers/{customerId} {
       allow create: if request.auth != null
                     && request.resource.data.uid == request.auth.uid
