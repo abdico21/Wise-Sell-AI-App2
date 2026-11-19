@@ -50,6 +50,9 @@ service cloud.firestore {
                     && request.resource.data.productId is string
                     && exists(/databases/$(database)/documents/products/$(request.resource.data.productId))
                     && get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.uid == request.auth.uid
+                    && request.resource.data.productName == get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.name
+                    && request.resource.data.price == get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.price
+                    && request.resource.data.quantityAvailable <= get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.quantity
                     && request.resource.data.productName is string
                     && request.resource.data.price is number
                     && request.resource.data.price >= 0
