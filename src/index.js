@@ -244,12 +244,22 @@ export default {
         "/api/ai/marketing-advisor": "digital-marketing",
         "/api/ai/lead-qualify": "sales-agent"
       };
-      const id = legacyRoutes[url.pathname] || url.pathname.slice("/api/agents/".length);
+      const routeId = url.pathname.slice("/api/agents/".length);
+      const routeAliases = {
+        business: "business-assistant",
+        marketing: "digital-marketing",
+        content: "seo-content",
+        seo: "seo-content",
+        social: "social-media",
+        video: "video-audio",
+        inventory: "business-assistant"
+      };
+      const id = legacyRoutes[url.pathname] || routeAliases[routeId] || routeId;
       const agent = AGENTS.find(a => a.id === id);
       if (!agent) return json({ error: "Unknown agent." }, 404, origin);
       let body;
       try { body = await request.json(); } catch { return json({ error: "Request body must be valid JSON." }, 400, origin); }
-      const message = typeof body.message === "string" ? body.message.trim() : JSON.stringify(body);
+      const message = typeof body.message === "string" ? body.message.trim() : typeof body.prompt === "string" ? body.prompt.trim() : JSON.stringify(body);
       if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
       try {
         const generated = await generateAgentAnswer(agent, user, message, env);
