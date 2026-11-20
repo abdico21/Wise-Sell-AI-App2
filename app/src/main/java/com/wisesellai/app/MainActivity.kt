@@ -48,10 +48,11 @@ private fun WiseSellScreen() {
  var email by remember { mutableStateOf("") }
  var password by remember { mutableStateOf("") }
  var token by remember { mutableStateOf("") }
+ var createAccount by remember { mutableStateOf(false) }
  var selected by remember { mutableStateOf(agents.first()) }
  var prompt by remember { mutableStateOf("") }
  var answer by remember { mutableStateOf("Select an agent and ask a business question.") }
- var status by remember { mutableStateOf("Sign in with your Firebase account to begin.") }
+ var status by remember { mutableStateOf("Create an account or sign in with your Firebase account.") }
  var busy by remember { mutableStateOf(false) }
  val scope = rememberCoroutineScope()
 
@@ -61,17 +62,33 @@ private fun WiseSellScreen() {
    Text("Your six-agent business growth team", color = Color.DarkGray)
    Spacer(Modifier.height(12.dp))
    if (token.isBlank()) {
-    Text("Firebase sign in", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-    OutlinedTextField(email, { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-    OutlinedTextField(password, { password = it }, label = { Text("Password") }, modifier = Modifier.fillMaxWidth())
+    Text(if (createAccount) "Create your WiseSell AI account" else "Sign in to WiseSell AI", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+    OutlinedTextField(email, { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+    OutlinedTextField(password, { password = it }, label = { Text("Password (at least 6 characters)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
     Button(onClick = {
      scope.launch {
-      busy = true; status = "Signing in…"
-      try { token = withContext(Dispatchers.IO) { firebaseSignIn(email.trim(), password) }; status = "Signed in successfully." }
-      catch (e: Exception) { status = e.message ?: "Sign-in failed." }
+      busy = true
+      status = if (createAccount) "Creating account…" else "Signing in…"
+      try {
+       token = withContext(Dispatchers.IO) {
+        if (createAccount) firebaseCreateAccount(email.trim(), password)
+        else firebaseSignIn(email.trim(), password)
+       }
+       status = if (createAccount) "Account created. You are signed in." else "Signed in successfully."
+      } catch (e: Exception) {
+       status = e.message ?: if (createAccount) "Account creation failed." else "Sign-in failed."
+      }
       busy = false
      }
-    }, enabled = !busy && email.isNotBlank() && password.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Sign in") }
+    }, enabled = !busy && email.isNotBlank() && password.length >= 6, modifier = Modifier.fillMaxWidth()) {
+     Text(if (busy) "Please wait…" else if (createAccount) "Create account" else "Sign in")
+    }
+    TextButton(onClick = {
+     createAccount = !createAccount
+     status = if (createAccount) "Enter your email and a password of at least 6 characters." else "Sign in with your existing account."
+    }, modifier = Modifier.fillMaxWidth(), enabled = !busy) {
+     Text(if (createAccount) "Already have an account? Sign in" else "New to WiseSell AI? Create account")
+    }
     if (BuildConfig.FIREBASE_API_KEY.isBlank()) Text("Build setup needed: configure GitHub secret WISESELL_FIREBASE_API_KEY.", color = Color(0xFFB54708), fontSize = 12.sp)
    } else {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -107,14 +124,35 @@ private fun WiseSellScreen() {
  }
 }
 
+private fun firebaseCreateAccount(email: String, password: String): String {
+ require(BuildConfig.FIREBASE_API_KEY.isNotBlank()) { "Firebase Web API key is not configured. Add WISESELL_FIREBASE_API_KEY to GitHub Actions secrets." }
+ require(password.length >= 6) { "Password must be at least 6 characters." }
+ return firebaseAuthRequest("signUp", email, password)
+}
+
 private fun firebaseSignIn(email: String, password: String): String {
  require(BuildConfig.FIREBASE_API_KEY.isNotBlank()) { "Firebase Web API key is not configured. Add WISESELL_FIREBASE_API_KEY to GitHub Actions secrets." }
+ return firebaseAuthRequest("signInWithPassword", email, password)
+}
+
+private fun firebaseAuthRequest(method: String, email: String, password: String): String {
  val payload = JSONObject().put("email", email).put("password", password).put("returnSecureToken", true).toString()
- val request = Request.Builder().url("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + BuildConfig.FIREBASE_API_KEY)
+ val request = Request.Builder().url("https://identitytoolkit.googleapis.com/v1/accounts:" + method + "?key=" + BuildConfig.FIREBASE_API_KEY)
   .post(payload.toRequestBody("application/json".toMediaType())).build()
  http.newCall(request).execute().use { response ->
   val json = JSONObject(response.body?.string().orEmpty())
-  if (!response.isSuccessful) throw IllegalStateException(json.optJSONObject("error")?.optString("message") ?: "Firebase sign-in failed.")
+  if (!response.isSuccessful) {
+   val code = json.optJSONObject("error")?.optString("message").orEmpty()
+   val friendly = when {
+    code.contains("EMAIL_EXISTS") -> "This email is already registered. Please sign in instead."
+    code.contains("WEAK_PASSWORD") -> "Choose a stronger password with at least 6 characters."
+    code.contains("INVALID_EMAIL") -> "Enter a valid email address."
+    code.contains("OPERATION_NOT_ALLOWED") -> "Email/password sign-up is disabled in Firebase Authentication. Enable the Email/Password provider in Firebase Console."
+    code.contains("API_KEY_INVALID") -> "The Firebase API key is invalid. Check the GitHub Actions secret."
+    else -> code.ifBlank { "Firebase authentication failed." }
+   }
+   throw IllegalStateException(friendly)
+  }
   return json.getString("idToken")
  }
 }
