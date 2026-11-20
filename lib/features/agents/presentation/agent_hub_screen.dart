@@ -80,7 +80,7 @@ class _AgentHubScreenState extends State<AgentHubScreen> {
         throw _AgentRequestException(l.agentSessionExpired);
       }
       final response = await http.post(
-        Uri.parse('$_apiBaseUrl/v1/agent'),
+        Uri.parse('$_apiBaseUrl/api/agents/$_selectedAgent'),
         headers: {
           'content-type': 'application/json',
           'authorization': 'Bearer $idToken',
