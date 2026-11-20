@@ -79,7 +79,9 @@ export default {
     if (request.method === "GET" && url.pathname === "/health") {
       return json({ status: "ok", service: "WiseSell AI", provider: "Cloudflare Workers AI" }, 200, origin);
     }
-    if (request.method !== "POST" || url.pathname !== "/v1/agent") {
+    const agentRoute = url.pathname.startsWith("/api/agents/") ? url.pathname.slice("/api/agents/".length) : null;
+    const isAgentRequest = url.pathname === "/v1/agent" || (agentRoute && Object.prototype.hasOwnProperty.call(AGENTS, agentRoute));
+    if (request.method !== "POST" || !isAgentRequest) {
       return json({ error: "Not found" }, 404, origin);
     }
 
@@ -104,8 +106,8 @@ export default {
       return json({ error: "Send a valid JSON request." }, 400, origin);
     }
 
-    const agent = String(body.agent || "business");
-    const prompt = String(body.prompt || "").trim();
+    const agent = String(agentRoute || body.agent || "business");
+    const prompt = String(body.message || body.prompt || "").trim();
     const language = String(body.language || "English").slice(0, 40);
     const context = String(body.businessContext || "").slice(0, 2000);
     if (!Object.prototype.hasOwnProperty.call(AGENTS, agent)) {
