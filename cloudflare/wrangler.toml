@@ -1,4 +1,4 @@
-name = "wise-sell-ai-app"
+name = "wise-sell-ai-app2"
 main = "src/index.js"
 compatibility_date = "2026-11-14"
 compatibility_flags = ["nodejs_compat"]
