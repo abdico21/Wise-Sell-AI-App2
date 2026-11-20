@@ -7,14 +7,16 @@ const mobile = read("../lib/features/agents/presentation/agent_hub_screen.dart")
 const worker = read("../cloudflare/src/index.js");
 const rules = read("../firestore.rules");
 
-assert.match(mobile, /Uri\.parse\('\$_apiBaseUrl\/v1\/agent'\)/,
-  "Flutter must call the Cloudflare POST /v1/agent endpoint.");
+assert.match(mobile, /Uri\.parse\('\$_apiBaseUrl\/api\/agents\/\$_selectedAgent'\)/,
+  "Flutter must call the agent-specific Cloudflare API route.");
 for (const field of ["agent", "prompt", "language"]) {
   assert.match(mobile, new RegExp("'" + field + "'\\s*:"), `Flutter request must send ${field}.`);
   assert.match(worker, new RegExp("body\\." + field + "\\b"), `Worker must read ${field}.`);
 }
-assert.match(worker, /url\.pathname !== "\/v1\/agent"/,
-  "Worker route must remain POST /v1/agent.");
+assert.match(worker, /url\.pathname === "\/v1\/agent"/,
+  "Worker must retain backward compatibility with POST /v1/agent.");
+assert.match(worker, /url\.pathname\.startsWith\("\/api\/agents\/"\)/,
+  "Worker must support agent-specific POST /api/agents/:agent routes.");
 for (const agent of ["business", "marketing", "content", "seo", "social", "video", "inventory"]) {
   assert.match(worker, new RegExp("\\b" + agent + "\\s*:"), `Worker is missing the ${agent} agent.`);
 }
