@@ -76,8 +76,32 @@ export default {
     });
 
     const url = new URL(request.url);
-    if (request.method === "GET" && url.pathname === "/health") {
-      return json({ status: "ok", service: "WiseSell AI", provider: "Cloudflare Workers AI" }, 200, origin);
+    if (request.method === "GET" && (url.pathname === "/health" || url.pathname === "/api/health")) {
+      return json({
+        ok: true,
+        app: "Wise Sell AI",
+        service: "Cloudflare Worker API",
+        integrations: {
+          firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID),
+          openaiConfigured: false,
+          zeroCostFallback: true,
+          provider: "Cloudflare Workers AI"
+        }
+      }, 200, origin);
+    }
+    if (request.method === "GET" && url.pathname === "/api/agents") {
+      const names = {
+        business: "AI Business Assistant",
+        marketing: "Digital Marketing Agent",
+        content: "SEO & Content Marketing Agent",
+        seo: "SEO Agent",
+        social: "Social Media Agent",
+        video: "Video & Audio Marketing Agent",
+        inventory: "Inventory Agent"
+      };
+      return json({
+        agents: Object.entries(names).map(([id, name]) => ({ id, name }))
+      }, 200, origin);
     }
     const agentRoute = url.pathname.startsWith("/api/agents/") ? url.pathname.slice("/api/agents/".length) : null;
     const isAgentRequest = url.pathname === "/v1/agent" || (agentRoute && Object.prototype.hasOwnProperty.call(AGENTS, agentRoute));
