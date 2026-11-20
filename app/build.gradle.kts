@@ -3,6 +3,9 @@ plugins {
  id("org.jetbrains.kotlin.android")
  id("org.jetbrains.kotlin.plugin.compose")
 }
+
+val firebaseApiKey = providers.gradleProperty("WISESELL_FIREBASE_API_KEY").orElse("").get()
+
 android {
  namespace = "com.wisesellai.app"
  compileSdk = 35
@@ -12,7 +15,7 @@ android {
   targetSdk = 35
   versionCode = 1
   versionName = "1.0.0"
-  buildConfigField("String", "FIREBASE_API_KEY", "\"\u0024{project.findProperty("WISESELL_FIREBASE_API_KEY") ?: ""}\"")
+  buildConfigField("String", "FIREBASE_API_KEY", "\"$firebaseApiKey\"")
   buildConfigField("String", "API_BASE_URL", "\"https://wise-sell-ai-app2.abdico-veiws22.workers.dev\"")
  }
  buildFeatures { compose = true; buildConfig = true }
