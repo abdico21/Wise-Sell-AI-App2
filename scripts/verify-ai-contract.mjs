@@ -18,7 +18,7 @@ assert.match(worker, /url\.pathname !== "\/v1\/agent"/,
 for (const agent of ["business", "marketing", "content", "seo", "social", "video", "inventory"]) {
   assert.match(worker, new RegExp("\\b" + agent + "\\s*:"), `Worker is missing the ${agent} agent.`);
 }
-assert.match(worker, /@cf\/meta\/llama-3\.1-8b-instruct/,
+assert.match(worker, /@cf\/google\/gemma-4-26b-a4b-it/,
   "Free-mode Cloudflare Workers AI model must be configured.");
 assert.doesNotMatch(worker, /OPENAI_API_KEY|api\.openai\.com/,
   "Free mode must not depend on an OpenAI API key.");
