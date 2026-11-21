@@ -6,6 +6,8 @@ on:
       - staging/wisesell-social-commerce
     paths:
       - 'src/index.js'
+      - 'src/payments/**'
+      - 'docs/PAYMENTS_PROVIDER_ARCHITECTURE.md'
       - '.github/workflows/staging-worker-check.yml'
   pull_request:
     branches:
@@ -21,3 +23,5 @@ jobs:
           node-version: '22'
       - name: Check Worker JavaScript syntax
         run: node --check src/index.js
+      - name: Check payment registry syntax
+        run: node --check src/payments/provider-registry.js
