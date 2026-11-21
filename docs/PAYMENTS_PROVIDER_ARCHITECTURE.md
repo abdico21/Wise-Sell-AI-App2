@@ -104,3 +104,18 @@ Store no wallet PIN, OTP, full credential, or unnecessary personal data. Store o
 5. Reconciliation test for a missed callback.
 6. Security review and successful staging CI.
 7. Explicit approval before any production work. This task does not authorize production changes or deployment.
+
+
+## Telebirr merchant status — approved, sandbox preparation pending
+
+The WiseSell AI owner has confirmed that the Telebirr merchant account is approved. This removes the business-approval gate, but it does not by itself prove that staging API credentials, sandbox access, callback verification material, or a test merchant profile are available.
+
+Next staging-only prerequisites:
+- Obtain the **sandbox/test-bed** Fabric App Key and App Secret from the official developer portal. Do not use production credentials in staging.
+- Confirm the assigned Merchant App ID, Merchant Code/Short Code, and the exact H5 C2B product permission.
+- Obtain the current official H5 C2B API reference/sample for token, unified order/preorder, request signing, notify callback verification, and query-order reconciliation.
+- Confirm the sandbox checkout base URL, callback allowlisting requirements, and a public HTTPS staging callback URL.
+- Store sandbox-only values as Cloudflare Worker secrets and keep signing/private keys out of GitHub, frontend bundles, logs, and chat. Never commit example or live secrets.
+- Run token, order creation, signature, callback, duplicate-notification, amount/currency/reference matching, and missed-callback reconciliation tests against the provider sandbox before enabling any route.
+
+**Current status:** merchant approval confirmed by the owner; code scaffold and fail-closed readiness tests are staged; no Telebirr API adapter, payment route, D1 payment tables, Worker secret, sandbox transaction, or production integration has been enabled or configured.
