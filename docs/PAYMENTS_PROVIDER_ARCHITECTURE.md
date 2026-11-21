@@ -119,3 +119,24 @@ Next staging-only prerequisites:
 - Run token, order creation, signature, callback, duplicate-notification, amount/currency/reference matching, and missed-callback reconciliation tests against the provider sandbox before enabling any route.
 
 **Current status:** merchant approval confirmed by the owner; code scaffold and fail-closed readiness tests are staged; no Telebirr API adapter, payment route, D1 payment tables, Worker secret, sandbox transaction, or production integration has been enabled or configured.
+
+
+### H5 C2B callback contract — official documentation review
+
+The H5 C2B Notify Callback page specifies a POST notification to the `notify_url` supplied at order creation and states that the callback URL must be whitelisted/configured on the SuperApp server. The documented payload includes:
+- Merchant/order identity: `appid`, `merch_code`, `merch_order_id`
+- Provider identity: `payment_order_id`, `trans_id`
+- Transaction details: `total_amount`, `trans_currency`, `trade_status`, `trans_end_time`
+- Verification metadata: `sign`, `sign_type` (documented as `SHA256WithRSA`)
+- Additional fields may include `notify_url`, `notify_time`, and `callback_info`.
+
+The H5 C2B guide lists callback trade states including `Paying`, `Expired`, `Pending`, `Completed`, and `Failure`. WiseSell must treat only a successfully signature-verified, correctly matched final `Completed` notification as a candidate success; other states remain non-success and may require reconciliation. Verify the exact case/field canonicalization rules against the merchant's current portal sample before implementing signature verification.
+
+**Important separation:** the portal also publishes a `queryOrder` page under its *In-App SDK Integration* documentation, with a query endpoint and a different response schema. That page is not the H5 C2B guide. Do not reuse that endpoint or schema for H5 C2B until Ethio Telecom confirms it applies to this merchant's H5 C2B product and account.
+
+Official references:
+- H5 C2B introduction: https://developer.ethiotelecom.et/docs/H5%20C2B%20Web%20Payment%20Integration%20Quick%20Guide/Introduction
+- H5 C2B notify callback: https://developer.ethiotelecom.et/docs/H5%20C2B%20Web%20Payment%20Integration%20Quick%20Guide/Notify_Callback
+- H5 C2B request-signature process: https://developer.ethiotelecom.et/docs/H5%20C2B%20Web%20Payment%20Integration%20Quick%20Guide/Request_signature_Process
+
+No callback parser or signature-verification code is enabled by this documentation-only update.
