@@ -217,7 +217,7 @@ async function generateAgentAnswer(agent, user, message, env) {
 async function handlePaymentRoutes(request, env, url, origin) {
   if (url.pathname === "/api/payments/providers" && request.method === "GET") {
     return json({ ok: true, currency: "ETB", providers: [
-      { id: "chapa", name: "Chapa", available: Boolean(env.CHAPA_PRIVATE_KEY && env.PAYMENT_DB), mode: env.CHAPA_PRIVATE_KEY && env.PAYMENT_DB ? "configured" : "needs_setup" },
+      { id: "chapa", name: "Chapa", available: Boolean(env.CHAPA_MODE === "test" && env.CHAPA_PRIVATE_KEY && env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_") && env.PAYMENT_DB), mode: env.CHAPA_MODE === "test" && env.CHAPA_PRIVATE_KEY && env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_") && env.PAYMENT_DB ? "test_checkout_configured" : "test_key_and_database_required" },
       { id: "telebirr", name: "Telebirr", available: false, mode: "merchant_api_setup_required" },
       { id: "cbe_birr", name: "CBE Birr", available: false, mode: "merchant_api_setup_required" }
     ], note: "Only configured providers can initialize checkout. Provider listing does not mean a payment has been made." }, 200, origin);
@@ -229,7 +229,7 @@ async function handlePaymentRoutes(request, env, url, origin) {
       user = await firebaseUser(request, env.FIREBASE_PROJECT_ID);
     } catch (e) { return json({ ok: false, error: "Authentication failed", detail: e.message }, 401, origin); }
     if (!env.PAYMENT_DB) return json({ ok: false, error: "Payment database is not configured. Bind a Cloudflare D1 database as PAYMENT_DB before checkout." }, 503, origin);
-    if (!env.CHAPA_PRIVATE_KEY) return json({ ok: false, error: "Chapa private key is not configured as a Cloudflare Worker secret." }, 503, origin);
+    if (env.CHAPA_MODE !== "test" || !env.CHAPA_PRIVATE_KEY || !env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_")) return json({ ok: false, error: "Staging checkout is locked to a Chapa test-mode private key. Configure CHAPA_MODE=test and a CHAPA_TEST_ private key." }, 503, origin);
     const body = await request.json().catch(() => null);
     if (!body || body.provider !== "chapa") return json({ ok: false, error: "Only the Chapa provider is currently implemented for checkout." }, 400, origin);
     const amount = Number(body.amountMinor);
@@ -275,7 +275,7 @@ async function handlePaymentRoutes(request, env, url, origin) {
       if (!env.FIREBASE_PROJECT_ID) throw new Error("Firebase project is not configured.");
       user = await firebaseUser(request, env.FIREBASE_PROJECT_ID);
     } catch (e) { return json({ ok: false, error: "Authentication failed", detail: e.message }, 401, origin); }
-    if (!env.PAYMENT_DB || !env.CHAPA_PRIVATE_KEY) return json({ ok: false, error: "Payment verification is not configured." }, 503, origin);
+    if (!env.PAYMENT_DB || env.CHAPA_MODE !== "test" || !env.CHAPA_PRIVATE_KEY || !env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_")) return json({ ok: false, error: "Test-mode payment verification is not configured." }, 503, origin);
     const reference = decodeURIComponent(match[1]);
     if (!/^[A-Z0-9]{10,30}$/.test(reference)) return json({ ok: false, error: "Invalid payment reference." }, 400, origin);
     const row = await env.PAYMENT_DB.prepare("SELECT * FROM payment_intents WHERE merchant_reference = ? AND uid = ?").bind(reference, user.uid).first();
