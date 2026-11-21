@@ -13,7 +13,7 @@ const json = (data, status = 200, origin = "*") => new Response(JSON.stringify(d
     "content-type": "application/json; charset=utf-8",
     "access-control-allow-origin": origin,
     "access-control-allow-methods": "GET,POST,OPTIONS",
-    "access-control-allow-headers": "Content-Type, Authorization",
+    "access-control-allow-headers": "Content-Type, Authorization, Idempotency-Key",
     "vary": "Origin"
   }
 });
