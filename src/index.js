@@ -288,14 +288,14 @@ async function handlePaymentRoutes(request, env, url, origin) {
     const paidAmount = Number(data.amount);
     const matches = response.ok && result?.status === "success" && providerStatus === "SUCCESS" &&
       Number.isSafeInteger(paidAmount) && paidAmount === Number(row.amount_minor) &&
-      String(data.currency || "").toUpperCase() === row.currency;
+      String(data.currency || "").toUpperCase() === row.currency && data.merchant_reference === reference;
     if (!matches) {
       const nextStatus = ["FAILED", "CANCELLED", "EXPIRED"].includes(providerStatus) ? "failed" : "pending";
       await env.PAYMENT_DB.prepare("UPDATE payment_intents SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE merchant_reference = ? AND uid = ?").bind(nextStatus, reference, user.uid).run();
       return json({ ok: true, payment: { reference, status: nextStatus }, note: "No matching successful provider verification. Do not fulfill the order." }, 200, origin);
     }
     await env.PAYMENT_DB.prepare("UPDATE payment_intents SET status = 'paid', provider_reference = ?, updated_at = CURRENT_TIMESTAMP WHERE merchant_reference = ? AND uid = ?")
-      .bind(String(data.reference || data.payment_reference || reference), reference, user.uid).run();
+      .bind(String(data.chapa_reference || data.processor_reference || reference), reference, user.uid).run();
     return json({ ok: true, payment: { reference, status: "paid", amountMinor: row.amount_minor, currency: row.currency }, verifiedBy: "Chapa server-to-server verification" }, 200, origin);
   }
   return null;
