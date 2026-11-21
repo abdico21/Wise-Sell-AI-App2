@@ -15,7 +15,8 @@ const PROVIDERS = Object.freeze({
     name: "CBE Birr",
     currency: "ETB",
     integration: "direct-merchant-api",
-    readinessEnv: ["CBE_BIRR_API_BASE_URL", "CBE_BIRR_MERCHANT_ID", "CBE_BIRR_API_KEY", "CBE_BIRR_WEBHOOK_SECRET"],
+    readinessEnv: [],
+    blocker: "official-merchant-api-spec-required",
   }),
 });
 
@@ -31,7 +32,7 @@ export function listPaymentProviders(env = {}) {
     name: provider.name,
     currency: provider.currency,
     enabled: false,
-    readiness: isConfigured(provider, env) ? "credentials-present-adapter-review-required" : "not-configured",
+    readiness: provider.blocker || (isConfigured(provider, env) ? "credentials-present-adapter-review-required" : "not-configured"),
   }));
 }
 
