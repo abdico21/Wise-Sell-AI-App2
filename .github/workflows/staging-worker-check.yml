@@ -25,3 +25,5 @@ jobs:
         run: node --check src/index.js
       - name: Check payment registry syntax
         run: node --check src/payments/provider-registry.js
+      - name: Test fail-closed payment provider registry
+        run: node --test tests/provider-registry.test.mjs
