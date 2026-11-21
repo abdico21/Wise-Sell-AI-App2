@@ -3,7 +3,8 @@
 ## Implemented in this staging branch
 
 - Authenticated Firebase-user payment initiation.
-- Chapa v2 hosted checkout adapter, locked to test mode (`CHAPA_MODE=test` and a `CHAPA_TEST_` private key).\n- This first pass uses one platform-level test merchant only; it is not yet a seller-by-seller merchant credential vault and is not linked to marketplace order fulfillment.
+- Chapa v2 hosted checkout adapter, locked to test mode (`CHAPA_MODE=test` and a `CHAPA_TEST_` private key).
+- This first pass uses one platform-level test merchant only; it is not yet a seller-by-seller merchant credential vault and is not linked to marketplace order fulfillment.
 - ETB-only amount validation in integer minor units (minimum 100).
 - D1-backed payment intent records, unique merchant references and per-user idempotency.
 - Server-to-server Chapa verification before a payment can become `paid`.
@@ -19,7 +20,8 @@ A payment is not considered complete because a browser redirects, a client says 
 1. Create a Cloudflare D1 database named `wisesell-ai-payments-staging`.
 2. Bind it to the staging Worker as `PAYMENT_DB` (D1 database binding).
 3. Apply `migrations/0001_payment_intents.sql` to that D1 database.
-4. Set Worker variable `CHAPA_MODE` to `test`.\n5. Add the Chapa **test-mode private key** as Worker secret `CHAPA_PRIVATE_KEY` (the key must start with `CHAPA_TEST_`). Never put it in GitHub source, Android config, or chat.
+4. Set Worker variable `CHAPA_MODE` to `test`.
+5. Add the Chapa **test-mode private key** as Worker secret `CHAPA_PRIVATE_KEY` (the key must start with `CHAPA_TEST_`). Never put it in GitHub source, Android config, or chat.
 6. Keep the existing `FIREBASE_PROJECT_ID` unchanged.
 7. Deploy only the staging branch/workflow after confirming the GitHub Actions workflow targets this branch and the staging Worker service. The current worker workflow is configured for main pushes; do not merge this branch to main to deploy it.
 
@@ -47,7 +49,11 @@ Authorization: Bearer <Firebase ID token>
 ```
 Fulfill an order only after this endpoint returns `payment.status: paid`. Keep the order's own status in the order service; this endpoint only verifies and records a payment intent.
 
-## Important merchant scope\n\nThe Chapa credential is currently a single platform test merchant. Do not use this flow to collect seller proceeds, marketplace buyer payments, or customer orders. A production multi-merchant rollout needs per-business merchant onboarding, encrypted per-tenant credential storage, seller authorization, order linkage, webhook verification, settlement reconciliation and payout handling.\n\n## Additional provider adapters
+## Important merchant scope
+
+The Chapa credential is currently a single platform test merchant. Do not use this flow to collect seller proceeds, marketplace buyer payments, or customer orders. A production multi-merchant rollout needs per-business merchant onboarding, encrypted per-tenant credential storage, seller authorization, order linkage, webhook verification, settlement reconciliation and payout handling.
+
+## Additional provider adapters
 
 - **Telebirr direct merchant API:** not enabled. Requires an approved merchant account, current merchant integration credentials, callback/signature requirements and sandbox/live endpoint details from the official Ethio telecom developer portal.
 - **CBE Birr direct merchant API:** not enabled. Requires the merchant integration agreement, API specification, credentials and test environment from CBE.
