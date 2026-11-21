@@ -13,7 +13,7 @@ const json = (data, status = 200, origin = "*") => new Response(JSON.stringify(d
     "content-type": "application/json; charset=utf-8",
     "access-control-allow-origin": origin,
     "access-control-allow-methods": "GET,POST,OPTIONS",
-    "access-control-allow-headers": "Content-Type, Authorization, Idempotency-Key",
+    "access-control-allow-headers": "Content-Type, Authorization",
     "vary": "Origin"
   }
 });
@@ -214,92 +214,6 @@ async function generateAgentAnswer(agent, user, message, env) {
   }
 }
 
-async function handlePaymentRoutes(request, env, url, origin) {
-  if (url.pathname === "/api/payments/providers" && request.method === "GET") {
-    return json({ ok: true, currency: "ETB", providers: [
-      { id: "chapa", name: "Chapa", available: Boolean(env.CHAPA_MODE === "test" && env.CHAPA_PRIVATE_KEY && env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_") && env.PAYMENT_DB), mode: env.CHAPA_MODE === "test" && env.CHAPA_PRIVATE_KEY && env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_") && env.PAYMENT_DB ? "test_checkout_configured" : "test_key_and_database_required" },
-      { id: "telebirr", name: "Telebirr", available: false, mode: "merchant_api_setup_required" },
-      { id: "cbe_birr", name: "CBE Birr", available: false, mode: "merchant_api_setup_required" }
-    ], note: "Only configured providers can initialize checkout. Provider listing does not mean a payment has been made." }, 200, origin);
-  }
-  if (url.pathname === "/api/payments/intents" && request.method === "POST") {
-    let user;
-    try {
-      if (!env.FIREBASE_PROJECT_ID) throw new Error("Firebase project is not configured.");
-      user = await firebaseUser(request, env.FIREBASE_PROJECT_ID);
-    } catch (e) { return json({ ok: false, error: "Authentication failed", detail: e.message }, 401, origin); }
-    if (!env.PAYMENT_DB) return json({ ok: false, error: "Payment database is not configured. Bind a Cloudflare D1 database as PAYMENT_DB before checkout." }, 503, origin);
-    if (env.CHAPA_MODE !== "test" || !env.CHAPA_PRIVATE_KEY || !env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_")) return json({ ok: false, error: "Staging checkout is locked to a Chapa test-mode private key. Configure CHAPA_MODE=test and a CHAPA_TEST_ private key." }, 503, origin);
-    const body = await request.json().catch(() => null);
-    if (!body || body.provider !== "chapa") return json({ ok: false, error: "Only the Chapa provider is currently implemented for checkout." }, 400, origin);
-    const amount = Number(body.amountMinor);
-    const currency = String(body.currency || "ETB").toUpperCase();
-    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-    const idempotencyKey = request.headers.get("Idempotency-Key") || "";
-    if (!Number.isSafeInteger(amount) || amount < 100 || amount > 100000000000 || currency !== "ETB" ||
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-        !/^[A-Za-z0-9._:-]{8,100}$/.test(idempotencyKey)) {
-      return json({ ok: false, error: "Provide amountMinor (integer >= 100), ETB currency, a valid email and an 8–100 character Idempotency-Key." }, 400, origin);
-    }
-    const reference = "WS" + Date.now().toString(36).toUpperCase() + crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
-    await env.PAYMENT_DB.prepare("INSERT INTO payment_intents (uid, provider, merchant_reference, idempotency_key, amount_minor, currency, customer_email, status, created_at, updated_at) VALUES (?, 'chapa', ?, ?, ?, ?, ?, 'initializing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(uid, idempotency_key) DO NOTHING")
-      .bind(user.uid, reference, idempotencyKey, amount, currency, email).run();
-    const row = await env.PAYMENT_DB.prepare("SELECT * FROM payment_intents WHERE uid = ? AND idempotency_key = ?").bind(user.uid, idempotencyKey).first();
-    if (!row) return json({ ok: false, error: "Could not reserve payment request. Retry using the same idempotency key." }, 503, origin);
-    if (row.merchant_reference !== reference || row.status !== "initializing") {
-      return json({ ok: true, reused: true, payment: { reference: row.merchant_reference, status: row.status, checkoutUrl: row.checkout_url || null, amountMinor: row.amount_minor, currency: row.currency } }, 200, origin);
-    }
-    try {
-      const response = await fetch("https://api.chapa.global/v2/payments/hosted", {
-        method: "POST",
-        headers: { "Authorization": "Bearer " + env.CHAPA_PRIVATE_KEY, "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
-        body: JSON.stringify({ amount, currency, merchant_reference: reference, customer: { email }, meta: { app: "WiseSell AI", user_ref: user.uid.slice(0, 12) } })
-      });
-      const result = await response.json().catch(() => ({}));
-      const checkoutUrl = result?.data?.checkout_url;
-      if (!response.ok || result?.status !== "success" || typeof checkoutUrl !== "string" || !checkoutUrl.startsWith("https://")) {
-        await env.PAYMENT_DB.prepare("UPDATE payment_intents SET status = 'failed', updated_at = CURRENT_TIMESTAMP WHERE merchant_reference = ? AND uid = ?").bind(reference, user.uid).run();
-        return json({ ok: false, error: "Chapa could not initialize hosted checkout.", providerStatus: response.status, detail: result?.message || "No valid checkout URL returned." }, 502, origin);
-      }
-      await env.PAYMENT_DB.prepare("UPDATE payment_intents SET status = 'pending', checkout_url = ?, updated_at = CURRENT_TIMESTAMP WHERE merchant_reference = ? AND uid = ?").bind(checkoutUrl, reference, user.uid).run();
-      return json({ ok: true, payment: { reference, status: "pending", checkoutUrl, amountMinor: amount, currency } }, 201, origin);
-    } catch {
-      await env.PAYMENT_DB.prepare("UPDATE payment_intents SET status = 'failed', updated_at = CURRENT_TIMESTAMP WHERE merchant_reference = ? AND uid = ?").bind(reference, user.uid).run();
-      return json({ ok: false, error: "Unable to reach Chapa. No payment was confirmed." }, 502, origin);
-    }
-  }
-  const match = url.pathname.match(/^\/api\/payments\/([^/]+)\/verify$/);
-  if (match && request.method === "POST") {
-    let user;
-    try {
-      if (!env.FIREBASE_PROJECT_ID) throw new Error("Firebase project is not configured.");
-      user = await firebaseUser(request, env.FIREBASE_PROJECT_ID);
-    } catch (e) { return json({ ok: false, error: "Authentication failed", detail: e.message }, 401, origin); }
-    if (!env.PAYMENT_DB || env.CHAPA_MODE !== "test" || !env.CHAPA_PRIVATE_KEY || !env.CHAPA_PRIVATE_KEY.startsWith("CHAPA_TEST_")) return json({ ok: false, error: "Test-mode payment verification is not configured." }, 503, origin);
-    const reference = decodeURIComponent(match[1]);
-    if (!/^[A-Z0-9]{10,30}$/.test(reference)) return json({ ok: false, error: "Invalid payment reference." }, 400, origin);
-    const row = await env.PAYMENT_DB.prepare("SELECT * FROM payment_intents WHERE merchant_reference = ? AND uid = ?").bind(reference, user.uid).first();
-    if (!row) return json({ ok: false, error: "Payment reference not found for this account." }, 404, origin);
-    if (row.status === "paid") return json({ ok: true, payment: { reference, status: "paid", amountMinor: row.amount_minor, currency: row.currency } }, 200, origin);
-    const response = await fetch("https://api.chapa.global/v2/payments/" + encodeURIComponent(reference) + "/verify", { headers: { "Authorization": "Bearer " + env.CHAPA_PRIVATE_KEY } });
-    const result = await response.json().catch(() => ({}));
-    const data = result?.data || {};
-    const providerStatus = String(data.status || "").toUpperCase();
-    const paidAmount = Number(data.amount);
-    const matches = response.ok && result?.status === "success" && providerStatus === "SUCCESS" &&
-      Number.isSafeInteger(paidAmount) && paidAmount === Number(row.amount_minor) &&
-      String(data.currency || "").toUpperCase() === row.currency && data.merchant_reference === reference;
-    if (!matches) {
-      const nextStatus = ["FAILED", "CANCELLED", "EXPIRED"].includes(providerStatus) ? "failed" : "pending";
-      await env.PAYMENT_DB.prepare("UPDATE payment_intents SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE merchant_reference = ? AND uid = ?").bind(nextStatus, reference, user.uid).run();
-      return json({ ok: true, payment: { reference, status: nextStatus }, note: "No matching successful provider verification. Do not fulfill the order." }, 200, origin);
-    }
-    await env.PAYMENT_DB.prepare("UPDATE payment_intents SET status = 'paid', provider_reference = ?, updated_at = CURRENT_TIMESTAMP WHERE merchant_reference = ? AND uid = ?")
-      .bind(String(data.chapa_reference || data.processor_reference || reference), reference, user.uid).run();
-    return json({ ok: true, payment: { reference, status: "paid", amountMinor: row.amount_minor, currency: row.currency }, verifiedBy: "Chapa server-to-server verification" }, 200, origin);
-  }
-  return null;
-}
 
 export default {
   async fetch(request, env) {
@@ -316,7 +230,7 @@ export default {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
         integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openaiConfigured: env.AI_PROVIDER === "openai" && Boolean(env.OPENAI_API_KEY), zeroCostFallback: env.AI_PROVIDER !== "openai", provider: env.AI_PROVIDER === "openai" ? "OpenAI (paid API)" : "Built-in zero-cost fallback" } }, 200, origin);
     }
-    if (url.pathname.startsWith("/api/payments/")) {\n      const paymentResponse = await handlePaymentRoutes(request, env, url, origin);\n      if (paymentResponse) return paymentResponse;\n    }\n\n    if (url.pathname === "/api/agents" && request.method === "GET")
+\n    if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
 
     if (url.pathname === "/api/agents/orchestrate" && request.method === "POST") {
