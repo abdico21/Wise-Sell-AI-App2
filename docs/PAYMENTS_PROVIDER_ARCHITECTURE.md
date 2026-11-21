@@ -58,7 +58,11 @@ Implementation must follow the current official Telebirr signing, token, preorde
 
 ## CBE Birr — onboarding gate
 
-A public, authoritative CBE Birr merchant API specification was not available during this staging design review. Before coding its adapter, obtain directly from CBE:
+CBE's official Merchant App listing describes merchant-initiated payment collection requests to CBE Birr customers. That is a documented merchant collection workflow, but it does not establish a public server-to-server API or webhook contract for WiseSell AI. The official app listing provides CBE support contacts (+251 965 183 828 and birukzegeju@cbe.com.et); CBE's official channel also describes merchant registration through a nearby branch and issuance of a Till Number.
+
+Until CBE supplies a technical API contract, the code registry deliberately reports CBE Birr as `official-merchant-api-spec-required` and does not invent base URLs, API-key names, signatures, or callback schemas.
+
+Before coding its adapter, obtain directly from CBE:
 - Merchant integration guide and API version
 - Sandbox base URL and merchant credentials
 - Checkout/initiation and transaction-query request/response schemas
@@ -67,6 +71,19 @@ A public, authoritative CBE Birr merchant API specification was not available du
 - Settlement and merchant-account requirements
 
 Do not guess endpoint URLs, authentication headers, signature algorithms, or callback fields. Until CBE supplies these materials, CBE Birr remains `not_configured`.
+
+## Merchant onboarding checklist
+
+**Telebirr**
+- Register the business on the [Ethio Telecom Developer Portal](https://developer.ethiotelecom.et/user/product).
+- Complete merchant/payment-product approval and obtain the assigned merchant credentials through the portal.
+- Use the official H5 C2B guide and portal test-bed; confirm the exact callback verification and query-order requirements from the current API reference before coding.
+- Keep sandbox and production credentials separate. WiseSell staging must receive sandbox credentials only.
+
+**CBE Birr**
+- Install the official [CBE Birr Merchant App](https://play.google.com/store/apps/details?id=prod.cbebirr.merchantapp) and complete CBE's merchant registration process if you need to collect payments manually while the API route is pending.
+- Contact CBE through the support details published on the official app listing and request the merchant/API integration pack, sandbox access, webhook specification, and test merchant account.
+- The merchant app is a manual merchant collection channel; it is not treated as an API integration in this codebase.
 
 ## Persistence requirements before enabling any payment
 
