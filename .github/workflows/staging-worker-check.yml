@@ -1,0 +1,28 @@
+name: WiseSell staging payment worker checks
+
+on:
+  push:
+    branches:
+      - staging/wisesell-social-commerce
+    paths:
+      - 'src/index.js'
+      - 'migrations/**'
+      - '.github/workflows/staging-worker-check.yml'
+  pull_request:
+    branches:
+      - staging/wisesell-social-commerce
+
+jobs:
+  worker-syntax-and-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Worker JavaScript syntax
+        run: node --check src/index.js
+      - name: Validate D1 migration
+        run: |
+          sqlite3 /tmp/wisesell-payment-test.db < migrations/0001_payment_intents.sql
+          sqlite3 /tmp/wisesell-payment-test.db ".schema payment_intents"
