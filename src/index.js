@@ -129,7 +129,7 @@ function offlineAgentAnswer(agentId, message, language = "en") {
   if (language === "am" || language === "om") {
     const copy = LOCALIZED_FALLBACKS[language];
     const steps = copy.roles[agentId] || copy.roles["business-assistant"];
-    return [copy.heading, "", "Request: " + request, "", ...steps.map((step, index) => (index + 1) + ". " + step), "", copy.note].join("\n");
+    return [copy.heading, "", (language === "am" ? "ጥያቄ: " : "Gaaffii: ") + request, "", ...steps.map((step, index) => (index + 1) + ". " + step), "", copy.note].join("\n");
   }
   if (agentId === "business-assistant" && /digital\s*marketing\s*agency|marketing\s*agency|digital\s*agency/i.test(request)) {
     const agencyPlan = [
