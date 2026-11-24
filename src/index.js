@@ -7,6 +7,37 @@ const AGENTS = [
   { id: "video-audio", name: "Video & Audio Marketing Agent", instruction: "Create video concepts, storyboards, scripts, voiceovers and audio ad scripts. Never claim to render or publish media." }
 ];
 
+const normalizeLanguage = (requested, message = "") => {
+  const value = String(requested || "").trim().toLowerCase();
+  if (["am", "amh", "amharic", "አማርኛ"].includes(value)) return "am";
+  if (["om", "orm", "oromo", "afaan oromoo"].includes(value)) return "om";
+  if (["en", "eng", "english"].includes(value)) return "en";
+  if (/[\u1200-\u137f]/u.test(message)) return "am";
+  if (/\b(akkam|maal|maaliif|gatii|oomisha|bituu|gurgurtaa|daldala|maamilaa|galatoomi|keessan|barbaada|baajata|galii|baasii)\b/i.test(message)) return "om";
+  return "en";
+};
+
+const LANGUAGE_GUIDANCE = { am: "Reply in natural Amharic using Ethiopic script. Keep product names, URLs and technical identifiers unchanged.", om: "Reply in natural Afaan Oromoo using Qubee Latin script. Keep product names, URLs and technical identifiers unchanged.", en: "Reply in clear English." };
+
+const LOCALIZED_FALLBACKS = {
+  am: { heading: "የWise Sell AI የስራ እቅድ", note: "ይህ በነፃ የሚሰራ የመመሪያ አብነት ነው፤ የቀጥታ AI ምላሽ አይደለም። የንግድ መረጃ ካልተሰጠ ቁጥሮችን አንገምትም።", roles: {
+    "business-assistant": ["የንግድዎን ግብ ይለዩ፦ ትርፍ፣ የገንዘብ ፍሰት፣ ወጪ ወይም ክምችት።", "ዕለታዊ ሽያጭ፣ ወጪና ቀሪ ገንዘብ ይመዝግቡ።", "በተፅዕኖ የሚበልጡ ሶስት ተግባራትን ይምረጡ።"],
+    "sales-agent": ["የታለመውን ደንበኛና የሚፈታውን ችግር ይግለጹ።", "ዋጋ፣ ጥቅምና ማድረሻ የሚገልጽ ቅናሽ ያዘጋጁ።", "የደንበኛ ጥያቄዎችን መዝግበው በአክብሮት ይከታተሉ።"],
+    "digital-marketing": ["የዘመቻውን ግብ ይምረጡ፦ ግንዛቤ፣ ጥያቄ ወይም ሽያጭ።", "ታዳሚ፣ መልዕክትና ቻናል ይወስኑ።", "ሁለት የይዘት አማራጮችን በመለኪያ ያነፃፅሩ።"],
+    "seo-content": ["የገጹን ወይም የምርቱን የፍለጋ ዓላማ ይወስኑ።", "ግልጽ ርዕስና የሜታ መግለጫ ያዘጋጁ።", "የውስጥ ሊንኮችንና የምስል alt ጽሑፎችን ያሻሽሉ።"],
+    "social-media": ["ለምርቱ ተስማሚ መድረክና ታዳሚ ይምረጡ።", "የደንበኛ ጥቅምን የሚያሳይ ጽሑፍ ያዘጋጁ።", "ምስል፣ መግለጫና የተግባር ጥሪ ከመለጠፍ በፊት ያረጋግጡ።"],
+    "video-audio": ["በመጀመሪያዎቹ ሰከንዶች የደንበኛውን ችግር ወይም ጥቅም ያሳዩ።", "የቪዲዮ ትዕይንት ዝርዝርና የድምፅ ጽሑፍ ይዘጋጁ።", "አጭር የተግባር ጥሪ ያካትቱ።"]
+  } },
+  om: { heading: "Karoora hojii Wise Sell AI", note: "Kun unka gargaarsa bilisaa dha; deebii AI kallattii miti. Odeeffannoon daldalaa yoo hin kennamne lakkoofsa hin tilmaamnu.", roles: {
+    "business-assistant": ["Kaayyoo daldalaa murteessaa: bu’aa, yaa’a maallaqaa, baasii ykn kuusaa.", "Gurgurtaa guyyaa, baasii fi maallaqa hafe galmeessaa.", "Tarkaanfiiwwan bu’aa guddaa qaban sadii dursa kennaa."],
+    "sales-agent": ["Maamila kaayyoo fi rakkoo oomishni keessan hiiku adda baafadhaa.", "Gatii, faayidaa fi geejjiba ibsuun dhiyeessaa.", "Gaaffii maamilaa galmeessaa; kabajaan hordofaa."],
+    "digital-marketing": ["Kaayyoo duulaa filadhaa: beeksisa, gaaffii ykn gurgurtaa.", "Maamila kaayyoo, ergaa fi karaa beeksisaa murteessaa.", "Yaada beeksisaa lama qopheessuun bu’aa isaanii madaalaa."],
+    "seo-content": ["Kaayyoo barbaacha fuula ykn oomishaa murteessaa.", "Mata-duree ifa fi ibsa meta qopheessaa.", "Hidhamtoota keessaa fi ibsa suuraa fooyyessaa."],
+    "social-media": ["Waltajjii fi maamila oomishaaf mijatu filadhaa.", "Faayidaa maamilaa ibsuun barruu gabaabaa qopheessaa.", "Suuraa fi barruu maxxansuu dura mirkaneessaa."],
+    "video-audio": ["Jalqaba viidiyoo keessatti rakkoo ykn faayidaa maamilaa agarsiisaa.", "Tarree suuraa fi barruu sagalee qopheessaa.", "Waamicha hojii ifaa itti dabalaa."]
+  } }
+};
+
 const json = (data, status = 200, origin = "*") => new Response(JSON.stringify(data), {
   status,
   headers: {
@@ -93,8 +124,13 @@ function extractSpki(der) {
   return der.slice(offset, field.next);
 }
 
-function offlineAgentAnswer(agentId, message) {
+function offlineAgentAnswer(agentId, message, language = "en") {
   const request = message.slice(0, 700).trim();
+  if (language === "am" || language === "om") {
+    const copy = LOCALIZED_FALLBACKS[language];
+    const steps = copy.roles[agentId] || copy.roles["business-assistant"];
+    return [copy.heading, "", "Request: " + request, "", ...steps.map((step, index) => (index + 1) + ". " + step), "", copy.note].join("\n");
+  }
   if (agentId === "business-assistant" && /digital\s*marketing\s*agency|marketing\s*agency|digital\s*agency/i.test(request)) {
     const agencyPlan = [
       "30-DAY SALES GROWTH PLAN — DIGITAL MARKETING AGENCY (ETHIOPIA)",
@@ -168,13 +204,13 @@ function offlineAgentAnswer(agentId, message) {
   return [titles[agentId] || "Wise Sell AI action plan", "", "Your request: " + request, "", "Recommended steps:", ...actions.map((step, i) => (i + 1) + ". " + step), "", "Track these results:", "- Activity completed", "- Customer inquiries or leads", "- Sales and revenue", "- Costs and profit", "", "This is the built-in zero-API fallback. It uses templates rather than a live AI model. Add your product, target customer, budget, and goal for a more specific plan."].join("\n");
 }
 
-async function generateAgentAnswer(agent, user, message, env) {
+async function generateAgentAnswer(agent, user, message, env, language = "en") {
   // Zero-cost mode is the default. OpenAI is called only after an explicit opt-in.
   if (env.AI_PROVIDER !== "openai") {
-    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback" };
+    return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback" };
   }
   if (!env.OPENAI_API_KEY) {
-    return { answer: offlineAgentAnswer(agent.id, message), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "OpenAI API key is not configured in the Worker." };
+    return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "OpenAI API key is not configured in the Worker." };
   }
   try {
     const model = env.OPENAI_MODEL || "gpt-4.1-mini";
@@ -186,7 +222,7 @@ async function generateAgentAnswer(agent, user, message, env) {
       },
       body: JSON.stringify({
         model,
-        instructions: "You are " + agent.name + " in Wise Sell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. Never request passwords, API keys, payment-card details, or unnecessary personal data.",
+        instructions: "You are " + agent.name + " in Wise Sell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". " + (LANGUAGE_GUIDANCE[language] || LANGUAGE_GUIDANCE.en) + " Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. Never request passwords, API keys, payment-card details, or unnecessary personal data.",
         input: message,
         max_output_tokens: 1800
       })
@@ -205,12 +241,12 @@ async function generateAgentAnswer(agent, user, message, env) {
       else if (response.status >= 500) reason = "OpenAI is temporarily unavailable (HTTP " + response.status + ").";
       else if (response.ok) reason = "OpenAI returned no usable text. The response may have been incomplete or blocked.";
       else reason = "OpenAI request failed (HTTP " + response.status + ").";
-      return { answer: offlineAgentAnswer(agent.id, message) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+      return { answer: offlineAgentAnswer(agent.id, message, language) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
     }
     return { answer, provider: "OpenAI", mode: "openai" };
   } catch (e) {
     const reason = "The Worker could not reach OpenAI. Check network availability and retry; no API key is displayed.";
-    return { answer: offlineAgentAnswer(agent.id, message) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+    return { answer: offlineAgentAnswer(agent.id, message, language) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
   }
 }
 export default {
@@ -251,6 +287,7 @@ export default {
         return json({ error: "agents must contain unique specialist agent IDs only." }, 400, origin);
       }
 
+      const language = normalizeLanguage(body.language, message);
       const businessContext = body.businessContext == null ? "" :
         (typeof body.businessContext === "string" ? body.businessContext : JSON.stringify(body.businessContext)).slice(0, 3000);
       const sharedBrief = [
@@ -263,7 +300,7 @@ export default {
       try {
         const contributions = await Promise.all(requested.map(async id => {
           const specialist = AGENTS.find(agent => agent.id === id);
-          const generated = await generateAgentAnswer(specialist, user, sharedBrief, env);
+          const generated = await generateAgentAnswer(specialist, user, sharedBrief, env, language);
           return { agent: id, answer: generated.answer, provider: generated.provider, mode: generated.mode };
         }));
 
@@ -276,13 +313,14 @@ export default {
           ...contributions.map(item => "\n[" + item.agent + "]\n" + item.answer),
           "Resolve conflicts, remove repetition, prioritize actions, identify dependencies, and give the user one clear next-step checklist. Do not claim that recommendations have been executed."
         ].filter(Boolean).join("\n\n");
-        const final = await generateAgentAnswer(coordinator, user, synthesisInput, env);
+        const final = await generateAgentAnswer(coordinator, user, synthesisInput, env, language);
         return json({
           ok: true,
           coordinator: "business-assistant",
+          language,
           requestedAgents: requested,
           contributions,
-          answer: final.answer,
+          answer: final.mode === "fallback" ? contributions.map(item => { const specialist = AGENTS.find(agent => agent.id === item.agent); return (specialist ? specialist.name : item.agent) + "\n" + item.answer; }).join("\n\n") : final.answer,
           provider: final.provider,
           mode: final.mode,
           notice: "Agents generated recommendations only; no external posting, messaging, purchases, or account changes were performed."
@@ -321,8 +359,9 @@ export default {
       try { body = await request.json(); } catch { return json({ error: "Request body must be valid JSON." }, 400, origin); }
       const message = typeof body.message === "string" ? body.message.trim() : typeof body.prompt === "string" ? body.prompt.trim() : JSON.stringify(body);
       if (!message || message.length > 8000) return json({ error: "Provide a message of 1–8000 characters." }, 400, origin);
+      const language = normalizeLanguage(body.language, message);
       try {
-        const generated = await generateAgentAnswer(agent, user, message, env);
+        const generated = await generateAgentAnswer(agent, user, message, env, language);
         const answer = generated.answer;
         if (legacyRoutes[url.pathname]) {
           const clean = answer.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
@@ -337,7 +376,7 @@ export default {
           }
           return json({ success: true, data, provider: generated.provider, mode: generated.mode }, 200, origin);
         }
-        return json({ ok: true, agent: agent.id, answer, provider: generated.provider, mode: generated.mode, ...(generated.reason ? { notice: generated.reason } : {}) }, 200, origin);
+        return json({ ok: true, agent: agent.id, language, answer, provider: generated.provider, mode: generated.mode, ...(generated.reason ? { notice: generated.reason } : {}) }, 200, origin);
       } catch (e) {
         return json({ error: "Agent request failed.", detail: e.message }, 502, origin);
       }
