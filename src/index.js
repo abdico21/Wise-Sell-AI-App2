@@ -300,7 +300,8 @@ export default {
       try {
         const contributions = await Promise.all(requested.map(async id => {
           const specialist = AGENTS.find(agent => agent.id === id);
-          const generated = await generateAgentAnswer(specialist, user, sharedBrief, env, language);
+          const specialistInput = env.AI_PROVIDER === "openai" && env.OPENAI_API_KEY ? sharedBrief : message;
+          const generated = await generateAgentAnswer(specialist, user, specialistInput, env, language);
           return { agent: id, answer: generated.answer, provider: generated.provider, mode: generated.mode };
         }));
 
