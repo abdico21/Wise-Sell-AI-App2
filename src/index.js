@@ -222,50 +222,94 @@ function offlineAgentAnswer(agentId, message, language = "en") {
   return [titles[agentId] || "Wise Sell AI action plan", "", "Your request: " + request, "", "Recommended steps:", ...actions.map((step, i) => (i + 1) + ". " + step), "", "Track these results:", "- Activity completed", "- Customer inquiries or leads", "- Sales and revenue", "- Costs and profit", "", "This is the built-in zero-API fallback. It uses templates rather than a live AI model. Add your product, target customer, budget, and goal for a more specific plan."].join("\n");
 }
 
+function agentSystemInstruction(agent, user, language) {
+  return "You are " + agent.name + " in Wise Sell AI. " + agent.instruction +
+    " The signed-in user's ID is " + user.uid + ". " +
+    (LANGUAGE_GUIDANCE[language] || LANGUAGE_GUIDANCE.en) +
+    " Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. " +
+    "Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. " +
+    "Never request passwords, API keys, payment-card details, or unnecessary personal data.";
+}
+
 async function generateAgentAnswer(agent, user, message, env, language = "en") {
-  // Zero-cost mode is the default. OpenAI is called only after an explicit opt-in.
-  if (env.AI_PROVIDER !== "openai") {
-    return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback" };
-  }
-  if (!env.OPENAI_API_KEY) {
-    return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "OpenAI API key is not configured in the Worker." };
-  }
-  try {
-    const model = env.OPENAI_MODEL || "gpt-4.1-mini";
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "authorization": "Bearer " + env.OPENAI_API_KEY
-      },
-      body: JSON.stringify({
-        model,
-        instructions: "You are " + agent.name + " in Wise Sell AI. " + agent.instruction + " The signed-in user's ID is " + user.uid + ". " + (LANGUAGE_GUIDANCE[language] || LANGUAGE_GUIDANCE.en) + " Do not claim access to external accounts, business records, payments or social platforms unless provided in this request. Answer helpfully and directly. Complete every requested section, use practical actions and measurable targets where useful, and finish with a complete sentence. Never request passwords, API keys, payment-card details, or unnecessary personal data.",
-        input: message,
-        max_output_tokens: 1800
-      })
-    });
-    const data = await response.json().catch(() => ({}));
-    const outputText = typeof data.output_text === "string" ? data.output_text :
-      (Array.isArray(data.output) ? data.output.flatMap(item =>
-        Array.isArray(item.content) ? item.content.filter(part => part.type === "output_text" && typeof part.text === "string").map(part => part.text) : []
-      ).join("\n") : "");
-    const answer = outputText.trim();
-    if (!response.ok || !answer) {
-      let reason;
-      if (response.status === 400) reason = "OpenAI rejected the request configuration (HTTP 400). Check the configured model and request parameters.";
-      else if (response.status === 401 || response.status === 403) reason = "OpenAI rejected the API key or its permissions (HTTP " + response.status + "). Check the OPENAI_API_KEY Worker secret.";
-      else if (response.status === 429) reason = "OpenAI rate limit or project quota was reached (HTTP 429). Check the OpenAI project billing and usage limits.";
-      else if (response.status >= 500) reason = "OpenAI is temporarily unavailable (HTTP " + response.status + ").";
-      else if (response.ok) reason = "OpenAI returned no usable text. The response may have been incomplete or blocked.";
-      else reason = "OpenAI request failed (HTTP " + response.status + ").";
-      return { answer: offlineAgentAnswer(agent.id, message, language) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+  const instructions = agentSystemInstruction(agent, user, language);
+
+  // Cloudflare Workers AI runs inside this Worker without a separate vendor API key.
+  if (env.AI_PROVIDER === "workers-ai") {
+    if (!env.AI || typeof env.AI.run !== "function") {
+      return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Workers AI binding is not configured. Add the AI binding in the Cloudflare Worker settings or Wrangler configuration." };
     }
-    return { answer, provider: "OpenAI", mode: "openai" };
-  } catch (e) {
-    const reason = "The Worker could not reach OpenAI. Check network availability and retry; no API key is displayed.";
-    return { answer: offlineAgentAnswer(agent.id, message, language) + "\n\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+    try {
+      const model = env.WORKERS_AI_MODEL || "@cf/zai-org/glm-4.7-flash";
+      const result = await env.AI.run(model, {
+        messages: [
+          { role: "system", content: instructions },
+          { role: "user", content: message }
+        ],
+        max_completion_tokens: 1200,
+        temperature: 0.35
+      });
+      const answer = (
+        result?.response ||
+        result?.choices?.[0]?.message?.content ||
+        result?.output_text ||
+        result?.generated_text ||
+        (typeof result === "string" ? result : "")
+      ).trim();
+      if (!answer) {
+        return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "Workers AI returned no usable text. The built-in fallback was used." };
+      }
+      return { answer, provider: "Cloudflare Workers AI", model, mode: "workers-ai" };
+    } catch (e) {
+      const reason = "Cloudflare Workers AI request failed. Check the AI binding, model availability, and daily free allocation. The built-in fallback was used.";
+      return { answer: offlineAgentAnswer(agent.id, message, language) + "\\n\\nWorkers AI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+    }
   }
+
+  // Paid OpenAI remains an explicit opt-in; it is never selected by default.
+  if (env.AI_PROVIDER === "openai") {
+    if (!env.OPENAI_API_KEY) {
+      return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback", reason: "OpenAI API key is not configured in the Worker." };
+    }
+    try {
+      const model = env.OPENAI_MODEL || "gpt-4.1-mini";
+      const response = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "authorization": "Bearer " + env.OPENAI_API_KEY
+        },
+        body: JSON.stringify({
+          model,
+          instructions,
+          input: message,
+          max_output_tokens: 1800
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      const outputText = typeof data.output_text === "string" ? data.output_text :
+        (Array.isArray(data.output) ? data.output.flatMap(item =>
+          Array.isArray(item.content) ? item.content.filter(part => part.type === "output_text" && typeof part.text === "string").map(part => part.text) : []
+        ).join("\\n") : "");
+      const answer = outputText.trim();
+      if (!response.ok || !answer) {
+        let reason;
+        if (response.status === 400) reason = "OpenAI rejected the request configuration (HTTP 400). Check the configured model and request parameters.";
+        else if (response.status === 401 || response.status === 403) reason = "OpenAI rejected the API key or its permissions (HTTP " + response.status + "). Check the OPENAI_API_KEY Worker secret.";
+        else if (response.status === 429) reason = "OpenAI rate limit or project quota was reached (HTTP 429). Check the OpenAI project billing and usage limits.";
+        else if (response.status >= 500) reason = "OpenAI is temporarily unavailable (HTTP " + response.status + ").";
+        else if (response.ok) reason = "OpenAI returned no usable text. The response may have been incomplete or blocked.";
+        else reason = "OpenAI request failed (HTTP " + response.status + ").";
+        return { answer: offlineAgentAnswer(agent.id, message, language) + "\\n\\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+      }
+      return { answer, provider: "OpenAI", mode: "openai" };
+    } catch (e) {
+      const reason = "The Worker could not reach OpenAI. Check network availability and retry; no API key is displayed.";
+      return { answer: offlineAgentAnswer(agent.id, message, language) + "\\n\\nOpenAI diagnostic: " + reason, provider: "Built-in zero-cost fallback", mode: "fallback", reason };
+    }
+  }
+
+  return { answer: offlineAgentAnswer(agent.id, message, language), provider: "Built-in zero-cost fallback", mode: "fallback" };
 }
 export default {
   async fetch(request, env) {
@@ -280,7 +324,7 @@ export default {
 
     if (url.pathname === "/" || url.pathname === "/api/health") {
       return json({ ok: true, app: env.APP_NAME || "Wise Sell AI", service: "Cloudflare Worker API",
-        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), openaiConfigured: env.AI_PROVIDER === "openai" && Boolean(env.OPENAI_API_KEY), zeroCostFallback: env.AI_PROVIDER !== "openai", provider: env.AI_PROVIDER === "openai" ? "OpenAI (paid API)" : "Built-in zero-cost fallback" } }, 200, origin);
+        integrations: { firebaseAuth: Boolean(env.FIREBASE_PROJECT_ID), workersAiConfigured: env.AI_PROVIDER === "workers-ai" && Boolean(env.AI && typeof env.AI.run === "function"), openaiConfigured: env.AI_PROVIDER === "openai" && Boolean(env.OPENAI_API_KEY), zeroCostFallback: env.AI_PROVIDER !== "openai" && env.AI_PROVIDER !== "workers-ai", provider: env.AI_PROVIDER === "workers-ai" ? "Cloudflare Workers AI" : env.AI_PROVIDER === "openai" ? "OpenAI (paid API)" : "Built-in zero-cost fallback" } }, 200, origin);
     }
     if (url.pathname === "/api/agents" && request.method === "GET")
       return json({ agents: AGENTS.map(({id,name}) => ({id,name})) }, 200, origin);
