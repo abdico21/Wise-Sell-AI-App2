@@ -11,13 +11,15 @@ const normalizeLanguage = (requested, message = "") => {
   const value = String(requested || "").trim().toLowerCase();
   if (["am", "amh", "amharic", "አማርኛ"].includes(value)) return "am";
   if (["om", "orm", "oromo", "afaan oromoo"].includes(value)) return "om";
+  if (["ti", "tir", "tigrinya", "ትግርኛ"].includes(value)) return "ti";
+  if (["so", "som", "somali", "soomaali"].includes(value)) return "so";
   if (["en", "eng", "english"].includes(value)) return "en";
   if (/[\u1200-\u137f]/u.test(message)) return "am";
   if (/\b(akkam|maal|maaliif|gatii|oomisha|bituu|gurgurtaa|daldala|maamilaa|galatoomi|keessan|barbaada|baajata|galii|baasii)\b/i.test(message)) return "om";
   return "en";
 };
 
-const LANGUAGE_GUIDANCE = { am: "Reply in natural Amharic using Ethiopic script. Keep product names, URLs and technical identifiers unchanged.", om: "Reply in natural Afaan Oromoo using Qubee Latin script. Keep product names, URLs and technical identifiers unchanged.", en: "Reply in clear English." };
+const LANGUAGE_GUIDANCE = { am: "Reply in natural Amharic using Ethiopic script. Keep product names, URLs and technical identifiers unchanged.", om: "Reply in natural Afaan Oromoo using Qubee Latin script. Keep product names, URLs and technical identifiers unchanged.", ti: "Reply in natural Tigrinya using Ethiopic script. Keep product names, URLs and technical identifiers unchanged.", so: "Reply in natural Somali using Latin script. Keep product names, URLs and technical identifiers unchanged.", en: "Reply in clear English." };
 
 const LOCALIZED_FALLBACKS = {
   am: { heading: "የWise Sell AI የስራ እቅድ", note: "ይህ በነፃ የሚሰራ የመመሪያ አብነት ነው፤ የቀጥታ AI ምላሽ አይደለም። የንግድ መረጃ ካልተሰጠ ቁጥሮችን አንገምትም።", roles: {
@@ -35,6 +37,22 @@ const LOCALIZED_FALLBACKS = {
     "seo-content": ["Kaayyoo barbaacha fuula ykn oomishaa murteessaa.", "Mata-duree ifa fi ibsa meta qopheessaa.", "Hidhamtoota keessaa fi ibsa suuraa fooyyessaa."],
     "social-media": ["Waltajjii fi maamila oomishaaf mijatu filadhaa.", "Faayidaa maamilaa ibsuun barruu gabaabaa qopheessaa.", "Suuraa fi barruu maxxansuu dura mirkaneessaa."],
     "video-audio": ["Jalqaba viidiyoo keessatti rakkoo ykn faayidaa maamilaa agarsiisaa.", "Tarree suuraa fi barruu sagalee qopheessaa.", "Waamicha hojii ifaa itti dabalaa."]
+  } },
+  ti: { heading: "ናይ Wise Sell AI ናይ ስራሕ መደብ", note: "እዚ ናይ ነጻ መምርሒ ኣብነት እዩ፤ ቀጥታዊ AI መልሲ ኣይኮነን። ዘይተዋህበ ናይ ንግዲ ቁጽሪ ኣይንግምትን።", roles: {
+    "business-assistant": ["ዕላማ ንግድኹም ፍለጡ፦ ትርፊ፣ ዋሕዚ ገንዘብ፣ ወጻኢታት ወይ ክምችት።", "መዓልታዊ መሸጣ፣ ወጻኢታትን ዝተረፈ ገንዘብን መዝግቡ።", "ኣዝዩ ዝለዓለ ጽልዋ ዘለዎም ሰለስተ ስራሕቲ ምረጹ።"],
+    "sales-agent": ["ዒላማ ዓሚልን እቲ ፍርያት ዝፈትሖ ጸገምን ፍለጡ።", "ዋጋ፣ ጥቕሚን ኣቕርቦትን ዘብርህ ንጹር ቅድመ ኩነት ኣዳልዉ።", "ሕቶታት ዓማዊል መዝግቡን ብኣኽብሮት ተኸታተሉን።"],
+    "digital-marketing": ["ዕላማ ወፍሪ ምረጹ፦ ምፍላጥ፣ ሕቶታት ወይ መሸጣ።", "ተዓዘብቲ፣ መልእኽቲን መድረኽን ወስኑ።", "ክልተ ኣማራጺ ትሕዝቶ ኣዳልዉን ውጽኢቶም መዝኑን።"],
+    "seo-content": ["ዕላማ ምድላይ ናይቲ ገጽ ወይ ፍርያት ወስኑ።", "ንጹር ኣርእስቲን ሓጺር መግለጺ metaን ኣዳልዉ።", "ውሽጣዊ መራኸቢታትን መግለጺ ስእሊን ኣሻሽሉ።"],
+    "social-media": ["ንፍርያትኩም ዝሰማማዕ መድረኽን ተዓዘብትን ምረጹ።", "ጥቕሚ ዓሚል ዘብርህ ሓጺር ጽሑፍ ኣዳልዉ።", "ስእሊ፣ መግለጺን ጻውዒት ተግባርን ቅድሚ ምልጣፍ ኣረጋግጹ።"],
+    "video-audio": ["ኣብ ፈለማ ሰከንድታት ጸገም ወይ ጥቕሚ ዓሚል ኣርእዩ።", "ዝርዝር ትርኢት ቪድዮን ጽሑፍ ድምጽን ኣዳልዉ።", "ንጹር ጻውዒት ተግባር ኣካትቱ።"]
+  } },
+  so: { heading: "Qorshaha shaqada Wise Sell AI", note: "Tani waa qaab-tusaale bilaash ah; ma aha jawaab AI toos ah. Ha qiyaasin tirooyin aan xog lagu siin.", roles: {
+    "business-assistant": ["Caddee yoolka ganacsiga: faa'iido, socodka lacagta, kharash ama kaydka alaabta.", "Diiwaangeli iibka maalinlaha ah, kharashka iyo lacagta hadhay.", "Mudnaan sii saddex hawlood oo saamayn weyn leh."],
+    "sales-agent": ["Aqoonso macmiilka bartilmaameedka iyo dhibaatada alaabtaadu xallinayso.", "Diyaari dalab cad oo leh qiime, faa'iido iyo shuruudaha keenista.", "Diiwaangeli su'aalaha macaamiisha, si xushmad lehna ula soco."],
+    "digital-marketing": ["Dooro yoolka ololaha: wacyigelin, codsiyo ama iib.", "Go'aami dhagaystayaasha, farriinta iyo kanaalka.", "Samee laba nooc oo xayeysiis ah, dabadeed cabbir natiijada."],
+    "seo-content": ["Go'aami ujeeddada raadinta ee bogga ama badeecadda.", "Qor cinwaan cad iyo sharaxaad meta oo kooban.", "Hagaaji xiriiriyeyaasha gudaha iyo qoraalka alt ee sawirrada."],
+    "social-media": ["Dooro madal iyo dhagaystayaal ku habboon badeecadda.", "Qor farriin kooban oo muujinaysa faa'iidada macmiilka.", "Hubi sawirka, qoraalka iyo baaqa ficilka ka hor daabacaadda."],
+    "video-audio": ["Bilowga muuqaalka ku muuji dhibaatada ama faa'iidada macmiilka.", "Diyaari qorshaha muuqaallada iyo qoraalka codka.", "Ku dar baaq ficil oo cad."]
   } }
 };
 
@@ -126,7 +144,7 @@ function extractSpki(der) {
 
 function offlineAgentAnswer(agentId, message, language = "en") {
   const request = message.slice(0, 700).trim();
-  if (language === "am" || language === "om") {
+  if (["am", "om", "ti", "so"].includes(language)) {
     const copy = LOCALIZED_FALLBACKS[language];
     const steps = copy.roles[agentId] || copy.roles["business-assistant"];
     return [copy.heading, "", (language === "am" ? "ጥያቄ: " : "Gaaffii: ") + request, "", ...steps.map((step, index) => (index + 1) + ". " + step), "", copy.note].join("\n");
