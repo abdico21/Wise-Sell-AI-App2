@@ -35,6 +35,15 @@ Suggested GitHub Actions secret names (the workflow must explicitly consume them
 - `ANDROID_KEY_ALIAS`
 - `ANDROID_KEY_PASSWORD`
 
+The mobile CI workflow now has an optional secure signing path:
+- It checks whether all four secrets are configured without printing their values.
+- If none are configured, it builds and uploads a CI-validation APK only; this artifact is not a production release.
+- If all four are configured, it writes the keystore and `android/key.properties` only on the ephemeral runner, configures Gradle release signing, verifies the APK certificate, builds an AAB, verifies the AAB signature, and uploads the signed AAB.
+- If only some signing secrets are configured, the workflow fails closed instead of silently producing an unsigned or debug-signed release.
+- The keystore and properties file are covered by `.gitignore`. Never paste signing credentials into chat, commit them, or upload them as ordinary repository files.
+
+The signing configurator supports the generated Gradle Kotlin DSL and Groovy DSL files. A successful unsigned CI run does not test the signing branch; that branch is only validated after the four repository secrets are configured.
+
 ## 3. App and device testing
 
 - [ ] Install the signed release APK on a physical Android device.
