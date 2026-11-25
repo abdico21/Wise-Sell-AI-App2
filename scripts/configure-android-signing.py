@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Configure Android release signing from ephemeral CI environment secrets.
-
-The keystore and key.properties are created only on the runner and are ignored by Git.
-No secret values are printed.
-"""
+"""Configure Android release signing from ephemeral CI environment secrets."""
 from __future__ import annotations
 
 import base64
@@ -65,59 +61,60 @@ def main() -> None:
 
     source = gradle_file.read_text(encoding="utf-8")
     is_kotlin = gradle_file.suffix == ".kts"
-    android_match = re.search(r"(?m)^android\\s*\\{", source)
+    android_match = re.search(r"(?m)^android\s*\{", source)
     if not android_match:
         raise SystemExit("Could not locate the Android Gradle configuration block")
 
     if is_kotlin:
         loader = (
-            'val keystoreProperties = java.util.Properties().apply {\\n'
-            '    load(java.io.FileInputStream(rootProject.file("key.properties")))\\n'
-            '}\\n\\n'
+            'val keystoreProperties = java.util.Properties().apply {\n'
+            '    load(java.io.FileInputStream(rootProject.file("key.properties")))\n'
+            '}\n\n'
         )
         signing = (
-            '    signingConfigs {\\n'
-            '        create("release") {\\n'
-            '            keyAlias = keystoreProperties.getProperty("keyAlias")\\n'
-            '            keyPassword = keystoreProperties.getProperty("keyPassword")\\n'
-            '            storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))\\n'
-            '            storePassword = keystoreProperties.getProperty("storePassword")\\n'
-            '        }\\n'
-            '    }\\n'
+            '    signingConfigs {\n'
+            '        create("release") {\n'
+            '            keyAlias = keystoreProperties.getProperty("keyAlias")\n'
+            '            keyPassword = keystoreProperties.getProperty("keyPassword")\n'
+            '            storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))\n'
+            '            storePassword = keystoreProperties.getProperty("storePassword")\n'
+            '        }\n'
+            '    }\n'
         )
         patterns = [
-            (r"signingConfig\\s*=\\s*signingConfigs\\.getByName\\(\\s*\\"debug\\"\\s*\\)",
+            (r'signingConfig\s*=\s*signingConfigs\.getByName\(\s*"debug"\s*\)',
              'signingConfig = signingConfigs.getByName("release")'),
-            (r"signingConfig\\s*=\\s*signingConfigs\\.debug",
+            (r"signingConfig\s*=\s*signingConfigs\.debug",
              'signingConfig = signingConfigs.getByName("release")'),
         ]
     else:
         loader = (
-            "def keystoreProperties = new java.util.Properties()\\n"
-            "keystoreProperties.load(new java.io.FileInputStream(rootProject.file('key.properties')))\\n\\n"
+            "def keystoreProperties = new java.util.Properties()\n"
+            "keystoreProperties.load(new java.io.FileInputStream(rootProject.file('key.properties')))\n\n"
         )
         signing = (
-            "    signingConfigs {\\n"
-            "        release {\\n"
-            "            keyAlias keystoreProperties['keyAlias']\\n"
-            "            keyPassword keystoreProperties['keyPassword']\\n"
-            "            storeFile rootProject.file(keystoreProperties['storeFile'])\\n"
-            "            storePassword keystoreProperties['storePassword']\\n"
-            "        }\\n"
-            "    }\\n"
+            "    signingConfigs {\n"
+            "        release {\n"
+            "            keyAlias keystoreProperties['keyAlias']\n"
+            "            keyPassword keystoreProperties['keyPassword']\n"
+            "            storeFile rootProject.file(keystoreProperties['storeFile'])\n"
+            "            storePassword keystoreProperties['storePassword']\n"
+            "        }\n"
+            "    }\n"
         )
         patterns = [
-            (r"signingConfig\\s*(?:=\\s*)?signingConfigs\\.getByName\\(\\s*['\\"]debug['\\"]\\s*\\)",
+            (r"""signingConfig\s*(?:=\s*)?signingConfigs\.getByName\(\s*['"]debug['"]\s*\)""",
              "signingConfig signingConfigs.getByName('release')"),
-            (r"signingConfig\\s*=\\s*signingConfigs\\.debug",
+            (r"signingConfig\s*=\s*signingConfigs\.debug",
              "signingConfig signingConfigs.release"),
         ]
 
-    if "key.properties" in source or "create(\"release\")" in source or re.search(r"signingConfigs\\s*\\{\\s*release", source):
+    if ("key.properties" in source or 'create("release")' in source
+            or re.search(r"signingConfigs\s*\{\s*release", source)):
         raise SystemExit("Gradle signing configuration already exists; refusing to overwrite it")
 
     source = source[:android_match.start()] + loader + source[android_match.start():]
-    build_types = re.search(r"(?m)^\\s*buildTypes\\s*\\{", source)
+    build_types = re.search(r"(?m)^\s*buildTypes\s*\{", source)
     if not build_types:
         raise SystemExit("Could not locate buildTypes in Android Gradle configuration")
     source = source[:build_types.start()] + signing + source[build_types.start():]
