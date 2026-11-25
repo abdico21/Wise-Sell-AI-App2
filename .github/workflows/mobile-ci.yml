@@ -102,6 +102,40 @@ jobs:
           print("Firebase configuration verified for com.aistudio.wisesell.kpzqvm")
           PY
 
+      - name: Detect Android signing secrets
+        id: android-signing
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          values=("$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD")
+          present=0
+          for value in "${values[@]}"; do
+            if [[ -n "$value" ]]; then present=$((present + 1)); fi
+          done
+          if [[ "$present" -eq 0 ]]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Production signing secrets are not configured; signed release packaging will be skipped."
+          elif [[ "$present" -eq 4 ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "All required signing secret names are available."
+          else
+            echo "Signing secrets are only partially configured; refusing to build a misleading release artifact." >&2
+            exit 1
+          fi
+
+      - name: Configure secure Android release signing
+        if: steps.android-signing.outputs.enabled == 'true'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: python3 scripts/configure-android-signing.py
+
       - name: Install Flutter dependencies
         run: flutter pub get
 
@@ -117,13 +151,40 @@ jobs:
       - name: Run tests
         run: flutter test --reporter expanded
 
-      - name: Build release APK
+      - name: Build CI validation APK
         run: flutter build apk --release --dart-define=WISESELL_API_BASE_URL=https://wisesell-ai-api.iamabdu3.workers.dev
 
-      - name: Upload release APK
+      - name: Verify production APK signature
+        if: steps.android-signing.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Build signed Google Play App Bundle
+        if: steps.android-signing.outputs.enabled == 'true'
+        run: flutter build appbundle --release --dart-define=WISESELL_API_BASE_URL=https://wisesell-ai-api.iamabdu3.workers.dev
+
+      - name: Verify signed App Bundle
+        if: steps.android-signing.outputs.enabled == 'true'
+        run: |
+          jarsigner -verify -verbose -certs build/app/outputs/bundle/release/app-release.aab
+          keytool -printcert -jarfile build/app/outputs/bundle/release/app-release.aab
+
+      - name: Upload CI validation APK
         uses: actions/upload-artifact@v4
         with:
-          name: wisesell-ai-android-release
+          name: wisesell-ai-android-ci-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload signed Google Play AAB
+        if: steps.android-signing.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wisesell-ai-android-signed-aab
+          path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
