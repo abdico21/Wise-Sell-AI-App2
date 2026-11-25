@@ -84,7 +84,7 @@ def main() -> None:
         patterns = [
             (r'signingConfig\s*=\s*signingConfigs\.getByName\(\s*"debug"\s*\)',
              'signingConfig = signingConfigs.getByName("release")'),
-            (r"signingConfig\s*=\s*signingConfigs\.debug",
+            (r"signingConfig\s*(?:=\s*)?signingConfigs\.debug",
              'signingConfig = signingConfigs.getByName("release")'),
         ]
     else:
