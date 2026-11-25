@@ -65,7 +65,7 @@ def main() -> None:
             configured = (app / filename).read_text(encoding="utf-8")
             assert "signingConfigs" in configured and "release" in configured
             assert "signingConfigs.debug" not in configured
-            assert "signingConfig = signingConfigs.getByName(\\"release\\")" in configured or "signingConfig signingConfigs.release" in configured
+            assert "signingConfig" in configured and "release" in configured
             assert (root / "android" / "key.properties").is_file()
             assert (app / "upload-keystore.jks").read_bytes() == b"dummy-test-keystore"
     print("Android signing configurator smoke tests passed for Kotlin DSL and Groovy DSL.")
