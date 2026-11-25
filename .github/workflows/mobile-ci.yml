@@ -48,6 +48,9 @@ jobs:
       - name: Generate Android platform scaffolding
         run: flutter create . --platforms=android --org=com.aistudio.wisesell --project-name=kpzqvm
 
+      - name: Test secure Android signing configurator
+        run: python3 scripts/test-android-signing-configurator.py
+
       - name: Generate WiseSell branded Android launcher icons
         run: |
           sudo apt-get update
